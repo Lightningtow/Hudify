@@ -16,6 +16,13 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	maven {
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
 }
 
 fabricApi {
@@ -30,7 +37,148 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	
+
+	modImplementation "maven.modrinth:customhud:${project.customhud_version}+${project.minecraft_version}"
+	//modImplementation "com.minenash:customhud:${project.customhud_version}+${project.minecraft_version}"
+
+	//include "com.minenash:customhud-${project.customhud_version}+${project.minecraft_version}"
+	//include(modImplementation("com.minenash:customhud:3.3.0+1.20.4"))
+//	include(modImplementation("com.minenash:customhud:3.3.0+1.20.4"))
+
+}
+//def fabricModInfoJson(ArrayList<CompatLayer> layers) {
+//	def modid
+//	def name
+//	def description
+//
+//	if (layers.size() > 1) {
+//		modid = "compat"
+//		name = "Mod"
+//		description = "Loads extra variables for CustomHUD from supported mods: ${layers.collect({ layer -> layer.name }).join(", ")}"
+//	} else {
+//		modid = layers[0].modid
+//		name = layers[0].name
+//		description = "Loads extra variables for CustomHUD from the ${layers[0].name} mod"
+//	}
+//
+//	Map info = [
+//			schemaVersion: 1,
+//			id: "customhud_${modid}",
+//			version: "${version}",
+//			name: "CustomHUD (${name} Compatibility)",
+//			description: description,
+//			authors: [
+//					"Public Domain"
+//			],
+//			contact: [
+//					homepage: "fillme",
+//					sources: "fillme"
+//			],
+//			license: "CC0-1.0",
+//			icon: "assets/customhud_compat/icon.png",
+//			environment: "*",
+//			entrypoints: [
+////					client: layers.collect {layer -> "lightningtow.hudify.CustomHUD." + layer.dir + ".Layer"}
+//			],
+//			depends: [
+//					java: ">=17",
+//					minecraft: "~${project.minecraft_version}",
+//					"fabric-api": "*",
+//					fabricloader: "*",
+//					"custom_hud": ">=2.0.0",
+//			]
+//	]
+//
+//	if (layers.size() == 1) {
+//		info.depends += [ "${layers[0].modid}": "*" ]
+//	}
+//
+//	return info
+//}
+
+//class CompatLayer {
+//	String name // fancy name
+//	String dir  // layer directory
+//	String[] extra // extra classes to include
+//	String modid // layer"s modid
+//}
+//
+//ext.layers = [
+//	//	new CompatLayer(name: "Tweakeroo", dir: "Tweakeroo", extra: [ "MalilibUtils" ], modid: "tweakeroo"),
+//	//	new CompatLayer(name: "Litematica", dir: "Litematica", extra: [ "MalilibUtils" ], modid: "litematica"),
+//	//	new CompatLayer(name: "Hudify", dir: "Hudify", extra: [], modid: "hudify")
+//]
+//
+//ext.layers.each { layer ->
+//	def configName = layer.dir[0].toLowerCase() + layer.dir[1..-1]
+//	tasks.create(name: "generate${layer.dir}Json", type: DefaultTask) {
+//		dependsOn processResources
+//		def outputJsonFile = file("build/client/resources/fabric-${layer.modid}.mod.json")
+//		def outputJson = fabricModInfoJson([layer])
+//		outputs.file outputJsonFile
+//
+//		doLast {
+//			outputJsonFile.text = new groovy.json.JsonBuilder(outputJson).toPrettyString()
+//		}
+//	}
+//
+//	tasks.create(name: "${configName}Jar", type: Jar) {
+//		dependsOn "generate${layer.dir}Json"
+//		archiveBaseName = "CustomHUD+${layer.dir}"
+//
+//		if (configurations.findByName(configName)) {
+//			from configurations."${configName}"
+//			compileClientJava {
+//				doFirst {
+//					sourceSets.client.java.srcDirs += "build/generated/sources/client/java/main/lightningtow/hudify/CustomHUD/${layer.dir}"
+//					classpath += configurations."${configName}"
+//				}
+//			}
+//		}
+//
+//		def fabricModJson = "fabric-${layer.modid}.mod.json"
+//		from ("build/client/resources/") {
+//			include fabricModJson
+//			into "/"
+//			rename { String fileName -> fileName.replace(fabricModJson, "fabric.mod.json") }
+//		}
+//
+//		from ("src/client/resources/") {
+//			include "assets/customhud_compat/icon.png"
+//		}
+//
+//		def basePath = "lightningtow/hudify/CustomHUD/"
+//		include "${basePath}/${layer.dir}/*"
+//		include "${basePath}/util/CommonUtil.class"
+//		from (sourceSets.client.output) {
+//			layer.extra.flatten().each { name ->
+//				include "${basePath}/util/${name}.class"
+//				include "${basePath}/util/${name}\$*.class"
+//			}
+//		}
+//		from("LICENSE")
+//	}
+//	build.dependsOn "${configName}Jar"
+//}
+
+tasks.register("setupGeneratedSources") {
+	doLast {
+		layers.each { layer ->
+			sourceSets.client.java.srcDirs += "build/generated/sources/client/java/main/lightningtow/hudify/CustomHUD/${layer.dir}"
+		}
+	}
+}
+
+//tasks.named("compileClientJava") {
+//	dependsOn "setupGeneratedSources"
+//}
+
+tasks.create(name: "generateModInfoJson", type: DefaultTask) {
+	doLast {
+		def output = file("build/resources/client/fabric.mod.json")
+		mkdir output.parentFile
+		output.text = new groovy.json.JsonBuilder(fabricModInfoJson(layers)).toPrettyString()
+	}
 }
 
 processResources {

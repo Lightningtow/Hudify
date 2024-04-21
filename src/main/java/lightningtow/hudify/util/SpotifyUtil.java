@@ -223,6 +223,8 @@ public class SpotifyUtil
             {
                 HudifyHUD.setDuration(1);
                 HudifyHUD.setProgress(0);
+                LOGGER.error("progress + duration updated in refreshActiveSession");
+
                 isPlaying = false;
                 return;
             }
@@ -349,6 +351,8 @@ public class SpotifyUtil
         EXECUTOR_SERVICE.execute(() -> {
             postRequest("next");
             HudifyHUD.setDuration(-2000);
+            LOGGER.error("duration set to -2000 from nextSong");
+
         });
     }
 
@@ -356,6 +360,8 @@ public class SpotifyUtil
         EXECUTOR_SERVICE.execute(() -> {
             postRequest("previous");
             HudifyHUD.setDuration(-2000);
+            LOGGER.error("duration set to -2000 from prevSong");
+
         });
     }
 
@@ -398,16 +404,17 @@ public class SpotifyUtil
             if (playbackResponse.statusCode() == 200)
             {
                 JsonObject json = (JsonObject) new JsonParser().parse(playbackResponse.body());
-                if (json.get("currently_playing_type").getAsString().equals("episode"))
+                if (json.get("currently_playing_type").getAsString().equals("episode")) // for podcasts
                 {
                     results[0] = json.get("item").getAsJsonObject().get("name").getAsString();
                     results[1] = json.get("item").getAsJsonObject().get("show").getAsJsonObject().get("name").getAsString();
                     results[2] = json.get("progress_ms").getAsString();
                     results[3] = json.get("item").getAsJsonObject().get("duration_ms").getAsString();
                     results[4] = json.get("item").getAsJsonObject().get("images").getAsJsonArray().get(1).getAsJsonObject().get("url").getAsString();
-                    return results;
+                    return results; // for podcasts
                 }
                 results[0] = json.get("item").getAsJsonObject().get("name").getAsString();
+                // LOGGER.error("getPlaybackInfo - name: " + results[0]);
                 JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
                 StringBuilder artistString = new StringBuilder();
                 for (int i = 0; i < artistArray.size(); i++)
@@ -422,6 +429,7 @@ public class SpotifyUtil
                         artistString.append(", ");
                     }
                 }
+                // 0 name, 1 artists, 2 progress, 3 duration, 4 album?, 5 external_url?, 6, volume percent
                 results[1] = artistString.toString();
                 results[2] = json.get("progress_ms").getAsString();
                 results[3] = json.get("item").getAsJsonObject().get("duration_ms").getAsString();
@@ -460,7 +468,7 @@ public class SpotifyUtil
             }
             else
             {
-                LOGGER.error("exception caught in getPlaybackInfo():" + e.getMessage());
+//                LOGGER.error("exception caught in getPlaybackInfo():" + e.getMessage());
             }
         }
         return results;

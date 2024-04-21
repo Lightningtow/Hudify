@@ -1,0 +1,43 @@
+package lightningtow.hudify;
+
+import com.minenash.customhud.HudElements.StringElement;
+import com.minenash.customhud.HudElements.supplier.IntegerSuppliers;
+import com.minenash.customhud.HudElements.supplier.StringSupplierElement;
+import lightningtow.hudify.util.SpotifyUtil;
+import net.fabricmc.api.ClientModInitializer;
+import com.minenash.customhud.HudElements.supplier.NumberSupplierElement;
+import com.minenash.customhud.mod_compat.CustomHudRegistry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerComplexData;
+import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerElement;
+import static org.apache.commons.lang3.math.NumberUtils.toInt;
+
+public class CustomhudIntegration implements ClientModInitializer {
+    public static final Logger LOGGER = LogManager.getLogger("Hudify");
+
+    @Override
+    public void onInitializeClient() {
+        LOGGER.error("running CHIntegration.onInitializeClient()");
+//        String[] info = SpotifyUtil.getPlaybackInfo();
+
+//    public static void registerCompat() {
+        // 0 name, 1 artists, 2 progress, 3 duration, 4 album?, 5 external_url?, 6, volume percent
+        // 5 url is like https://open.spotify.com/track/536ZTi6wWJQ2gYXkXnJwVX?si=4e244a84c9884ae4
+        registerElement("spotify_title", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[0]));
+        registerElement("spotify_artist", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[1]));
+        registerElement("spotify_progress_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60)));
+        registerElement("spotify_duration_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getDuration() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getDuration() / 1000 % 60)));
+        registerElement("spotify_url", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[5]));
+        registerElement("spotify_volume", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[6]));
+
+        ////        String progressText = (progressMS / (1000 * 60)) + ":" + String.format("%02d", (progressMS / 1000 % 60));
+        // (HudifyHUD.hudInfo[2] / (1000 * 60)) + ":" + String.format("%02d", (progressMS / 1000 % 60))
+        // approximately 180 calls per minute without throwing 429, 3 calls per second
+
+       // registerElement("spotify_progress_ms", (str) -> new NumberSupplierElement(() ->  toInt(info[2]), 1));
+//	response code 429 -> Too Many Requests - Rate limiting has been applied.
+    }
+
+}
