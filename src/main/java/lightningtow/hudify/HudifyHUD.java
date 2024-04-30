@@ -139,7 +139,7 @@ public class HudifyHUD
         progressMS = hudInfo[2] == null ? 0 : (Integer.parseInt(hudInfo[2]) - 1000);
         durationMS = hudInfo[3] == null ? -1 : Integer.parseInt(hudInfo[3]);
 
-        LOGGER.error("updateData" + Arrays.toString(data));
+        //LOGGER.error("HudifyHud.updateData" + Arrays.toString(data));
 
     }
 

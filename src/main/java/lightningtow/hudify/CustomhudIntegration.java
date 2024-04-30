@@ -1,14 +1,21 @@
 package lightningtow.hudify;
 
+import com.minenash.customhud.ComplexData;
+import com.minenash.customhud.HudElements.HudElement;
 import com.minenash.customhud.HudElements.StringElement;
+import com.minenash.customhud.HudElements.supplier.BooleanSupplierElement;
 import com.minenash.customhud.HudElements.supplier.IntegerSuppliers;
 import com.minenash.customhud.HudElements.supplier.StringSupplierElement;
 import lightningtow.hudify.util.SpotifyUtil;
 import net.fabricmc.api.ClientModInitializer;
 import com.minenash.customhud.HudElements.supplier.NumberSupplierElement;
 import com.minenash.customhud.mod_compat.CustomHudRegistry;
+import net.minecraft.world.Heightmap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
+import java.util.function.Supplier;
 
 import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerComplexData;
 import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerElement;
@@ -25,7 +32,24 @@ public class CustomhudIntegration implements ClientModInitializer {
 //    public static void registerCompat() {
         // 0 name, 1 artists, 2 progress, 3 duration, 4 album?, 5 external_url?, 6, volume percent
         // 5 url is like https://open.spotify.com/track/536ZTi6wWJQ2gYXkXnJwVX?si=4e244a84c9884ae4
-        registerElement("spotify_title", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[0]));
+        registerElement("spotify_track", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[0]));
+
+        registerElement("spotify_ready", (_str) -> new BooleanSupplierElement(() -> Objects.equals(HudifyHUD.hudInfo[0], "-")));
+
+//       // HudElement track = new StringSupplierElement(HudifyHUD.hudInfo[0]);
+//        registerElement("name1", (_str) -> VERSION);
+//        registerElement("name2", (_str) -> VERSION);
+
+//        Supplier<String> tracksupplier = () -> HudifyHUD.hudInfo[0];
+//        track  = (str) -> new StringSupplierElement(HudifyHUD.hudInfo[0]);
+
+//        Supplier<String> track =   HudifyHUD.hudInfo[0];
+        StringSupplierElement track = new StringSupplierElement(() -> HudifyHUD.hudInfo[0]);
+        CustomHudRegistry.registerElement("spotify_track", (_str) -> track);
+        CustomHudRegistry.registerElement("sp_track",  (_str) ->  track);
+//        CustomHudRegistry.registerElement("spotify_track", track);
+//        CustomHudRegistry.registerElement("sp_track", track);
+
         registerElement("spotify_artist", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[1]));
         registerElement("spotify_progress_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60)));
         registerElement("spotify_duration_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getDuration() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getDuration() / 1000 % 60)));
