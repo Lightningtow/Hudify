@@ -48,8 +48,8 @@ Volume: {spotify_volume}
 ```
 #### Known issues:
 - sometimes progress var skips a second
-- progress doesn't always update progress on first skip of session
-- when skipping, a slight delay before hud updates
+- variables doesn't always update on first skip of session
+- when skipping tracks, a slight but noticeable delay before hud updates
 
 
 #### Todo list:  
