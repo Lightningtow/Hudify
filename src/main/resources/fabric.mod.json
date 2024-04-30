@@ -3,9 +3,9 @@
 	"id": "hudify",
 	"version": "${version}",
 	"name": "Hudify",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Passes Spotify info to CustomHud",
 	"authors": [
-		"Me!"
+		"Lightningtow"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
@@ -23,7 +23,6 @@
 		]
 	},
 	"mixins": [
-		"hudify.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.15.7",

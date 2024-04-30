@@ -14,27 +14,24 @@ import net.minecraft.world.Heightmap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Objects;
-import java.util.function.Supplier;
-
-import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerComplexData;
 import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerElement;
-import static org.apache.commons.lang3.math.NumberUtils.toInt;
 
 public class CustomhudIntegration implements ClientModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("Hudify");
 
     @Override
     public void onInitializeClient() {
-        LOGGER.error("running CHIntegration.onInitializeClient()");
+//        LOGGER.info("running CHIntegration.onInitializeClient()");
+        LOGGER.info("integrating with CustomHud");
+
 //        String[] info = SpotifyUtil.getPlaybackInfo();
 
 //    public static void registerCompat() {
         // 0 name, 1 artists, 2 progress, 3 duration, 4 album?, 5 external_url?, 6, volume percent
         // 5 url is like https://open.spotify.com/track/536ZTi6wWJQ2gYXkXnJwVX?si=4e244a84c9884ae4
-        registerElement("spotify_track", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[0]));
+     //   registerElement("spotify_track", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[0]));
 
-        registerElement("spotify_ready", (_str) -> new BooleanSupplierElement(() -> Objects.equals(HudifyHUD.hudInfo[0], "-")));
+    //    registerElement("spotify_ready", (_str) -> new BooleanSupplierElement(() -> Objects.equals(HudifyHUD.hudInfo[0], "-")));
 
 //       // HudElement track = new StringSupplierElement(HudifyHUD.hudInfo[0]);
 //        registerElement("name1", (_str) -> VERSION);
@@ -50,9 +47,24 @@ public class CustomhudIntegration implements ClientModInitializer {
 //        CustomHudRegistry.registerElement("spotify_track", track);
 //        CustomHudRegistry.registerElement("sp_track", track);
 
-        registerElement("spotify_artist", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[1]));
-        registerElement("spotify_progress_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60)));
-        registerElement("spotify_duration_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getDuration() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getDuration() / 1000 % 60)));
+        StringSupplierElement artists = new StringSupplierElement(() -> HudifyHUD.hudInfo[1]);
+        CustomHudRegistry.registerElement("spotify_artists", (_str) -> artists);
+        CustomHudRegistry.registerElement("sp_artists",  (_str) ->  artists);
+
+       // registerElement("spotify_artist", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[1]));
+        StringSupplierElement progress = new StringSupplierElement(() -> (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60));
+        CustomHudRegistry.registerElement("spotify_progress", (_str) -> progress);
+        CustomHudRegistry.registerElement("sp_prog",  (_str) ->  progress);
+
+        StringSupplierElement duration = new StringSupplierElement(() -> (HudifyHUD.getDuration() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getDuration() / 1000 % 60));
+        CustomHudRegistry.registerElement("spotify_duration", (_str) -> duration);
+        CustomHudRegistry.registerElement("sp_dur",  (_str) ->  duration);
+
+       // registerElement("spotify_progress_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60)));
+       // registerElement("spotify_duration_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getDuration() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getDuration() / 1000 % 60)));
+
+
+
         registerElement("spotify_url", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[5]));
         registerElement("spotify_volume", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[6]));
 

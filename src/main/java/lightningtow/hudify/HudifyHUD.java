@@ -45,85 +45,6 @@ public class HudifyHUD
         durationMS = -1;
     }
 
-    public static void draw(MatrixStack matrixStack)
-    {
-        matrixStack.push();
-        if (hudInfo[1] == null || isHidden)
-        {
-            return;
-        }
-
-        double percentProgress = (double) progressMS / (double) durationMS;
-        if (percentProgress < 0)
-        {
-            percentProgress = 0;
-        }
-
-//        HudifyHUD.matrixStack = matrixStack;
-//        matrixStack.translate((lightningtow.hudify.util.HudifyConfig.anchor == lightningtow.hudify.util.HudifyConfig.Anchor.TOP_LEFT || lightningtow.hudify.util.HudifyConfig.anchor == lightningtow.hudify.util.HudifyConfig.Anchor.BOTTOM_LEFT) ? lightningtow.hudify.util.HudifyConfig.posX : scaledWidth - 185 - lightningtow.hudify.util.HudifyConfig.posX,
-//                (lightningtow.hudify.util.HudifyConfig.anchor == lightningtow.hudify.util.HudifyConfig.Anchor.TOP_LEFT || lightningtow.hudify.util.HudifyConfig.anchor == lightningtow.hudify.util.HudifyConfig.Anchor.TOP_RIGHT) ? lightningtow.hudify.util.HudifyConfig.posY : scaledHeight - 55 - lightningtow.hudify.util.HudifyConfig.posY, 0);
-//        matrixStack.scale((float) lightningtow.hudify.util.HudifyConfig.scale, (float) lightningtow.hudify.util.HudifyConfig.scale,1);
-//        scaledWidth = client.getWindow().getScaledWidth();
-//        scaledHeight = client.getWindow().getScaledHeight();
-//        int textOffset = 55;
-//        if ((lightningtow.hudify.util.HudifyConfig.drawCover) && hudInfo[4] != null && (!prevImage.equals(hudInfo[4]) && !hudInfo[4].equals("")))
-//        {
-//            LOGGER.info("Drawing new album cover.");
-////            albumImage.setImage(hudInfo[4]);
-//            prevImage = hudInfo[4];
-//        }
-
-//        if (hudInfo[4] != null && (lightningtow.hudify.util.HudifyConfig.drawCover))
-//        {
-//            drawRectangle(5, 5, 50, 50, new Color(0,0,0,150));
-////            RenderUtil.drawTexture(matrixStack, albumImage, 5, 5, .15F);
-//            textOffset = 0;
-//        }
-
-//        drawRectangle(0, 0, 185 - textOffset, 55, new Color(MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.backgroundColor).getRed(), MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.backgroundColor).getGreen(), MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.backgroundColor).getBlue(), lightningtow.hudify.util.HudifyConfig.backgroundTransparency));
-//        drawRectangle(60 - textOffset, 48, 180 - textOffset, 50, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.barColor).darker().darker());
-//        drawRectangle(60 - textOffset, 48, (float) (60 + (120 * percentProgress)) - textOffset, 50, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.barColor));
-
-        List<OrderedText> nameWrap = fontRenderer.wrapLines(StringVisitable.plain(hudInfo[0]), 125);
-        int yOffset = 0;
-//        if (nameWrap.size() > 1)
-//        {
-//            fontRenderer.drawWithShadow(matrixStack, nameWrap.get(0), 60 - textOffset, 5, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.titleColor).getRGB());
-//            fontRenderer.drawWithShadow(matrixStack, nameWrap.get(1), 60 - textOffset, 18, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.titleColor).getRGB());
-//            yOffset = 15;
-//        }
-//        else
-//        {
-//            fontRenderer.drawWithShadow(matrixStack, nameWrap.get(0), 60 - textOffset, 5, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.titleColor).getRGB());
-//        }
-//        matrixStack.scale(.5F, .5F, .5F);
-//
-//        List<OrderedText> artistWrap = fontRenderer.wrapLines(StringVisitable.plain(hudInfo[1]), 140);
-//        int artistYOffset = 0;
-//        if (artistWrap.size() > 1)
-//        {
-//            fontRenderer.drawWithShadow(matrixStack, artistWrap.get(0), 120 - (textOffset * 2), 44 + yOffset, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.artistColor).getRGB());
-//            fontRenderer.drawWithShadow(matrixStack, artistWrap.get(1), 120 - (textOffset * 2), 57 + yOffset, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.artistColor).getRGB());
-//            artistYOffset = 15;
-//        }
-//        else
-//        {
-//            fontRenderer.drawWithShadow(matrixStack, artistWrap.get(0), 120 - (textOffset * 2), 44 + yOffset, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.artistColor).getRGB());
-//        }
-//        String progressText = (progressMS / (1000 * 60)) + ":" + String.format("%02d", (progressMS / 1000 % 60));
-//        String durationText = (durationMS / (1000 * 60)) + ":" + String.format("%02d ", (durationMS / 1000 % 60)) + I18n.translate("Hudify.hud.volume") + ": " + hudInfo[6];
-
-//        fontRenderer.drawWithShadow(matrixStack, progressText, 120 - (textOffset * 2), 85, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.timeColor).getRGB());
-//        fontRenderer.drawWithShadow(matrixStack, durationText, 360 - (fontRenderer.getWidth(durationText)) - (textOffset * 2), 85, MidnightColorUtil.hex2Rgb(lightningtow.hudify.util.HudifyConfig.timeColor).getRGB());
-//        matrixStack.scale(2F, 2F, 2F);
-        matrixStack.scale(1,1,1);
-        matrixStack.pop();
-    }
-
-//    public static void drawRectangle(float x1, float y1, float x2, float y2, Color color)
-//    {
-//        InGameHud.fill(matrixStack, (int) (x1), (int) (y1), (int) (x2), (int) (y2), color.getRGB());
-//    }
 
     public static void updateData(String[] data)
     {
@@ -174,13 +95,11 @@ public class HudifyHUD
         // int ms = hudInfo[3] == null ? -1 : Integer.parseInt(hudInfo[3]);
     }
 
-    public static void setProgress(int progress)
-    {
+    public static void setProgress(int progress) {
         progressMS = progress;
     }
 
-    public static void setDuration(int duration)
-    {
+    public static void setDuration(int duration) {
         durationMS = duration;
     }
 

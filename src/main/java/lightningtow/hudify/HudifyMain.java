@@ -57,13 +57,15 @@ public class HudifyMain implements ModInitializer
 	// see this link for unofficial estimates of ratelimits
 	// https://community.spotify.com/t5/Spotify-for-Developers/Web-API-ratelimit/m-p/5503153/highlight/true#M7931
 
-	final private boolean db = true; // toggle debug messages
+	final private boolean db = false; // toggle debug messages
 	@Override
 	public void onInitialize()
 	{
 
-		LOGGER.error("Hudify successfully loaded"); //info
-	//	HudifyConfig.init("Hudify", lightningtow.hudify.util.HudifyConfig.class);
+		//LOGGER.info("running HudifyMain.onInitialize()"); //info
+		LOGGER.info("initializing main loop"); //info
+
+		//	HudifyConfig.init("Hudify", lightningtow.hudify.util.HudifyConfig.class);
 		requestThread = new Thread()
 		{
 			public void run() {
@@ -84,7 +86,7 @@ public class HudifyMain implements ModInitializer
 							} else if (data[0] != null && data[0].equals("Reset")) {
 								LOGGER.error("Reset condition, maintaining HUD until reset"); // was info and from blockiy
 							} else {
-								LOGGER.info("main loop: updating data");
+								if(db) LOGGER.info("main loop: updating data");
 								lightningtow.hudify.HudifyHUD.updateData(data);
 							}
 //							} else if (SpotifyUtil.isPlaying()) {
@@ -110,7 +112,7 @@ public class HudifyMain implements ModInitializer
 			}
 
 		};
-		requestThread.setName("Spotify Thread");
+		requestThread.setName("SpThr"); //spotify thread
 		requestThread.start();
 		SpotifyUtil.initialize();
 //		CustomhudIntegration.on

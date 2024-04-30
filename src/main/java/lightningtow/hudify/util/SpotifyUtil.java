@@ -53,7 +53,8 @@ public class SpotifyUtil
 
     public static void initialize()
     {
-        LOGGER.error("running SpotifyUtil.initialize()");
+        //LOGGER.info("running SpotifyUtil.initialize()");
+        LOGGER.info("initializing with Spotify");
 
         authFile = new File(System.getProperty("user.dir") + File.separator +
                 "config" + File.separator + "HudifyTokens.json");
@@ -378,16 +379,15 @@ public class SpotifyUtil
     }
 
     public static void playPause() {
-        if (isPlaying)
-        {
+        //isPlaying == true : pauseSong() ? playSong();
+        if (isPlaying) {
             pauseSong();
-            isPlaying = false;
         }
-        else
-        {
+        else {
             playSong();
-            isPlaying = true;
         }
+
+        isPlaying = !isPlaying;
     }
 
     public static String[] getPlaybackInfo()
