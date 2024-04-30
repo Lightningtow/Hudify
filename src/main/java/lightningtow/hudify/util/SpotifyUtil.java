@@ -255,7 +255,7 @@ public class SpotifyUtil
 
     public static void putRequest(String type)
     {
-        LOGGER.error("running SpotifyUtil.putRequest");
+        //LOGGER.error("running SpotifyUtil.putRequest");
 
         try
         {
@@ -320,6 +320,7 @@ public class SpotifyUtil
             }
             else if (postRes.statusCode() == 403)
             {
+                assert MinecraftClient.getInstance().player != null;
                 MinecraftClient.getInstance().player.sendMessage(Text.of("Spotify Premium is required for this feature."));
             }
             else if (postRes.statusCode() == 401)
@@ -352,7 +353,9 @@ public class SpotifyUtil
         EXECUTOR_SERVICE.execute(() -> {
             postRequest("next");
             HudifyHUD.setDuration(-2000);
-            LOGGER.error("duration set to -2000 from nextSong");
+            LOGGER.info("Skipping to next song");
+
+            // LOGGER.error("duration set to -2000 from nextSong");
 
         });
     }
@@ -361,7 +364,8 @@ public class SpotifyUtil
         EXECUTOR_SERVICE.execute(() -> {
             postRequest("previous");
             HudifyHUD.setDuration(-2000);
-            LOGGER.error("duration set to -2000 from prevSong");
+            LOGGER.info("Skipping to previous song");
+            //LOGGER.error("duration set to -2000 from prevSong");
 
         });
     }
@@ -369,17 +373,23 @@ public class SpotifyUtil
     public static void playSong() {
         EXECUTOR_SERVICE.execute(() -> {
             putRequest("play");
+            LOGGER.info("Play");
+
         });
     }
 
     public static void pauseSong() {
         EXECUTOR_SERVICE.execute(() -> {
             putRequest("pause");
+            LOGGER.info("Pause");
+
         });
     }
 
     public static void playPause() {
         //isPlaying == true : pauseSong() ? playSong();
+        LOGGER.info("Toggle");
+
         if (isPlaying) {
             pauseSong();
         }

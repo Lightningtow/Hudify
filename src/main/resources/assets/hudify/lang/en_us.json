@@ -1,6 +1,6 @@
 {
   "hudify.key.category": "Hudify",
-  "hudify.key.play": "Play/Pause",
+  "hudify.key.toggle": "Toggle Play/Pause",
   "hudify.key.next": "Next Song",
   "hudify.key.prev": "Previous Song",
   "hudify.key.force": "Force Update",

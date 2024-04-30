@@ -1,16 +1,14 @@
 package lightningtow.hudify;
 
 import lightningtow.hudify.util.SpotifyUtil;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,16 +40,17 @@ public class HudifyMain implements ModInitializer
 //	private static KeyBinding increaseVolumeKey;
 //	private static KeyBinding decreaseVolumeKey;
 //	private static KeyBinding toggleInGameMusicKey;
-	private boolean playKeyPrevState = false;
-	private boolean nextKeyPrevState = false;
-	private boolean prevKeyPrevState = false;
+	private static boolean toggleKeyPrevState = false;
+	private static boolean nextKeyPrevState = false;
+	private static boolean prevKeyPrevState = false;
 	private boolean forceKeyPrevState = false;
 //	private boolean hideKeyPrevState = false;
 //	private boolean increaseVolumeKeyPrevState = false;
 //	private boolean decreaseVolumeKeyPrevState = false;
 //	private boolean toggleInGameMusicKeyPrevState = false;
 	private static Thread requestThread;
-
+//	private static final String CATEGORY = "key.categories." + GammaUtils.NAMESPACE;
+//	private static final String BASE_KEY = "key." + GammaUtils.NAMESPACE;
 	public static final Logger LOGGER = LogManager.getLogger("Hudify");
 
 	// see this link for unofficial estimates of ratelimits
@@ -66,89 +65,86 @@ public class HudifyMain implements ModInitializer
 		LOGGER.info("initializing main loop"); //info
 
 		//	HudifyConfig.init("Hudify", lightningtow.hudify.util.HudifyConfig.class);
-		requestThread = new Thread()
-		{
-			public void run() {
-				while (true) {
-					try {
-						Thread.sleep(1000);
-						if (MinecraftClient.getInstance().world != null) {
+		requestThread = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                    if (MinecraftClient.getInstance().world != null) {
 //							if (lightningtow.hudify.HudifyHUD.getDuration() < lightningtow.hudify.HudifyHUD.getProgress()) {
-							//Thread.sleep(1000);
-							String[] data = SpotifyUtil.getPlaybackInfo();
-							//if(db) LOGGER.info("main loop - data[0]: " + data[0]);
+                        //Thread.sleep(1000);
+                        String[] data = SpotifyUtil.getPlaybackInfo();
+                        //if(db) LOGGER.info("main loop - data[0]: " + data[0]);
 
-							if (data[0] != null && data[0].equals("Status Code: 204")) {
-								SpotifyUtil.refreshActiveSession();
-							} else if (data[0] != null && data[0].equals("Status Code: 429")) { // rate limited
-								LOGGER.error("RATE LIMITED============================================================");
-								Thread.sleep(3000);
-							} else if (data[0] != null && data[0].equals("Reset")) {
-								LOGGER.error("Reset condition, maintaining HUD until reset"); // was info and from blockiy
-							} else {
-								if(db) LOGGER.info("main loop: updating data");
-								lightningtow.hudify.HudifyHUD.updateData(data);
-							}
+                        if (data[0] != null && data[0].equals("Status Code: 204")) {
+                            SpotifyUtil.refreshActiveSession();
+                        } else if (data[0] != null && data[0].equals("Status Code: 429")) { // rate limited
+                            LOGGER.error("RATE LIMITED============================================================");
+                            Thread.sleep(3000);
+                        } else if (data[0] != null && data[0].equals("Reset")) {
+                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was info and from blockiy
+                        } else {
+                            if(db) LOGGER.info("main loop: updating data");
+                            HudifyHUD.updateData(data);
+                        }
 //							} else if (SpotifyUtil.isPlaying()) {
-							lightningtow.hudify.HudifyHUD.setProgress(lightningtow.hudify.HudifyHUD.getProgress() + 1000);
-								//LOGGER.info("progress updated in main loop to: " + lightningtow.hudify.HudifyHUD.getProgress() + 1000); // spammy but very helpful
-							if(db) LOGGER.info("progress updated in main loop to: " +
-									(HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60)); // spammy but very helpful
+                        HudifyHUD.setProgress(HudifyHUD.getProgress() + 1000);
+                            //LOGGER.info("progress updated in main loop to: " + lightningtow.hudify.HudifyHUD.getProgress() + 1000); // spammy but very helpful
+                        if(db) LOGGER.info("progress updated in main loop to: " +
+                                (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60)); // spammy but very helpful
 
 //							}
-						} else {
-							//when world is null
-							lightningtow.hudify.HudifyHUD.setProgress(0);
-							lightningtow.hudify.HudifyHUD.setDuration(-1);
-							// LOGGER.error("progress + duration updated in refreshActiveSession"); // spammy af
+                    } else {
+                        //when world is null
+                        HudifyHUD.setProgress(0);
+                        HudifyHUD.setDuration(-1);
+                        // LOGGER.error("progress + duration updated in refreshActiveSession"); // spammy af
 
-						}
-					} catch (InterruptedException e) {
-						LOGGER.error("error in main loop: " + e);
-						e.printStackTrace();
+                    }
+                } catch (InterruptedException e) {
+                    LOGGER.error("error in main loop: " + e);
+                    e.printStackTrace();
 
-					}
-				}
-			}
-
-		};
-		requestThread.setName("SpThr"); //spotify thread
+                }
+            }
+        });
+		requestThread.setName("Spotify Thread"); //spotify thread
 		requestThread.start();
 		SpotifyUtil.initialize();
+		registerBindings();
 //		CustomhudIntegration.on
-		prevKey = KeyBindingHelper.registerKeyBinding(
-				new KeyBinding("hudify.key.prev", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
+//		prevKey = KeyBindingHelper.registerKeyBinding(
+//				new KeyBinding("hudify.key.prev", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
 
-		playKey = KeyBindingHelper.registerKeyBinding(
-				new KeyBinding("hudify.key.play", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
+//		playKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("hudify.key.play", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
 
-		nextKey = KeyBindingHelper.registerKeyBinding(
-				new KeyBinding("hudify.key.next", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
+//		nextKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("hudify.key.next", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
 
-		forceKey = KeyBindingHelper.registerKeyBinding(
-				new KeyBinding("hudify.key.force", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
+//		forceKey = KeyBindingHelper.registerKeyBinding(
+//				new KeyBinding("hudify.key.force", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
 
-//		hideKey = KeyBindingHelper.registerKeyBinding(
-//				new KeyBinding("hudify.key.hide", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
-//
-//		increaseVolumeKey = KeyBindingHelper.registerKeyBinding(
-//				new KeyBinding("hudify.key.increaseVolume", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
-//
-//		decreaseVolumeKey = KeyBindingHelper.registerKeyBinding(
-//				new KeyBinding("hudify.key.decreaseVolume", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
-//
-//		toggleInGameMusicKey = KeyBindingHelper.registerKeyBinding(
-//				new KeyBinding("hudify.key.toggleInGameMusic", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
 
 		ClientTickEvents.END_CLIENT_TICK.register(
 				client ->
 				{
 					try
 					{
-						playKeyHandler(playKey.isPressed());
-						nextKeyHandler(nextKey.isPressed());
-						prevKeyHandler(prevKey.isPressed());
-						forceKeyHandler(forceKey.isPressed());
+
+
+//					if (nextKeyIsPressed && !playKeyPrevState) {
+//						if (SpotifyUtil.isAuthorized()) {
+//							LOGGER.error("Authorized!"); //info
+//						SpotifyUtil.playPause();
+//						}
+//					else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
+//					}
+//					playKeyPrevState = nextKeyIsPressed;
+
+
+
+//						playKeyHandler(playKey.isPressed());
+//						nextKeyHandler(nextKey.isPressed());
+//						prevKeyHandler(prevKey.isPressed());
+//						forceKeyHandler(forceKey.isPressed());
 //						hideKeyHandler(hideKey.isPressed());
 //						increaseVolumeKeyHandler(increaseVolumeKey.isPressed());
 //						decreaseVolumeKeyHandler(decreaseVolumeKey.isPressed());
@@ -160,40 +156,85 @@ public class HudifyMain implements ModInitializer
 					}
 				}
 		);
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-			dispatcher.register(
-					ClientCommandManager.literal("sharetrack").executes(context -> {
-						var player = MinecraftClient.getInstance().player;
-						if (player == null) { return 0; }
-						player.sendMessage(Text.of(lightningtow.hudify.HudifyHUD.hudInfo[5]));
-						return 0;
-					})
-			);
-		});
+//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+//			dispatcher.register(
+//					ClientCommandManager.literal("sharetrack").executes(context -> {
+//						var player = MinecraftClient.getInstance().player;
+//						if (player == null) { return 0; }
+//						player.sendMessage(Text.of(lightningtow.hudify.HudifyHUD.hudInfo[5]));
+//						return 0;
+//					})
+//			);
+//		});
 	}
+	public static void registerBindings() {
+		registerToggleKey();
+		registerNextKey();
+		registerPrevKey();
+	}
+	private static void registerToggleKey() {
+		KeyBinding toggleKey = new KeyBinding("hudify.key.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify");
+		KeyBindingHelper.registerKeyBinding(toggleKey);
 
-	public void playKeyHandler(boolean currPressState)
-	{
-		// LOGGER.error("running HudifyMain.playKeyHandler"); quite spammy lol
-		try {
-			if (currPressState && !playKeyPrevState) {
+		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (toggleKey.wasPressed() && !toggleKeyPrevState) {
 				if (SpotifyUtil.isAuthorized()) {
-					LOGGER.error("Authorized!"); //info
+					LOGGER.info("Authorized!"); //info
 					SpotifyUtil.playPause();
 				}
 				else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 			}
-			playKeyPrevState = currPressState;
-		} catch (Exception e) { LOGGER.error("exception caught in playKeyHandler(): " + e.getMessage());}
+			toggleKeyPrevState = toggleKey.wasPressed();
+		});
 	}
+	private static void registerNextKey() {
+		KeyBinding nextKey = new KeyBinding("hudify.key.next", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify");
+		KeyBindingHelper.registerKeyBinding(nextKey);
 
-	public void nextKeyHandler(boolean currPressState) {
-		if (currPressState && !nextKeyPrevState) {
+		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+		if (nextKey.wasPressed() && !nextKeyPrevState) {
 			LOGGER.info("Next Key Pressed");
 			SpotifyUtil.nextSong();
 		}
-		nextKeyPrevState = currPressState;
+			nextKeyPrevState = nextKey.wasPressed();
+		});
 	}
+	private static void registerPrevKey() {
+		KeyBinding prevKey = new KeyBinding("hudify.key.prev", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify");
+		KeyBindingHelper.registerKeyBinding(prevKey);
+
+		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (prevKey.wasPressed() && !prevKeyPrevState) {
+				LOGGER.info("Prev Key Pressed");
+				SpotifyUtil.prevSong();
+			}
+			prevKeyPrevState = prevKey.wasPressed();
+		});
+	}
+//	public void playKeyHandler(boolean currPressState)
+//	{
+//		// LOGGER.error("running HudifyMain.playKeyHandler"); quite spammy lol
+//		try {
+//			if (currPressState && !playKeyPrevState) {
+//				if (SpotifyUtil.isAuthorized()) {
+//					LOGGER.error("Authorized!"); //info
+//					SpotifyUtil.playPause();
+//				}
+//				else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
+//			}
+//			playKeyPrevState = currPressState;
+//		} catch (Exception e) { LOGGER.error("exception caught in playKeyHandler(): " + e.getMessage());}
+//	}
+
+//	public void nextKeyHandler(boolean currPressState) {
+//		if (currPressState && !nextKeyPrevState) {
+//			LOGGER.info("Next Key Pressed");
+//			SpotifyUtil.nextSong();
+//		}
+//		nextKeyPrevState = currPressState;
+//	}
+
+
 
 	public void prevKeyHandler(boolean currPressState) {
 		if (currPressState && !prevKeyPrevState) {
