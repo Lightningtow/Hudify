@@ -15,7 +15,7 @@ String variables:
 `spotify_progress` / `sp_prog` - song progress in MM:SS notation  
 `spotify_duration` / `sp_dur`  - song duration in MM:SS notation  
 
-`spotify_url` - a long, not-clickable url link to your current track  
+`spotify_url` - a long, unclickable url link to your current track  
 `spotify_volume` - your volume from 1-100. Spotify's built-in volume, not your devices' volume
 
 ### Example CustomHud Config:
