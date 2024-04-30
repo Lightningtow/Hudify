@@ -50,7 +50,7 @@ Volume: {spotify_volume}
 - sometimes progress var skips a second
 - variables doesn't always update on first skip of session
 - when skipping tracks, a slight but noticeable delay before hud updates
-
+- at launch, variables are often empty
 
 #### Todo list:
 - create my own spotify dev app

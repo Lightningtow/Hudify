@@ -32,14 +32,7 @@ import org.lwjgl.glfw.GLFW;
 public class HudifyMain implements ModInitializer
 {
 	public static final String MOD_ID = "Hudify";
-	private static KeyBinding playKey;
-	private static KeyBinding nextKey;
-	private static KeyBinding prevKey;
-	private static KeyBinding forceKey;
-//	private static KeyBinding hideKey;
-//	private static KeyBinding increaseVolumeKey;
-//	private static KeyBinding decreaseVolumeKey;
-//	private static KeyBinding toggleInGameMusicKey;
+
 	private static boolean toggleKeyPrevState = false;
 	private static boolean nextKeyPrevState = false;
 	private static boolean prevKeyPrevState = false;
@@ -49,13 +42,13 @@ public class HudifyMain implements ModInitializer
 //	private boolean decreaseVolumeKeyPrevState = false;
 //	private boolean toggleInGameMusicKeyPrevState = false;
 	private static Thread requestThread;
-//	private static final String CATEGORY = "key.categories." + GammaUtils.NAMESPACE;
-//	private static final String BASE_KEY = "key." + GammaUtils.NAMESPACE;
 	public static final Logger LOGGER = LogManager.getLogger("Hudify");
 
 	// see this link for unofficial estimates of ratelimits
 	// https://community.spotify.com/t5/Spotify-for-Developers/Web-API-ratelimit/m-p/5503153/highlight/true#M7931
 
+	// api response code descriptions
+	// https://developer.spotify.com/documentation/web-api/concepts/api-calls
 	final private boolean db = false; // toggle debug messages
 	@Override
 	public void onInitialize()
@@ -123,39 +116,7 @@ public class HudifyMain implements ModInitializer
 //				new KeyBinding("hudify.key.force", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
 
 
-		ClientTickEvents.END_CLIENT_TICK.register(
-				client ->
-				{
-					try
-					{
 
-
-//					if (nextKeyIsPressed && !playKeyPrevState) {
-//						if (SpotifyUtil.isAuthorized()) {
-//							LOGGER.error("Authorized!"); //info
-//						SpotifyUtil.playPause();
-//						}
-//					else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
-//					}
-//					playKeyPrevState = nextKeyIsPressed;
-
-
-
-//						playKeyHandler(playKey.isPressed());
-//						nextKeyHandler(nextKey.isPressed());
-//						prevKeyHandler(prevKey.isPressed());
-//						forceKeyHandler(forceKey.isPressed());
-//						hideKeyHandler(hideKey.isPressed());
-//						increaseVolumeKeyHandler(increaseVolumeKey.isPressed());
-//						decreaseVolumeKeyHandler(decreaseVolumeKey.isPressed());
-//						toggleInGameMusicKeyHandler(toggleInGameMusicKey.isPressed());
-
-					} catch (Exception e)
-					{
-						LOGGER.error("exception caught in ClientTickEvents.END_CLIENT_TICK.register(): " + e.getMessage());
-					}
-				}
-		);
 //		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 //			dispatcher.register(
 //					ClientCommandManager.literal("sharetrack").executes(context -> {
@@ -211,28 +172,7 @@ public class HudifyMain implements ModInitializer
 			prevKeyPrevState = prevKey.wasPressed();
 		});
 	}
-//	public void playKeyHandler(boolean currPressState)
-//	{
-//		// LOGGER.error("running HudifyMain.playKeyHandler"); quite spammy lol
-//		try {
-//			if (currPressState && !playKeyPrevState) {
-//				if (SpotifyUtil.isAuthorized()) {
-//					LOGGER.error("Authorized!"); //info
-//					SpotifyUtil.playPause();
-//				}
-//				else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
-//			}
-//			playKeyPrevState = currPressState;
-//		} catch (Exception e) { LOGGER.error("exception caught in playKeyHandler(): " + e.getMessage());}
-//	}
 
-//	public void nextKeyHandler(boolean currPressState) {
-//		if (currPressState && !nextKeyPrevState) {
-//			LOGGER.info("Next Key Pressed");
-//			SpotifyUtil.nextSong();
-//		}
-//		nextKeyPrevState = currPressState;
-//	}
 
 
 
