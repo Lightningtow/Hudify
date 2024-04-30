@@ -12,7 +12,7 @@ To uninstall, also be sure to also disconnect the app from https://www.spotify.c
 Tested, working versions
 If you use on other versions of Minecraft or CustomHud, please lmk whether it works or doesnt
 - Minecraft 1.20.4 with CustomHud 3.3.0
-- Minecraft 1.20.4 with CustomHud 4.0 Beta 23 (found on [Jakob's discord](https://discord.gg/eYf7DDHhvN))
+- Minecraft 1.20.4 with CustomHud 4.0 Beta 23 (found on Jakob's discord)
 
 
 ### Variables added:
