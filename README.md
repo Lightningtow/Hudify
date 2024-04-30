@@ -52,7 +52,8 @@ Volume: {spotify_volume}
 - when skipping tracks, a slight but noticeable delay before hud updates
 
 
-#### Todo list:  
+#### Todo list:
+- create my own spotify dev app
 - change volume var from string to integer. Or just remove it?
 - add more variables
 - add more playback controls, maybe
