@@ -1,3 +1,5 @@
+## Requires https://modrinth.com/mod/customhud
+
 
 You'll need to authorize the app Blockify to use this mod.   
 You'll be prompted to authorize once you use the first play/pause action
@@ -35,3 +37,7 @@ Volume: {spotify_volume}
 Todo list:  
 - turn volume to integer
 - more variables
+- maybe? make customhud a soft dependency
+
+Credit:  
+a huge thank you to erruqie and https://github.com/erruqie/Blockify and Jakob for their fantastic work
