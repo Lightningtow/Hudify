@@ -28,7 +28,7 @@ If you use on other versions of Minecraft or CustomHud, please lmk whether it wo
 
 ### Example CustomHud Config:
 ```
-=if: ({spotify_track} = "-" | {spotify_track} = "Status Code: 400")=
+=if: (spotify_track = "-" | spotify_track = "Status Code: 400")=
 Spotify not loaded/initialized/whatnot
 
 If this is your first time using this mod, 
@@ -54,7 +54,7 @@ Volume: {spotify_volume}
 
 #### Todo list:
 - create my own spotify dev app
-- change volume var from string to integer. Or just remove it?
+- change volume var from string to integer
 - add more variables
 - add more playback controls, maybe
 - maybe? make customhud a soft dependency

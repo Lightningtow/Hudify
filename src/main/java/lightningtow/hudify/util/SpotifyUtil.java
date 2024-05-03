@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 import lightningtow.hudify.HudifyHUD;
+import lightningtow.hudify.HudifyMain;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
@@ -171,7 +172,7 @@ public class SpotifyUtil
 
     public static boolean refreshAccessToken()
     {
-        LOGGER.error("running SpotifyUtil.refreshAccessToken");
+        if (HudifyMain.dbs) LOGGER.error("running SpotifyUtil.refreshAccessToken");
 
         try
         {
@@ -199,14 +200,14 @@ public class SpotifyUtil
             }
         } catch (Exception e)
         {
-            LOGGER.error("exception caught in refreshAccessToken():" + e.getMessage());
+            if (HudifyMain.dbs) LOGGER.error("exception caught in refreshAccessToken():" + e.getMessage());
         }
         return false;
     }
 
     public static void refreshActiveSession()
     {
-        LOGGER.error("running SpotifyUtil.refreshActiveSession");
+        if (HudifyMain.dbs) LOGGER.error("running SpotifyUtil.refreshActiveSession");
 
         try
         {
@@ -224,7 +225,7 @@ public class SpotifyUtil
             {
                 HudifyHUD.setDuration(1);
                 HudifyHUD.setProgress(0);
-                LOGGER.error("progress + duration updated in refreshActiveSession");
+                if (HudifyMain.dbs) LOGGER.error("progress + duration updated in refreshActiveSession");
 
                 isPlaying = false;
                 return;
@@ -244,11 +245,11 @@ public class SpotifyUtil
                     .header("Authorization", "Bearer " + accessToken)
                     .PUT(HttpRequest.BodyPublishers.ofString(deviceIDBody))
                     .build();
-            LOGGER.info("Responded with :" + client.send(setActive, HttpResponse.BodyHandlers.ofString()).statusCode());
+            if (HudifyMain.dbs) LOGGER.info("Responded with :" + client.send(setActive, HttpResponse.BodyHandlers.ofString()).statusCode());
 
         } catch (Exception e)
         {
-            LOGGER.error("exception caught in refreshActiveSession():" + e.getMessage());
+            if (HudifyMain.dbs) LOGGER.error("exception caught in refreshActiveSession():" + e.getMessage());
         }
         LOGGER.info("Successfully refreshed active session");
     }

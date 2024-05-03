@@ -49,7 +49,9 @@ public class HudifyMain implements ModInitializer
 
 	// api response code descriptions
 	// https://developer.spotify.com/documentation/web-api/concepts/api-calls
-	final private boolean db = false; // toggle debug messages
+	final public boolean db = false; // toggle debug messages
+	final public static boolean dbs = false; // toggle debug messages
+
 	@Override
 	public void onInitialize()
 	{
