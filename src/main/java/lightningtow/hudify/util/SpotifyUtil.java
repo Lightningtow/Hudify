@@ -171,6 +171,7 @@ public class SpotifyUtil
 
     public static boolean refreshAccessToken()
     {
+        // returns true if refreshed successfully, false if could not refresh
         if (db) LOGGER.error("running SpotifyUtil.refreshAccessToken");
 
         try
@@ -188,7 +189,7 @@ public class SpotifyUtil
                     .build();
 
             HttpResponse<String> refreshResponse = client.send(refreshRequest, HttpResponse.BodyHandlers.ofString());
-            if (refreshResponse.statusCode() == 200)
+            if (refreshResponse.statusCode() == 200) // successful
             {
                 JsonObject refreshJson = new JsonParser().parse(refreshResponse.body()).getAsJsonObject();
                 accessToken = refreshJson.get("access_token").getAsString();
@@ -417,15 +418,13 @@ public class SpotifyUtil
             LOGGER.info("Resuming playback");
         }
 
-        isPlaying = !isPlaying;
+//        isPlaying = !isPlaying; // this should update automatically
     }
     //</editor-fold>
 
-//    public static String[] getPlaybackInfo() // rename to updatePlaybackInfo?
     public static void updatePlaybackInfo() // rename to updatePlaybackInfo?
-
     {
-//        String[] results = new String[8];
+        String dump_msg = "getPlaybackInfo";
         try
         {
             playbackResponse = client.send(playbackRequest, HttpResponse.BodyHandlers.ofString());
@@ -436,8 +435,6 @@ public class SpotifyUtil
 
             if (playbackResponse.statusCode() == 429) // Too Many Requests - Rate limiting has been applied.
             {
-//                results[0] = "Status Code: " + playbackResponse.statusCode();
-//                return results;
                 return;
             }
             if (playbackResponse.statusCode() == 200) // OK - The request has succeeded
@@ -459,51 +456,49 @@ public class SpotifyUtil
 //                    results[4] = json.get("item").getAsJsonObject().get("images").getAsJsonArray().get(1).getAsJsonObject().get("url").getAsString();
                     return; // for podcasts
                 }
+
+
                 // the rest is all for normal music tracks
-
-
-//                results[0] = json.get("item").getAsJsonObject().get("name").getAsString();
                 HudifyMain.track = json.get("item").getAsJsonObject().get("name").getAsString();
 
-                // LOGGER.error("getPlaybackInfo - name: " + results[0]);
+                /** artist variables **/
                 JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
                 StringBuilder artistString = new StringBuilder();
                 HudifyMain.first_artist = artistArray.get(0).getAsJsonObject().get("name").getAsString();
                 artistString.append(artistArray.get(0).getAsJsonObject().get("name").getAsString());
                 for (int i = 1; i < artistArray.size(); i++) // skips the first artist
                 {
-                    artistString.append(", " + artistArray.get(i).getAsJsonObject().get("name").getAsString());
+                    artistString.append(", ").append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
                 }
                 HudifyMain.artists = artistString.toString();
+                /** artist variables **/
 
 
-                // 0 name, 1 artists, 2 progress, 3 duration, 4 album image, 5 external_url?, 6, volume percent
                 // the `json.get("progress_ms")` is incorrect after pausing then resuming
-//                LOGGER.info("getPlaybackInfo - progress " + json.get("progress_ms") + ", duration " + json.get("item").getAsJsonObject().get("duration_ms"));
-//                results[2] = String.valueOf((json.get("progress_ms").getAsInt() / 1000));
-//                results[3] = String.valueOf((json.get("item").getAsJsonObject().get("duration_ms").getAsInt() / 1000));
+                dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
+
                 HudifyMain.progress = (json.get("progress_ms").getAsInt() / 1000);
                 HudifyMain.duration = (json.get("item").getAsJsonObject().get("duration_ms").getAsInt() / 1000);
-
-//                results[3] = json.get("item").getAsJsonObject().get("duration_ms").getAsString();
-                //               results[2] = json.get("progress_ms").getAsString();
-//                results[3] = json.get("item").getAsJsonObject().get("duration_ms").getAsString();
-
-//                JsonArray imageArray = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images")
-//                        .getAsJsonArray();
-//                if (imageArray.size() > 1)
-//                {
-//                    results[4] = imageArray.get(1).getAsJsonObject().get("url").getAsString();
-//                }
-//                else
-//                {
-//                    results[4] = null;
-//                }
-//                results[5] = json.get("item").getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString();
-//                results[6] = json.get("device").getAsJsonObject().get("volume_percent").getAsString();
-                //                results[7] = context;
                 HudifyMain.context_type = json.get("context").getAsJsonObject().get("type").getAsString();
+                switch (HudifyMain.context_type)
+                { // playing directly from search result listings throws an exception but gets causght
+                    case "artist":
+                        HudifyMain.context_name = HudifyMain.first_artist; break;
+                    case "album":
+                        HudifyMain.context_name = HudifyMain.album;     break;
+                    case "show":
+                        HudifyMain.context_name = HudifyMain.artists;   break;
+                    case "playlist":
+                        HudifyMain.context_name = "playlist title goes here. fetch from URI";   break;
+                }
+
+                HudifyMain.album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
+
+
+
                 isPlaying = json.get("is_playing").getAsBoolean();
+
+
 //                if (db) LOGGER.info("getPlaybackInfo - isPlaying: " + isPlaying);
             }
             else if (playbackResponse.statusCode() == 401)
@@ -514,13 +509,7 @@ public class SpotifyUtil
                     isAuthorized = false;
                 }
             }
-            else // if status code is not 429, 200, or 401 (ratelimit, ok, unauthorized)
-            {
-//                results[0] = "Status Code: " + playbackResponse.statusCode();
-//                if (db) LOGGER.info("getPlaybackInfo returning: " + Arrays.toString(results));
-//
-//                return results;
-            }
+
         } catch (Exception e)
         {
             if (e instanceof IOException && e.getMessage().equals("Connection reset"))
@@ -530,13 +519,12 @@ public class SpotifyUtil
             }
             else
             {
-                LOGGER.error("exception caught in getPlaybackInfo():" + e.getMessage());
+                LOGGER.error("exception caught in getPlaybackInfo(): " + e.getMessage());
             }
         }
-        HudifyMain.dump("getPlaybackInfo");
+        HudifyMain.dump(dump_msg);
         return;
 
-//        return results;
     }
 
 
@@ -547,6 +535,12 @@ public class SpotifyUtil
     }
 
     public static boolean isPlaying() { return isPlaying; } // getter, makes it so outer classes can't screw it up
+
+
+//JsonArray imageArray = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").getAsJsonArray();
+//if (imageArray.size() > 1)
+//{ results[4] = imageArray.get(1).getAsJsonObject().get("url").getAsString();
+//} else { results[4] = null; }
 
 
 }

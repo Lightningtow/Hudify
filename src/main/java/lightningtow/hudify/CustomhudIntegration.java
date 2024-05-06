@@ -24,12 +24,6 @@ public class CustomhudIntegration implements ClientModInitializer {
 //        LOGGER.info("running CHIntegration.onInitializeClient()");
         LOGGER.info("integrating with CustomHud");
 
-//        String[] info = SpotifyUtil.getPlaybackInfo();
-
-//    public static void registerCompat() {
-        // 0 name, 1 artists, 2 progress, 3 duration, 4 album?, 5 external_url?, 6, volume percent
-        // 5 url is like https://open.spotify.com/track/536ZTi6wWJQ2gYXkXnJwVX?si=4e244a84c9884ae4
-     //   registerElement("spotify_track", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[0]));
 
     //    registerElement("spotify_ready", (_str) -> new BooleanSupplierElement(() -> Objects.equals(HudifyHUD.hudInfo[0], "-")));
 
@@ -44,7 +38,6 @@ public class CustomhudIntegration implements ClientModInitializer {
         StringSupplierElement track = new StringSupplierElement(() -> HudifyMain.track);
         CustomHudRegistry.registerElement("sp_track",  (_str) ->  track);
 
-
         StringSupplierElement artists = new StringSupplierElement(() -> HudifyMain.artists);
         CustomHudRegistry.registerElement("sp_artists",  (_str) ->  artists);
 
@@ -54,7 +47,12 @@ public class CustomhudIntegration implements ClientModInitializer {
         StringSupplierElement context_type = new StringSupplierElement(() -> HudifyMain.context_type);
         CustomHudRegistry.registerElement("sp_context_type", (_str) -> context_type);
 
-       // registerElement("spotify_artist", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[1]));
+        StringSupplierElement context_name = new StringSupplierElement(() -> HudifyMain.context_name);
+        CustomHudRegistry.registerElement("sp_context_name", (_str) -> context_name);
+
+        StringSupplierElement album = new StringSupplierElement(() -> HudifyMain.album);
+        CustomHudRegistry.registerElement("sp_album", (_str) -> album);
+
         StringSupplierElement progress = new StringSupplierElement(() ->
                 (HudifyMain.progress / 60) + ":" + String.format("%02d", HudifyMain.progress % 60));
         CustomHudRegistry.registerElement("spotify_progress", (_str) -> progress);
@@ -65,21 +63,14 @@ public class CustomhudIntegration implements ClientModInitializer {
         CustomHudRegistry.registerElement("spotify_duration", (_str) -> duration);
         CustomHudRegistry.registerElement("sp_dur",  (_str) ->  duration);
 
-       // registerElement("spotify_progress_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60)));
-       // registerElement("spotify_duration_ms", (_str) -> new StringSupplierElement(() -> (HudifyHUD.getDuration() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getDuration() / 1000 % 60)));
 
         NumberSupplierElement status_code = new NumberSupplierElement(() -> HudifyMain.status_code, 1.0);
-        CustomHudRegistry.registerElement("sp_status_code", (_aaa   ) -> status_code);
+        CustomHudRegistry.registerElement("sp_status_code", (what_does_this_do) -> status_code);
 
-//        registerElement("spotify_url", (_str) -> new StringSupplierElement(() -> HudifyMain.hudInfo[5]));
-//        registerElement("spotify_volume", (_str) -> new StringSupplierElement(() -> HudifyMain.hudInfo[6]));
 
-        ////        String progressText = (progressMS / (1000 * 60)) + ":" + String.format("%02d", (progressMS / 1000 % 60));
-        // (HudifyHUD.hudInfo[2] / (1000 * 60)) + ":" + String.format("%02d", (progressMS / 1000 % 60))
+        //	response code 429 -> Too Many Requests - Rate limiting has been applied.
         // approximately 180 calls per minute without throwing 429, 3 calls per second
 
-       // registerElement("spotify_progress_ms", (str) -> new NumberSupplierElement(() ->  toInt(info[2]), 1));
-//	response code 429 -> Too Many Requests - Rate limiting has been applied.
     }
 
 }

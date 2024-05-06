@@ -17,44 +17,30 @@ If you use on other versions of Minecraft or CustomHud, please lmk whether it wo
 
 ### Variables added:
 
-#### String variables:  
-`spotify_track` / `sp_track` - song's title  
-`spotify_artists` / `sp_artists` - If multiple artists, they are combined into one string  
-`spotify_progress` / `sp_prog` - song progress in MM:SS notation  
-`spotify_duration` / `sp_dur`  - song duration in MM:SS notation  
+#### String variables:
+`{sp_track}` - song's title  
+`{sp_album}` - album of current track
+`{sp_artists}` - All artists combined into one string
+`{sp_first_artist}` - The very first artist listed
+`{sp_context_type}` - Where the track is playing from. Can be "artist", "playlist", "album", "show"
+`{sp_context_name}` - Name of context's artist/playlist/album/show
 
-`spotify_url` - a long, unclickable url link to your current track  
-`spotify_volume` - your volume from 1-100. Spotify's built-in volume, not your devices' volume
+`{spotify_progress}` / `{sp_prog}` - song progress in MM:SS notation  
+`{spotify_duration}` / `{sp_dur}`  - song duration in MM:SS notation  
+
 
 ### Example CustomHud Config:
 ```
-=if: (spotify_track = "-" | spotify_track = "Status Code: 400")=
-Spotify not loaded/initialized/whatnot
-
-If this is your first time using this mod, 
-    auth yourself via pressing the 'toggle playback' key (unbound by default)
-
-If you've already authed, please report this. 
-It's not an error exactly, but I want to understand when/why it happens, to make handling it cleaner
-=else=
-{spotify_track}
-{spotify_artists}
-{spotify_progress} / {spotify_duration}
-
-// you probably won't need these
-URL: {spotify_url}
-Volume: {spotify_volume}
-=endif=
+todo
 ```
 #### Known issues:
-- sometimes progress var skips a second
+- progress can get thrown off after unpausing
 - variables doesn't always update on first skip of session
 - when skipping tracks, a slight but noticeable delay before hud updates
 - at launch, variables are often empty
 
 #### Todo list:
 - create my own spotify dev app
-- add more variables
 - add more playback controls, maybe
 - maybe? make customhud a soft dependency
 - add screenshots to readme
