@@ -16,9 +16,9 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"lightningtow.hudify.HudifyMain"
 		],
 		"client": [
+			"lightningtow.hudify.HudifyMain",
 			"lightningtow.hudify.CustomhudIntegration"
 		]
 	},

@@ -455,23 +455,13 @@ public class SpotifyUtil
                 JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
                 StringBuilder artistString = new StringBuilder();
                 artistString.append(artistArray.get(0).getAsJsonObject().get("name").getAsString());
-                for (int i = 1; i < artistArray.size(); i++) // int i = 0
+                for (int i = 1; i < artistArray.size(); i++) // skipping the first artist
                 {
                     artistString.append(", " + artistArray.get(i).getAsJsonObject().get("name").getAsString());
-
-
-//                    if (i == artistArray.size() - 1)
-//                    {
-//                        artistString.append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
-//                    }
-//                    else
-//                    {
-//                        artistString.append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
-//                        artistString.append(", ");
-//                    }
                 }
-                // 0 name, 1 artists, 2 progress, 3 duration, 4 album?, 5 external_url?, 6, volume percent
                 results[1] = artistString.toString();
+
+                // 0 name, 1 artists, 2 progress, 3 duration, 4 album?, 5 external_url?, 6, volume percent
                 // the `json.get("progress_ms")` is incorrect after pausing then resuming
                 LOGGER.info("progress " + json.get("progress_ms") + ", duration " + json.get("item").getAsJsonObject().get("duration_ms"));
                 results[2] = String.valueOf((json.get("progress_ms").getAsInt() / 1000));

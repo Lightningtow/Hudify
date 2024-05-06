@@ -1,6 +1,7 @@
 package lightningtow.hudify;
 
 import lightningtow.hudify.util.SpotifyUtil;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -15,7 +16,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
 
-public class HudifyMain implements ModInitializer
+public class HudifyMain implements ClientModInitializer
 {
 	public static final String MOD_ID = "Hudify";
 
@@ -40,7 +41,7 @@ public class HudifyMain implements ModInitializer
 	public static String[] hudInfo;
 
 	@Override
-	public void onInitialize()
+	public void onInitializeClient()
 	{
 
 		//LOGGER.info("running HudifyMain.onInitialize()"); //info
