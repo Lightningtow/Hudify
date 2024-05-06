@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerElement;
 
 public class CustomhudIntegration implements ClientModInitializer {
-    public static final Logger LOGGER = LogManager.getLogger("Hudify");
+    public static final Logger LOGGER = LogManager.getLogger(HudifyMain.MOD_ID);
 
     @Override
     public void onInitializeClient() {
@@ -41,25 +41,27 @@ public class CustomhudIntegration implements ClientModInitializer {
 //        track  = (str) -> new StringSupplierElement(HudifyHUD.hudInfo[0]);
 
 //        Supplier<String> track =   HudifyHUD.hudInfo[0];
-        StringSupplierElement track = new StringSupplierElement(() -> HudifyHUD.hudInfo[0]);
+        StringSupplierElement track = new StringSupplierElement(() -> HudifyMain.hudInfo[0]);
         CustomHudRegistry.registerElement("spotify_track", (_str) -> track);
         CustomHudRegistry.registerElement("sp_track",  (_str) ->  track);
 //        CustomHudRegistry.registerElement("spotify_track", track);
 //        CustomHudRegistry.registerElement("sp_track", track);
 
-        StringSupplierElement artists = new StringSupplierElement(() -> HudifyHUD.hudInfo[1]);
+        StringSupplierElement artists = new StringSupplierElement(() -> HudifyMain.hudInfo[1]);
         CustomHudRegistry.registerElement("spotify_artists", (_str) -> artists);
         CustomHudRegistry.registerElement("sp_artists",  (_str) ->  artists);
 
-        StringSupplierElement context_type = new StringSupplierElement(() -> HudifyHUD.hudInfo[7]);
+        StringSupplierElement context_type = new StringSupplierElement(() -> HudifyMain.hudInfo[7]);
         CustomHudRegistry.registerElement("sp_context_type", (_str) -> context_type);
 
        // registerElement("spotify_artist", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[1]));
-        StringSupplierElement progress = new StringSupplierElement(() -> (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60));
+        StringSupplierElement progress = new StringSupplierElement(() ->
+                (HudifyMain.getProgress() / 60) + ":" + String.format("%02d", HudifyMain.getProgress() % 60));
         CustomHudRegistry.registerElement("spotify_progress", (_str) -> progress);
         CustomHudRegistry.registerElement("sp_prog",  (_str) ->  progress);
 
-        StringSupplierElement duration = new StringSupplierElement(() -> (HudifyHUD.getDuration() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getDuration() / 1000 % 60));
+        StringSupplierElement duration = new StringSupplierElement(() ->
+                (HudifyMain.getDuration() / 60) + ":" + String.format("%02d", HudifyMain.getDuration() % 60));
         CustomHudRegistry.registerElement("spotify_duration", (_str) -> duration);
         CustomHudRegistry.registerElement("sp_dur",  (_str) ->  duration);
 
@@ -68,8 +70,8 @@ public class CustomhudIntegration implements ClientModInitializer {
 
 
 
-        registerElement("spotify_url", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[5]));
-        registerElement("spotify_volume", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[6]));
+        registerElement("spotify_url", (_str) -> new StringSupplierElement(() -> HudifyMain.hudInfo[5]));
+        registerElement("spotify_volume", (_str) -> new StringSupplierElement(() -> HudifyMain.hudInfo[6]));
 
         ////        String progressText = (progressMS / (1000 * 60)) + ":" + String.format("%02d", (progressMS / 1000 % 60));
         // (HudifyHUD.hudInfo[2] / (1000 * 60)) + ":" + String.format("%02d", (progressMS / 1000 % 60))

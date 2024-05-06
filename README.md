@@ -54,7 +54,6 @@ Volume: {spotify_volume}
 
 #### Todo list:
 - create my own spotify dev app
-- change volume var from string to integer
 - add more variables
 - add more playback controls, maybe
 - maybe? make customhud a soft dependency

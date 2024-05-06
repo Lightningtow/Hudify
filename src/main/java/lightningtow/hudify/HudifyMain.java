@@ -1,7 +1,6 @@
 package lightningtow.hudify;
 
 import lightningtow.hudify.util.SpotifyUtil;
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -14,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.Arrays;
 
 public class HudifyMain implements ModInitializer
 {
@@ -22,17 +22,22 @@ public class HudifyMain implements ModInitializer
 	private static boolean toggleKeyPrevState = false;
 	private static boolean nextKeyPrevState = false;
 	private static boolean prevKeyPrevState = false;
-	private boolean forceKeyPrevState = false;
+//	private boolean forceKeyPrevState = false;
 	private static Thread requestThread;
-	public static final Logger LOGGER = LogManager.getLogger("Hudify");
+//	private static int progressMS;
+//	private static int durationMS;
+	private static int progress;
+	private static int duration;
+	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
 	// see this link for unofficial estimates of ratelimits
 	// https://community.spotify.com/t5/Spotify-for-Developers/Web-API-ratelimit/m-p/5503153/highlight/true#M7931
 
 	// api response code descriptions
 	// https://developer.spotify.com/documentation/web-api/concepts/api-calls
-	final public boolean db = false; // toggle debug messages
-	final public static boolean dbs = false; // toggle debug messages
+//	final public boolean db = true; // toggle debug messages. very spammy!
+	final public static boolean db = true; // toggle debug messages. very spammy!
+	public static String[] hudInfo;
 
 	@Override
 	public void onInitialize()
@@ -45,35 +50,43 @@ public class HudifyMain implements ModInitializer
 		requestThread = new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(800);
                     if (MinecraftClient.getInstance().world != null) {
 //							if (lightningtow.hudify.HudifyHUD.getDuration() < lightningtow.hudify.HudifyHUD.getProgress()) {
                         //Thread.sleep(1000);
                         String[] data = SpotifyUtil.getPlaybackInfo();
-                        //if(db) LOGGER.info("main loop - data[0]: " + data[0]);
+//						if(dbs) LOGGER.info("main loop - data[]: " + Arrays.toString(data));
+//                        if(dbs) LOGGER.info("main loop - data[0]: " + data[0]);
+// 204 when app is closed, doesnt immediately go away when app opened
 
                         if (data[0] != null && data[0].equals("Status Code: 204")) {
-                            SpotifyUtil.refreshActiveSession();
+							// No Content - The request has succeeded but returns no message body.
+                            SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
                         } else if (data[0] != null && data[0].equals("Status Code: 429")) { // rate limited
                             LOGGER.error("RATE LIMITED============================================================");
                             Thread.sleep(3000);
                         } else if (data[0] != null && data[0].equals("Reset")) {
-                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was info and from blockiy
-                        } else {
-                            if(db) LOGGER.info("main loop: updating data");
-                            HudifyHUD.updateData(data);
+                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
+                        } else { // else it went thru successfully...?
+//                            if(db) LOGGER.info("main loop: updating data"); // redundant with the logger call in updateData
+                            HudifyMain.updateData(data);
                         }
 //							} else if (SpotifyUtil.isPlaying()) {
-                        HudifyHUD.setProgress(HudifyHUD.getProgress() + 1000);
+//                        HudifyHUD.setProgress(HudifyHUD.getProgress() + 1000);
+//						progressMS = progressMS + 1000;
+						// this runs regardless of whether it errored out?
+//						progress += 1;
                             //LOGGER.info("progress updated in main loop to: " + lightningtow.hudify.HudifyHUD.getProgress() + 1000); // spammy but very helpful
-                        if(db) LOGGER.info("progress updated in main loop to: " +
-                                (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60)); // spammy but very helpful
+//                        if(db) LOGGER.info("progress updated in main loop to: " +
+//                                (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60)); // spammy but very helpful
 
 //							}
                     } else {
                         //when world is null
-                        HudifyHUD.setProgress(0);
-                        HudifyHUD.setDuration(-1);
+//						progressMS = 0;
+//						durationMS = -1;
+						progress = 0;
+						duration = -1;
                         // LOGGER.error("progress + duration updated in refreshActiveSession"); // spammy af
 
                     }
@@ -87,12 +100,41 @@ public class HudifyMain implements ModInitializer
 		requestThread.setName("Spotify Thread"); //spotify thread
 		requestThread.start();
 		SpotifyUtil.initialize();
-		registerBindings();
+		registerKeyBindings();
 
 
 	}
+	public static void updateData(String[] data)
+	{
+		hudInfo = data;
+//		progressMS = hudInfo[2] == null ? 0 : (Integer.parseInt(hudInfo[2]) - 1000);
+//		durationMS = hudInfo[3] == null ? -1 : Integer.parseInt(hudInfo[3]);
+		progress = hudInfo[2] == null ?  0 : Integer.parseInt(hudInfo[2]);
+		duration = hudInfo[3] == null ? -1 : Integer.parseInt(hudInfo[3]);
+
+//		progress = hudInfo[2] == null ?  0 : (int) (Math.floor(((double) Integer.parseInt(hudInfo[2]) / 1000)) - 1);
+//		duration = hudInfo[3] == null ? -1 : (int) (Math.floor((double) Integer.parseInt(hudInfo[3]) / 1000));
+		if(db) { LOGGER.info("HudifyMain.updateData: (" + progress + " / " + duration + ") - " + Arrays.toString(data)); }
+	}
+//	public static int getProgressSec() { return (progressMS/1000); }
+//	public static int getDurationSec() { return (durationMS/1000); }
+	public static int getProgress() { return (progress); }
+	public static int getDuration() { return (duration); }
+
+	public static void setProgress(int progress_arg) {
+		progress = progress_arg;
+//		progressMS = progress;
+	}
+
+	public static void setDuration(int duration_arg) {
+		duration = duration_arg;
+//		durationMS = duration;
+	}
+
+
+
 	//<editor-fold desc="register keybindings">
-	public static void registerBindings() {
+	public static void registerKeyBindings() {
 		registerToggleKey();
 		registerNextKey();
 		registerPrevKey();
