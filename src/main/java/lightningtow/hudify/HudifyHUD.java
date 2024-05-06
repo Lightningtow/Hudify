@@ -31,19 +31,6 @@ public class HudifyHUD
     public static final Logger LOGGER = LogManager.getLogger("Hudify");
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
-    public HudifyHUD(MinecraftClient client)
-    {
-        HudifyHUD.client = client;
-        scaledWidth = client.getWindow().getScaledWidth();
-        scaledHeight = client.getWindow().getScaledHeight();
-      //  albumImage = new URLImage(300, 300);
-        fontRenderer = client.textRenderer;
-        int ticks = 0;
-        hudInfo = new String[7];
-        prevImage = "empty";
-        progressMS = 0;
-        durationMS = -1;
-    }
 
 
     public static void updateData(String[] data)
@@ -94,48 +81,15 @@ public class HudifyHUD
         return ms;
         // int ms = hudInfo[3] == null ? -1 : Integer.parseInt(hudInfo[3]);
     }
-
     public static void setProgress(int progress) {
         progressMS = progress;
     }
+
+    // do these even need to exist? is it just to feed to the fancy hud i deleted?
 
     public static void setDuration(int duration) {
         durationMS = duration;
     }
 
-//    public static void increaseVolume()
-//    {
-//        EXECUTOR_SERVICE.execute(() -> {
-//            prevVolume = Integer.parseInt(hudInfo[6]);
-//            LOGGER.info("Prev volume: " + prevVolume);
-//            newVolume = prevVolume + lightningtow.hudify.util.HudifyConfig.volumeStep;
-//            if (prevVolume == 100) {
-//                return;
-//            } else if (newVolume > 100) {
-//                newVolume = 100;
-//            }
-//            SpotifyUtil.putRequest("volume?volume_percent=" + newVolume);
-//            LOGGER.info("Set new volume: " + newVolume);
-//            hudInfo[6] = String.valueOf(newVolume);
-//        });
-//    }
-//    public static void decreaseVolume()
-//    {
-//        EXECUTOR_SERVICE.execute(() -> {
-//            prevVolume = Integer.parseInt(hudInfo[6]);
-//            LOGGER.info("Prev volume: " + prevVolume);
-//            newVolume = prevVolume - lightningtow.hudify.util.HudifyConfig.volumeStep;
-//            if (prevVolume == 0)
-//            {
-//                return;
-//            }
-//            else if (newVolume < 0)
-//            {
-//                newVolume = 0;
-//            }
-//            SpotifyUtil.putRequest("volume?volume_percent=" + newVolume);
-//            LOGGER.info("Set new volume: " + newVolume);
-//            hudInfo[6] = String.valueOf(newVolume);
-//        });
-//    }
+
 }

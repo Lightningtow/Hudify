@@ -52,6 +52,7 @@ public class SpotifyUtil
     public static final Logger LOGGER = LogManager.getLogger("Hudify");
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
+    //<editor-fold desc="auth utils">
     public static void initialize()
     {
         //LOGGER.info("running SpotifyUtil.initialize()");
@@ -254,8 +255,32 @@ public class SpotifyUtil
         LOGGER.info("Successfully refreshed active session");
     }
 
+    public static void updateJson()
+    {
+        try
+        {
+            FileWriter jsonWriter = new FileWriter(authFile);
+            jsonWriter.write("{" + "\"access_token\" : \"" + accessToken + "\", \"refresh_token\" : \"" + refreshToken + "\" }");
+            jsonWriter.flush();
+            jsonWriter.close();
+        } catch (IOException e)
+        {
+            LOGGER.error(e.getMessage());
+        }
+    }
+
+    public static void updatePlaybackRequest()
+    {
+        playbackRequest = HttpRequest.newBuilder(
+                        URI.create("https://api.spotify.com/v1/me/player?additional_types=episode"))
+                .header("Accept", "application/json")
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json").build();
+    }
     public static void putRequest(String type)
     {
+        // PUT - Changes and/or replaces resources or collections
+        // dont mess with this, getPlaybackInfo() is what you're looking for
         //LOGGER.error("running SpotifyUtil.putRequest");
 
         try
@@ -305,6 +330,8 @@ public class SpotifyUtil
 
     public static void postRequest(String type)
     {
+        // POST - Creates resources
+        // dont mess with this, getPlaybackInfo() is what you're looking for
         try
         {
             HttpRequest postReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
@@ -349,15 +376,16 @@ public class SpotifyUtil
             }
         }
     }
+    //</editor-fold>
 
+
+    //<editor-fold desc="playback functions">
     public static void nextSong() {
         EXECUTOR_SERVICE.execute(() -> {
             postRequest("next");
             HudifyHUD.setDuration(-2000);
             LOGGER.info("Skipping to next song");
-
             // LOGGER.error("duration set to -2000 from nextSong");
-
         });
     }
 
@@ -367,52 +395,45 @@ public class SpotifyUtil
             HudifyHUD.setDuration(-2000);
             LOGGER.info("Skipping to previous song");
             //LOGGER.error("duration set to -2000 from prevSong");
-
         });
     }
 
     public static void playSong() {
-        EXECUTOR_SERVICE.execute(() -> {
-            putRequest("play");
-            LOGGER.info("Play");
-
-        });
+        EXECUTOR_SERVICE.execute(() -> putRequest("play"));
     }
 
     public static void pauseSong() {
-        EXECUTOR_SERVICE.execute(() -> {
-            putRequest("pause");
-            LOGGER.info("Pause");
-
-        });
+        EXECUTOR_SERVICE.execute(() -> putRequest("pause"));
     }
 
     public static void playPause() {
         //isPlaying == true : pauseSong() ? playSong();
-        LOGGER.info("Toggle");
-
+        LOGGER.info("Toggling playback");
         if (isPlaying) {
             pauseSong();
+            LOGGER.info("Pausing playback");
         }
         else {
             playSong();
+            LOGGER.info("Resuming playback");
         }
 
         isPlaying = !isPlaying;
     }
+    //</editor-fold>
 
     public static String[] getPlaybackInfo()
     {
-        String[] results = new String[7];
+        String[] results = new String[8];
         try
         {
             playbackResponse = client.send(playbackRequest, HttpResponse.BodyHandlers.ofString());
-            if (playbackResponse.statusCode() == 429)
+            if (playbackResponse.statusCode() == 429) // Too Many Requests - Rate limiting has been applied.
             {
                 results[0] = "Status Code: " + playbackResponse.statusCode();
                 return results;
             }
-            if (playbackResponse.statusCode() == 200)
+            if (playbackResponse.statusCode() == 200) // OK - The request has succeeded
             {
                 JsonObject json = (JsonObject) new JsonParser().parse(playbackResponse.body());
                 if (json.get("currently_playing_type").getAsString().equals("episode")) // for podcasts
@@ -456,10 +477,13 @@ public class SpotifyUtil
                 }
                 results[5] = json.get("item").getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString();
                 results[6] = json.get("device").getAsJsonObject().get("volume_percent").getAsString();
+                String context = json.get("context").getAsJsonObject().get("type").getAsString();
+                results[7] = context;
                 isPlaying = json.get("is_playing").getAsBoolean();
             }
             else if (playbackResponse.statusCode() == 401)
-            {
+            { // Unauthorized - The request requires user authentication or,
+                // if the request included authorization credentials, authorization has been refused for those credentials.
                 if (!refreshAccessToken())
                 {
                     isAuthorized = false;
@@ -485,49 +509,14 @@ public class SpotifyUtil
         return results;
     }
 
-    public static void updateJson()
-    {
-        try
-        {
-            FileWriter jsonWriter = new FileWriter(authFile);
-            jsonWriter.write("{" + "\"access_token\" : \"" + accessToken + "\", \"refresh_token\" : \"" + refreshToken + "\" }");
-            jsonWriter.flush();
-            jsonWriter.close();
-        } catch (IOException e)
-        {
-            LOGGER.error(e.getMessage());
-        }
-    }
 
-    public static void updatePlaybackRequest()
-    {
-        playbackRequest = HttpRequest.newBuilder(
-                URI.create("https://api.spotify.com/v1/me/player?additional_types=episode"))
-                .header("Accept", "application/json")
-                .header("Authorization", "Bearer " + accessToken)
-                .header("Content-Type", "application/json").build();
-    }
 
     public static boolean isAuthorized()
     {
         return isAuthorized;
     }
 
-    public static boolean isPlaying()
-    {
-        return isPlaying;
-    }
+    public static boolean isPlaying() { return isPlaying; } // getter, makes it so outer classes can't screw it up
 
-//    public static void toggleInGameMusic()
-//    {
-//        GameOptions options = MinecraftClient.getInstance().options;
-//        if (!isPlaying()) {
-//            options.getSoundVolumeOption(SoundCategory.MUSIC).setValue(HudifyConfig.inGameMusicVolume);
-//            MinecraftClient.getInstance().player.sendMessage(Text.of("In-game music is now enabled"));
-//        } else {
-//            options.getSoundVolumeOption(SoundCategory.MUSIC).setValue(0.0d);
-//            MinecraftClient.getInstance().player.sendMessage(Text.of("In-game music is now disabled"));
-//        }
-//        options.write();
-//    }
+
 }

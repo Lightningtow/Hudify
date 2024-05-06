@@ -51,6 +51,9 @@ public class CustomhudIntegration implements ClientModInitializer {
         CustomHudRegistry.registerElement("spotify_artists", (_str) -> artists);
         CustomHudRegistry.registerElement("sp_artists",  (_str) ->  artists);
 
+        StringSupplierElement context_type = new StringSupplierElement(() -> HudifyHUD.hudInfo[7]);
+        CustomHudRegistry.registerElement("sp_context_type", (_str) -> context_type);
+
        // registerElement("spotify_artist", (_str) -> new StringSupplierElement(() -> HudifyHUD.hudInfo[1]));
         StringSupplierElement progress = new StringSupplierElement(() -> (HudifyHUD.getProgress() / (1000 * 60)) + ":" + String.format("%02d", HudifyHUD.getProgress() / 1000 % 60));
         CustomHudRegistry.registerElement("spotify_progress", (_str) -> progress);

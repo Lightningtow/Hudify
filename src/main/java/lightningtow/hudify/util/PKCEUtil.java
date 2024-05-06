@@ -1,6 +1,7 @@
 package lightningtow.hudify.util;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -30,7 +31,7 @@ public class PKCEUtil
             throws UnsupportedEncodingException,
             NoSuchAlgorithmException
     {
-        byte[] bytes = codeVerifier.getBytes("US-ASCII");
+        byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(bytes, 0, bytes.length);
         byte[] digest = messageDigest.digest();

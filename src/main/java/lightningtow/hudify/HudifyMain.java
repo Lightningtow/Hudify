@@ -14,21 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
-//public class Hudify implements ModInitializer {
-//	// This logger is used to write text to the console and the log file.
-//	// It is considered best practice to use your mod id as the logger's name.
-//	// That way, it's clear which mod wrote info, warnings, and errors.
-//    public static final Logger LOGGER = LoggerFactory.getLogger("hudify");
-//
-//	@Override
-//	public void onInitialize() {
-//		// This code runs as soon as Minecraft is in a mod-load-ready state.
-//		// However, some things (like resources) may still be uninitialized.
-//		// Proceed with mild caution.
-//
-//		LOGGER.info("Hello Fabric world!");
-//	}
-//}
+
 public class HudifyMain implements ModInitializer
 {
 	public static final String MOD_ID = "Hudify";
@@ -37,10 +23,6 @@ public class HudifyMain implements ModInitializer
 	private static boolean nextKeyPrevState = false;
 	private static boolean prevKeyPrevState = false;
 	private boolean forceKeyPrevState = false;
-//	private boolean hideKeyPrevState = false;
-//	private boolean increaseVolumeKeyPrevState = false;
-//	private boolean decreaseVolumeKeyPrevState = false;
-//	private boolean toggleInGameMusicKeyPrevState = false;
 	private static Thread requestThread;
 	public static final Logger LOGGER = LogManager.getLogger("Hudify");
 
@@ -106,30 +88,10 @@ public class HudifyMain implements ModInitializer
 		requestThread.start();
 		SpotifyUtil.initialize();
 		registerBindings();
-//		CustomhudIntegration.on
-//		prevKey = KeyBindingHelper.registerKeyBinding(
-//				new KeyBinding("hudify.key.prev", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
-
-//		playKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("hudify.key.play", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
-
-//		nextKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("hudify.key.next", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
-
-//		forceKey = KeyBindingHelper.registerKeyBinding(
-//				new KeyBinding("hudify.key.force", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify"));
 
 
-
-//		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-//			dispatcher.register(
-//					ClientCommandManager.literal("sharetrack").executes(context -> {
-//						var player = MinecraftClient.getInstance().player;
-//						if (player == null) { return 0; }
-//						player.sendMessage(Text.of(lightningtow.hudify.HudifyHUD.hudInfo[5]));
-//						return 0;
-//					})
-//			);
-//		});
 	}
+	//<editor-fold desc="register keybindings">
 	public static void registerBindings() {
 		registerToggleKey();
 		registerNextKey();
@@ -174,63 +136,8 @@ public class HudifyMain implements ModInitializer
 			prevKeyPrevState = prevKey.wasPressed();
 		});
 	}
+	//</editor-fold>
 
 
 
-
-	public void prevKeyHandler(boolean currPressState) {
-		if (currPressState && !prevKeyPrevState) {
-			LOGGER.info("Previous Key Pressed");
-			SpotifyUtil.prevSong();
-		}
-		prevKeyPrevState = currPressState;
-	}
-
-	public void forceKeyHandler(boolean currPressState) {
-		if (currPressState && !forceKeyPrevState) {
-			LOGGER.info("Force Key Pressed");
-			//lightningtow.hudify.util.HudifyHUD.setDuration(-2000);
-		}
-		forceKeyPrevState = currPressState;
-	}
-//
-//	public void hideKeyHandler(boolean currPressState)
-//	{
-//		if (currPressState && !hideKeyPrevState)
-//		{
-//			LOGGER.info("Hide Key Pressed");
-//			lightningtow.hudify.util.HudifyHUD.isHidden = !lightningtow.hudify.util.HudifyHUD.isHidden;
-//		}
-//		hideKeyPrevState = currPressState;
-//	}
-//
-//	public void increaseVolumeKeyHandler(boolean currPressState)
-//	{
-//		if (currPressState && !increaseVolumeKeyPrevState)
-//		{
-//			LOGGER.info("Increase Volume Key Pressed");
-//			lightningtow.hudify.util.HudifyHUD.increaseVolume();
-//		}
-//		increaseVolumeKeyPrevState = currPressState;
-//	}
-//
-//	public void decreaseVolumeKeyHandler(boolean currPressState)
-//	{
-//		if (currPressState && !decreaseVolumeKeyPrevState)
-//		{
-//			LOGGER.info("Decrease Volume Key Pressed");
-//			lightningtow.hudify.util.HudifyHUD.decreaseVolume();
-//		}
-//		decreaseVolumeKeyPrevState = currPressState;
-//	}
-//
-//	public void toggleInGameMusicKeyHandler(boolean currPressState)
-//	{
-//		if (currPressState && !toggleInGameMusicKeyPrevState)
-//		{
-//			LOGGER.info("Toggle In Game Music Key Pressed");
-//			SpotifyUtil.toggleInGameMusic();
-//		}
-//		toggleInGameMusicKeyPrevState = currPressState;
-//	}
 }
