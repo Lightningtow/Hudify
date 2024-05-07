@@ -18,13 +18,15 @@ To uninstall, also be sure to also disconnect the app from https://www.spotify.c
 `{sp_artists}` - All artists combined into one string
 `{sp_first_artist}` - The very first artist listed
 `{sp_context_type}` - Where the track is playing from. Can be "artist", "playlist", "album", "show"
-`{sp_context_name}` - Name of context's artist/playlist/album/show
+`{sp_context_name}` - Name of context's artist/playlist/album/show. Unavoidably buggy, see below
 
 `{spotify_progress}` / `{sp_prog}` - Song progress in MM:SS notation  
 `{spotify_duration}` / `{sp_dur}`  - Song duration in MM:SS notation  
 
-`{sp_shuffle_state}` - "off", "track", or "all"
-`{sp_repeat_state}` - Boolean
+`{sp_shuffle_state}` - Boolean. True if shuffling, false if shuffle is off
+`{sp_repeat_state}` - "off", "track", or "all"
+`{sp_media_type}` - "track" or "episode" - should i remove this in favor of `is_podcast`?
+`{sp_is_podcast}` - Boolean. True if podcast, false if not
 
 ### Example CustomHud Config:
 ```
@@ -33,12 +35,16 @@ todo
 #### Known issues:
 - progress can get thrown off after unpausing
 - at launch, variables are often empty
-- 'context' doesnt like playing from search results. May be an issue with spotify itself?
+- 'context' doesnt update if playing from queue or search results. 
+  - Most likely a limitation of [Spotify's api](https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback)
 
 #### Todo list:
+is playing/ is valid / is app closed etc vars
+- figure out refreshActiveSession
+
+- "program message" variable
 - truncate long variables
-- scrub "remastered"s and other unnecessary addons
-- add more playback controls, maybe
+- scrub "remastered"s and other unnecessary stuff appended to track titles
 - add screenshots to readme
 
 #### Credit:  

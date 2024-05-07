@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 import lightningtow.hudify.HudifyMain;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +25,20 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import static lightningtow.hudify.HudifyMain.sp_track;
+import static lightningtow.hudify.HudifyMain.sp_artists;
+import static lightningtow.hudify.HudifyMain.sp_first_artist;
+import static lightningtow.hudify.HudifyMain.sp_album;
+import static lightningtow.hudify.HudifyMain.sp_repeat_state;
+import static lightningtow.hudify.HudifyMain.sp_shuffle_state;
+import static lightningtow.hudify.HudifyMain.sp_context_type;
+import static lightningtow.hudify.HudifyMain.sp_context_name;
+import static lightningtow.hudify.HudifyMain.sp_status_code;
+import static lightningtow.hudify.HudifyMain.sp_duration;
+import static lightningtow.hudify.HudifyMain.sp_progress;
+import static lightningtow.hudify.HudifyMain.sp_media_type;
+
 
 import static lightningtow.hudify.HudifyMain.db;
 
@@ -219,7 +232,9 @@ public class SpotifyUtil
 
     public static void refreshActiveSession()
     {
-        if (db) LOGGER.info("running SpotifyUtil.refreshActiveSession");
+    // todo this gets devices? is this only needed for the volume thing?
+    // https://developer.spotify.com/documentation/web-api/reference/get-a-users-available-devices
+        //        if (db) LOGGER.info("running SpotifyUtil.refreshActiveSession");
 
         try
         {
@@ -236,8 +251,8 @@ public class SpotifyUtil
             String thisDeviceID = "";
             if (devicesJson.isEmpty())
             {
-                HudifyMain.duration = 1;
-                HudifyMain.progress = 0;
+                sp_duration = 1;
+                sp_progress = 0;
                 if (db) LOGGER.error("SpotifyUtil.refreshActiveSession: no active device");
 
                 isPlaying = false;
@@ -290,14 +305,15 @@ public class SpotifyUtil
                 .header("Authorization", "Bearer " + accessToken)
                 .header("Content-Type", "application/json").build();
     }
-    //</editor-fold>
+    //</editor-fold> auth utils
 
 
-    //<editor-fold desc="put/post/get request">
-    public static void putRequest(String type) /* play, pause */
-    {
+    //<editor-fold desc="put/get/post calls">
+
+    // https://developer.spotify.com/documentation/web-api/concepts/api-calls
+
+    public static void putRequest(String type) /* play, pause */ {
         // PUT - Changes and/or replaces resources or collections
-
         try
         {
             HttpRequest putReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
@@ -320,23 +336,18 @@ public class SpotifyUtil
                 else isAuthorized = false;
             }
         }
-        catch (IOException | InterruptedException | URISyntaxException e)
-        {
+        catch (IOException | InterruptedException | URISyntaxException e) {
             if (e instanceof IOException && e.getMessage().equals("Connection reset"))
             {
                 LOGGER.info("Attempting to retry put request...");
                 putRequest(type);
                 LOGGER.info("Successfully sent put request");
             }
-            else
-            {
-                LOGGER.error("exception caught in putRequest():" + e.getMessage());
-            }
+            else LOGGER.error("exception caught in putRequest():" + e.getMessage());
         }
     }
 
-    public static void postRequest(String type) /* skip forward, back */
-    {
+    public static void postRequest(String type) /* skip forward, back */ {
         // POST - Creates resources
         try
         {
@@ -360,23 +371,18 @@ public class SpotifyUtil
             }
 
         }
-        catch (IOException | InterruptedException | URISyntaxException e)
-        {
+        catch (IOException | InterruptedException | URISyntaxException e) {
             if (e instanceof IOException && e.getMessage().equals("Connection reset"))
             {
                 LOGGER.info("Attempting to retry post request...");
                 postRequest(type);
                 LOGGER.info("Successfully sent post request");
             }
-            else
-            {
-                LOGGER.error("exception caught in postRequest():" + e.getMessage());
-            }
+            else LOGGER.error("exception caught in postRequest():" + e.getMessage());
         }
     }
-    // https://developer.spotify.com/documentation/web-api/concepts/api-calls
-    public static String getRequest(String uri) // todo probably gotta rename this
-    {
+
+    public static String getRequest(String uri) /* get name from uri */ {
         // gets the name of a playlist/artist/album from their uri
         // get - Retrieves resources
         try
@@ -406,29 +412,27 @@ public class SpotifyUtil
             JsonObject json = (JsonObject) JsonParser.parseString(getRes.body());
 //            LOGGER.info("get request" + getRes.body()); // prints entire block of returned json
             return (String.valueOf(json.get("name")).replaceAll("\"", ""));
-
-
-        } catch (IOException | InterruptedException | URISyntaxException e)
-        {
+        }
+        catch (IOException | InterruptedException | URISyntaxException e) {
             if (e instanceof IOException && e.getMessage().equals("Connection reset"))
             {
                 LOGGER.info("Attempting to retry get request...");
                 getRequest(uri);
                 LOGGER.info("Successfully sent get request");
             }
-            else { LOGGER.error("exception caught in getRequest():" + e.getMessage()); }
+            else LOGGER.error("exception caught in getRequest():" + e.getMessage());
         }
         return "error in getRequest()";
     }
 
-    //</editor-fold>
+    //</editor-fold> put/get/post calls
 
 
     //<editor-fold desc="playback functions">
     public static void nextSong() {
         EXECUTOR_SERVICE.execute(() -> {
             postRequest("next");
-            HudifyMain.duration = -2;
+            sp_duration = -2;
             LOGGER.info("Skipping to next song");
             // LOGGER.error("duration set to -2000 from nextSong");
         });
@@ -436,15 +440,13 @@ public class SpotifyUtil
     public static void prevSong() {
         EXECUTOR_SERVICE.execute(() -> {
             postRequest("previous");
-            HudifyMain.duration = -2; // was -2000
+            sp_duration = -2; // was -2000
             LOGGER.info("Skipping to previous song");
             //LOGGER.error("duration set to -2000 from prevSong");
         });
     }
 
-    public static void playPause() {
-        //isPlaying == true : pauseSong() ? playSong();
-//        LOGGER.info("Toggling playback");
+    public static void togglePlayPause() {
         if (isPlaying) {
             LOGGER.info("Pausing playback");
             EXECUTOR_SERVICE.execute(() -> putRequest("pause"));
@@ -456,16 +458,19 @@ public class SpotifyUtil
 
 //        isPlaying = !isPlaying; // this should update automatically
     }
-    //</editor-fold>
+    //</editor-fold> playback functions
 
     public static void updatePlaybackInfo() // rename to updatePlaybackInfo?
     {
+        // todo can I just mash this whole thing into main loop?
+        // probably not a good idea
         String dump_msg = "getPlaybackInfo";
         try
         {
             HttpResponse<String> playbackResponse = client.send(playbackRequest, HttpResponse.BodyHandlers.ofString());
             // https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback
-            HudifyMain.status_code = playbackResponse.statusCode();
+
+            sp_status_code = playbackResponse.statusCode();
 //            LOGGER.info("getPlaybackInfo - status code: " + playbackResponse.statusCode());
             // app closed returns 204
 
@@ -473,61 +478,55 @@ public class SpotifyUtil
             if (playbackResponse.statusCode() == 200) // OK - The request has succeeded
             {
                 JsonObject json = (JsonObject) JsonParser.parseString(playbackResponse.body());
+                // the `json.get("progress_ms")` is incorrect after pausing then resuming
 
-                //<editor-fold desc="podcast variables">
-                if (json.get("currently_playing_type").getAsString().equals("episode")) /* for podcasts */ {
-//                    results[0] = json.get("item").getAsJsonObject().get("name").getAsString();
-//                    results[1] = json.get("item").getAsJsonObject().get("show").getAsJsonObject().get("name").getAsString();
-//                    results[2] = json.get("progress_ms").getAsString();
-//                    results[3] = json.get("item").getAsJsonObject().get("duration_ms").getAsString();
-//                    results[4] = json.get("item").getAsJsonObject().get("images").getAsJsonArray().get(1).getAsJsonObject().get("url").getAsString();
-//                    return results; // for podcasts
-                    HudifyMain.track = json.get("item").getAsJsonObject().get("name").getAsString();
-                    String show = json.get("item").getAsJsonObject().get("show").getAsJsonObject().get("name").getAsString();
-                    HudifyMain.artists = show;
-                    HudifyMain.first_artist = show;
-                    HudifyMain.progress = (json.get("progress_ms").getAsInt() / 1000);
-                    HudifyMain.duration = (json.get("item").getAsJsonObject().get("duration_ms").getAsInt() / 1000);
-                    return; // for podcasts
-                }
-                //</editor-fold>
+                dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
 
-                /* track */ HudifyMain.track = json.get("item").getAsJsonObject().get("name").getAsString();
 
-                /** artist variables **/
-                JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
-//                LOGGER.info("update playback info - artist array: " + artistArray);
-                StringBuilder artistString = new StringBuilder();
-                artistString.append(artistArray.get(0).getAsJsonObject().get("name").getAsString());
-                HudifyMain.first_artist = String.valueOf(artistString);
-                for (int i = 1; i < artistArray.size(); i++) // skip the first artist
-                {
-                    artistString.append(", ").append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
-                }
-                HudifyMain.artists = artistString.toString();
-                /** artist variables **/
 
-                /* progress */ HudifyMain.progress = (json.get("progress_ms").getAsInt() / 1000);
-                /* duration */ HudifyMain.duration = (json.get("item").getAsJsonObject().get("duration_ms").getAsInt() / 1000);
+                sp_media_type = (json.get("currently_playing_type").getAsString().equals("episode")) ? "episode" : "track";
+
+                sp_progress = (json.get("progress_ms").getAsInt() / 1000);
+                sp_duration = (json.get("item").getAsJsonObject().get("duration_ms").getAsInt() / 1000);
+
+                sp_shuffle_state = json.get("shuffle_state").getAsBoolean();
+                sp_repeat_state = json.get("repeat_state").getAsString(); // if repeat is "context" change to "all"
+                /* repeat */  if (Objects.equals(sp_repeat_state, "context")) sp_repeat_state = "all"; // else leave it
 
                 /* context */ JsonObject context = json.get("context").getAsJsonObject();
-                /* context type */ HudifyMain.context_type = context.get("type").getAsString();
-                /* context name */ EXECUTOR_SERVICE.execute(()-> HudifyMain.context_name = getRequest(context.get("uri").getAsString()));
+                /* context type */ sp_context_type = context.get("type").getAsString();
+                /* context name */ EXECUTOR_SERVICE.execute(()-> sp_context_name = getRequest(context.get("uri").getAsString()));
 
-
-                /* shuffle */ HudifyMain.shuffle_state = json.get("shuffle_state").getAsBoolean();
-
-                /* repeat */ HudifyMain.repeat_state = json.get("repeat_state").getAsString(); // if repeat is "context" change to "all"
-                /* repeat */ if (Objects.equals(HudifyMain.repeat_state, "context")) HudifyMain.repeat_state = "all"; // else leave it
-
-                /* album */ HudifyMain.album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
+                sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
 
                 isPlaying = json.get("is_playing").getAsBoolean();
 
-                // the `json.get("progress_ms")` is incorrect after pausing then resuming
-                dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
 
-//                if (db) LOGGER.info("getPlaybackInfo - isPlaying: " + isPlaying);
+                if (Objects.equals(sp_media_type, "episode")) /* for podcasts */ {
+                    String show = json.get("item").getAsJsonObject().get("show").getAsJsonObject().get("name").getAsString();
+                    sp_artists = show;
+                    sp_first_artist = show;
+                    sp_album = "";
+
+                    HudifyMain.dump(dump_msg);
+                    return;
+                }
+
+
+                /** sp_artists + sp_first_artist **/ {
+                    JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
+                    StringBuilder artistString = new StringBuilder(artistArray.get(0).getAsJsonObject().get("name").getAsString());
+                    sp_first_artist = artistString.toString();
+                    for (int i = 1; i < artistArray.size(); i++) /* skip the first artist */ {
+                        artistString.append(", ").append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
+                    }
+                    sp_artists = artistString.toString();
+                }
+
+
+                sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
+
+
             }
             else if (playbackResponse.statusCode() == 401) /* unauthorized */ {
                 if (!refreshAccessToken()) isAuthorized = false;
@@ -536,8 +535,12 @@ public class SpotifyUtil
         } catch (Exception e)
         {
             if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-            { LOGGER.info("Resetting connection and retrying info get..."); }
-            else { LOGGER.error("exception caught in getPlaybackInfo(): " + e.getMessage()); }
+            {
+                LOGGER.info("Resetting connection and retrying info get...");
+//                results[0] = "Reset";
+
+            }
+            else LOGGER.error("exception caught in getPlaybackInfo(): " + e.getMessage());
         }
         HudifyMain.dump(dump_msg);
 //        return;
