@@ -32,11 +32,12 @@ todo
 ```
 #### Known issues:
 - progress can get thrown off after unpausing
-- variables doesn't always update on first skip of session
-- when skipping tracks, a slight but noticeable delay before hud updates
 - at launch, variables are often empty
+- 'context' doesnt like playing from search results. May be an issue with spotify itself?
 
 #### Todo list:
+- truncate long variables
+- scrub "remastered"s and other unnecessary addons
 - add more playback controls, maybe
 - add screenshots to readme
 

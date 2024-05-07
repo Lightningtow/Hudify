@@ -8,10 +8,14 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.Arrays;
 
 public class HudifyMain implements ClientModInitializer
 {
@@ -19,8 +23,6 @@ public class HudifyMain implements ClientModInitializer
 	private static boolean toggleKeyPrevState = false;
 	private static boolean nextKeyPrevState = false;
 	private static boolean prevKeyPrevState = false;
-	private static Thread requestThread;
-
 	public static int progress;
 	public static int duration;
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
@@ -44,60 +46,68 @@ public class HudifyMain implements ClientModInitializer
 	public static void dump (String source) {
 		if (db) LOGGER.info(String.join(", ",
 				source + " dump - Status Code " + status_code, "(" + progress + " / " + duration + ")",
-				track, first_artist, artists, context_type)
+				track, first_artist, "(" + artists + ")", context_type)
 		);
 	}
+//	public static void send_message (MutableText message, int duration) {
+//		// Text.translatable("item.tutorial.fabric_item.tooltip")
+//		assert MinecraftClient.getInstance().player != null;
+//		MinecraftClient.getInstance().player.sendMessage();
+//		// MinecraftClient.getInstance().player.sendMessage(Text.of("Spotify Premium is required for this feature."));
+//	}
+	public static void send_message (String message, int duration) { // todo probably make this a customhud variable instead/as well
+		// be sure to use translatable text! This accepts a string rather than translatableText,
+		// cause otherwise it doesn't check en_us for the string
+		assert MinecraftClient.getInstance().player != null;
+		MinecraftClient.getInstance().player.sendMessage(Text.of(message));
+	}
+
 	@Override
 	public void onInitializeClient()
 	{
+		//	HudifyConfig.init("Hudify", lightningtow.hudify.util.HudifyConfig.class);
 
-		//LOGGER.info("running HudifyMain.onInitialize()"); //info
 		LOGGER.info("initializing main loop"); //info
 
-		//	HudifyConfig.init("Hudify", lightningtow.hudify.util.HudifyConfig.class);
-		requestThread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(800);
-                    if (MinecraftClient.getInstance().world != null) {
+		Thread requestThread = new Thread(() -> {
+			while (true) {
+				try {
+					Thread.sleep(800);
+					if (MinecraftClient.getInstance().world != null) {
 //                        Thread.sleep(1000);
 						SpotifyUtil.updatePlaybackInfo();
 
 // 204 when app is closed, doesnt immediately go away when app opened
-                        if (status_code == 204) {
-							// No Content - The request has succeeded but returns no message body.
-                            SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
+						if (status_code == 204) { // No Content - The request has succeeded but returns no message body.
+							SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
 						} else if (status_code == 429) { // rate limited
 							// approximately 180 calls per minute without throwing 429, ~3 calls per second
 							LOGGER.error("RATE LIMITED============================================================");
-                            Thread.sleep(3000);
+							Thread.sleep(3000);
 //                        } else if (data[0] != null && data[0].equals("Reset")) {
 							// getPlaybackInfo returns this if it manually hits an error
 //                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
-                        }
+						}
 					} else { //when world is null
 						Thread.sleep(3000);
 						progress = 0;
 						duration = -1;
 //						LOGGER.error("world null, progress + duration updated in refreshActiveSession"); // spammy af
 
-                    }
-                } catch (InterruptedException e) {
-                    LOGGER.error("error in main loop: " + e);
-                    e.printStackTrace();
+					}
+				} catch (InterruptedException e) {
+					LOGGER.error("error in main loop: " + Arrays.toString(e.getStackTrace()));
+//                    e.printStackTrace();
 
-                }
-            }
-        });
+				}
+			}
+		});
 		requestThread.setName("Spotify Thread"); //spotify thread
 		requestThread.start();
 		SpotifyUtil.initialize();
 		registerKeyBindings();
 
 	}
-
-
-
 	//<editor-fold desc="register keybindings">
 	public static void registerKeyBindings() {
 		registerToggleKey();
@@ -111,7 +121,7 @@ public class HudifyMain implements ClientModInitializer
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (toggleKey.wasPressed() && !toggleKeyPrevState) {
 				if (SpotifyUtil.isAuthorized()) {
-					LOGGER.info("Authorized!"); //info
+					if (db) LOGGER.info("Toggle key pressed!"); //info
 					SpotifyUtil.playPause();
 				}
 				else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
@@ -125,8 +135,12 @@ public class HudifyMain implements ClientModInitializer
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 		if (nextKey.wasPressed() && !nextKeyPrevState) {
-			LOGGER.info("Next Key Pressed");
-			SpotifyUtil.nextSong();
+			if (SpotifyUtil.isAuthorized()) {
+				if (db) LOGGER.info("Next Key Pressed");
+				SpotifyUtil.nextSong();
+			}
+			else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
+
 		}
 			nextKeyPrevState = nextKey.wasPressed();
 		});
@@ -137,14 +151,15 @@ public class HudifyMain implements ClientModInitializer
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (prevKey.wasPressed() && !prevKeyPrevState) {
-				LOGGER.info("Prev Key Pressed");
-				SpotifyUtil.prevSong();
+				if (SpotifyUtil.isAuthorized()) {
+					if (db) LOGGER.info("Prev Key Pressed");
+					SpotifyUtil.prevSong();
+				}
+				else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 			}
 			prevKeyPrevState = prevKey.wasPressed();
 		});
 	}
 	//</editor-fold>
-
-
 
 }
