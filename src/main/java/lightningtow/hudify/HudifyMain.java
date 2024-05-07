@@ -36,9 +36,10 @@ public class HudifyMain implements ClientModInitializer
 	public static String artists = ""; // all artists
 	public static String first_artist = ""; // first artist listed. if one artist or podcast, identical to `artists`
 	public static String album = "";
-
-	public static String context_type = " "; // "artist", "playlist", "album", "show".
-	public static String context_name = " ";
+	public static String repeat_state = "";
+	public static Boolean shuffle_state = false;
+	public static String context_type = ""; // "artist", "playlist", "album", "show".
+	public static String context_name = "";
 
 	public static void dump (String source) {
 		if (db) LOGGER.info(String.join(", ",
@@ -59,7 +60,6 @@ public class HudifyMain implements ClientModInitializer
                 try {
                     Thread.sleep(800);
                     if (MinecraftClient.getInstance().world != null) {
-//						if (duration < progress) {
 //                        Thread.sleep(1000);
 						SpotifyUtil.updatePlaybackInfo();
 
@@ -67,7 +67,6 @@ public class HudifyMain implements ClientModInitializer
                         if (status_code == 204) {
 							// No Content - The request has succeeded but returns no message body.
                             SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
-//                        } else if (data[0] != null && data[0].equals("Status Code: 429")) { // rate limited
 						} else if (status_code == 429) { // rate limited
 							// approximately 180 calls per minute without throwing 429, ~3 calls per second
 							LOGGER.error("RATE LIMITED============================================================");
@@ -76,9 +75,7 @@ public class HudifyMain implements ClientModInitializer
 							// getPlaybackInfo returns this if it manually hits an error
 //                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
                         }
-
-//							}
-                    } else { //when world is null
+					} else { //when world is null
 						Thread.sleep(3000);
 						progress = 0;
 						duration = -1;

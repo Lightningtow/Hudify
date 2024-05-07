@@ -6,6 +6,7 @@ import com.minenash.customhud.HudElements.StringElement;
 import com.minenash.customhud.HudElements.supplier.BooleanSupplierElement;
 import com.minenash.customhud.HudElements.supplier.IntegerSuppliers;
 import com.minenash.customhud.HudElements.supplier.StringSupplierElement;
+import com.minenash.customhud.data.Flags;
 import lightningtow.hudify.util.SpotifyUtil;
 import net.fabricmc.api.ClientModInitializer;
 import com.minenash.customhud.HudElements.supplier.NumberSupplierElement;
@@ -53,6 +54,12 @@ public class CustomhudIntegration implements ClientModInitializer {
         StringSupplierElement album = new StringSupplierElement(() -> HudifyMain.album);
         CustomHudRegistry.registerElement("sp_album", (_str) -> album);
 
+        StringSupplierElement repeat_state = new StringSupplierElement(() -> HudifyMain.repeat_state);
+        CustomHudRegistry.registerElement("sp_repeat_state", (_str) -> repeat_state);
+
+        BooleanSupplierElement shuffle_state = new BooleanSupplierElement(() -> HudifyMain.shuffle_state);
+        CustomHudRegistry.registerElement("sp_shuffle_state", (_bool) -> shuffle_state);
+
         StringSupplierElement progress = new StringSupplierElement(() ->
                 (HudifyMain.progress / 60) + ":" + String.format("%02d", HudifyMain.progress % 60));
         CustomHudRegistry.registerElement("spotify_progress", (_str) -> progress);
@@ -64,8 +71,9 @@ public class CustomhudIntegration implements ClientModInitializer {
         CustomHudRegistry.registerElement("sp_dur",  (_str) ->  duration);
 
 
-        NumberSupplierElement status_code = new NumberSupplierElement(() -> HudifyMain.status_code, 1.0);
-        CustomHudRegistry.registerElement("sp_status_code", (what_does_this_do) -> status_code);
+//        NumberSupplierElement status_code = new NumberSupplierElement(() -> HudifyMain.status_code, 1.0);
+//        NumberSupplierElement status_code = new NumberSupplierElement(() -> HudifyMain.status_code, new Flags());
+//        CustomHudRegistry.registerElement("sp_status_code", (what_does_this_do) -> status_code);
 
 
         //	response code 429 -> Too Many Requests - Rate limiting has been applied.

@@ -9,6 +9,7 @@
   "hudify.key.decreaseVolume": "Decrease Volume",
   "hudify.key.toggleInGameMusic": "Toggle In-Game Music",
   "hudify.hud.volume": "Volume",
+  "hudify.messages.premium_required": "Spotify Premium is required for this feature",
   "hudify.midnightconfig.volumeStep": "Volume Step",
   "hudify.midnightconfig.title": "Hudify Config",
   "hudify.midnightconfig.midnightlib_description": "§nMidnightLib",

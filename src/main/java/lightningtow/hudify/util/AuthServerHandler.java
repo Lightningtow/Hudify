@@ -12,9 +12,7 @@ import org.apache.logging.log4j.Logger;
 
 public class AuthServerHandler implements HttpHandler
 {
-
     public static final Logger LOGGER = LogManager.getLogger("Hudify");
-
     @Override
     public void handle(HttpExchange httpExchange) throws IOException
     {
