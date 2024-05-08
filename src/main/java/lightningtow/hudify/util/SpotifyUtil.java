@@ -77,7 +77,7 @@ public class SpotifyUtil
                 boolean fileCreated = authFile.createNewFile();
                 // Validate that file actually got created
                 if (fileCreated) {
-                    LOGGER.info("Could not create new token file at: " + authFile.getAbsolutePath());
+                    LOGGER.info("Created new token file at: " + authFile.getAbsolutePath());
                 }
                 accessToken = "";
                 refreshToken = "";
@@ -389,6 +389,7 @@ public class SpotifyUtil
         {
             String[] splitString = uri.split(":");
             String link = "https://api.spotify.com/v1/" + splitString[1] + "s/" + splitString[2];
+            LOGGER.info("context link: " + link);
 
             HttpRequest getReq = HttpRequest.newBuilder(new URI(link))
                     .GET()
@@ -405,12 +406,20 @@ public class SpotifyUtil
                HudifyMain.send_message(String.valueOf(Text.translatable("hudify.messages.premium_required")), 3);
             }
             else if (getRes.statusCode() == 401) /* unauthorized */ {
-                if (refreshAccessToken()) getRequest(uri);
-                else isAuthorized = false;
-            }
+//                if (refreshAccessToken()) getRequest(uri);
+//                else isAuthorized = false;
 
+            } else if (getRes.statusCode() == 429) { // rate limited
+                // approximately 180 calls per minute without throwing 429, ~3 calls per second
+                LOGGER.error("RATE LIMITED============================================================");
+                Thread.sleep(3000);
+                return "rate limited!";
+    //                        } else if (data[0].equals("Reset")) {
+                // getPlaybackInfo returns this if connection reset
+    //                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
+            }
+            LOGGER.info("get request " + getRes.body()); // prints entire block of returned json
             JsonObject json = (JsonObject) JsonParser.parseString(getRes.body());
-//            LOGGER.info("get request" + getRes.body()); // prints entire block of returned json
             return (String.valueOf(json.get("name")).replaceAll("\"", ""));
         }
         catch (IOException | InterruptedException | URISyntaxException e) {
@@ -495,7 +504,7 @@ public class SpotifyUtil
 
                 /* context */ JsonObject context = json.get("context").getAsJsonObject();
                 /* context type */ sp_context_type = context.get("type").getAsString();
-                /* context name */ EXECUTOR_SERVICE.execute(()-> sp_context_name = getRequest(context.get("uri").getAsString()));
+//                /* context name */ EXECUTOR_SERVICE.execute(()-> sp_context_name = getRequest(context.get("uri").getAsString()));
 
                 sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
 
@@ -513,7 +522,7 @@ public class SpotifyUtil
                 }
 
 
-                /** sp_artists + sp_first_artist **/ {
+                /** sp_artists + sp_first_artist **/
                     JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
                     StringBuilder artistString = new StringBuilder(artistArray.get(0).getAsJsonObject().get("name").getAsString());
                     sp_first_artist = artistString.toString();
@@ -521,7 +530,7 @@ public class SpotifyUtil
                         artistString.append(", ").append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
                     }
                     sp_artists = artistString.toString();
-                }
+                /** sp_artists + sp_first_artist **/
 
 
                 sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();

@@ -23,7 +23,7 @@ public class HudifyMain implements ClientModInitializer
 	private static boolean nextKeyPrevState = false;
 	private static boolean prevKeyPrevState = false;
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
-	final public static boolean db = true; // toggle debug messages. very spammy!
+	final public static boolean db = false; // toggle debug messages. very spammy!
 	// see this link for unofficial estimates of ratelimits
 	// https://community.spotify.com/t5/Spotify-for-Developers/Web-API-ratelimit/m-p/5503153/highlight/true#M7931
 
@@ -68,19 +68,24 @@ public class HudifyMain implements ClientModInitializer
 		//	HudifyConfig.init("Hudify", lightningtow.hudify.util.HudifyConfig.class);
 
 		LOGGER.info("initializing main loop"); //info
+		if (!SpotifyUtil.isAuthorized()) {
+			LOGGER.info("initializing client. Spotify is not authorized, initiating authorization progress ");
 
+			Util.getOperatingSystem().open(SpotifyUtil.authorize());
+		}
+		else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 		Thread requestThread = new Thread( () -> {
 			while (true) {
 				try {
-					Thread.sleep(800);
+					Thread.sleep(850);
 					if (MinecraftClient.getInstance().world != null) {
 //                        Thread.sleep(1000);
 						SpotifyUtil.updatePlaybackInfo();
 
 // 204 when app is closed, doesnt immediately go away when app opened
 						if (sp_status_code == 204) { // No Content - The request has succeeded but returns no message body.
-							sp_progress = 0;
-							sp_duration = -1;
+//							sp_progress = 0; // todo this is whats breaking progress when paused
+//							sp_duration = -1; // todo but how do i fix progress bug
 							SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
 						} else if (sp_status_code == 429) { // rate limited
 							// approximately 180 calls per minute without throwing 429, ~3 calls per second

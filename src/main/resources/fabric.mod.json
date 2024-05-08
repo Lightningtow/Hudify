@@ -13,17 +13,13 @@
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/hudify/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
-		"main": [
-		],
 		"client": [
 			"lightningtow.hudify.HudifyMain",
 			"lightningtow.hudify.CustomhudIntegration"
 		]
 	},
-	"mixins": [
-	],
 	"depends": {
 		"fabricloader": ">=0.15.7",
 		"minecraft": "~1.20.4",
