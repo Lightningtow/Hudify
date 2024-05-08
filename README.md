@@ -31,7 +31,18 @@ To uninstall, also be sure to also disconnect the app from https://www.spotify.c
 
 ### Example CustomHud Config:
 
-todo
+```
+=if: (sp_track = "-" | sp_track = "")=
+=else=
+{sp_track}
+{sp_album}
+{sp_artists}
+{sp_progress} / {sp_duration}
+
+Shuffle: {sp_shuffle}
+Repeat: {sp_repeat}
+=endif=
+```
 
 #### Known issues:
 - progress can get thrown off after unpausing

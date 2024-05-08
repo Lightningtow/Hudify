@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.File;
 import java.util.Arrays;
 
 public class HudifyMain implements ClientModInitializer
@@ -55,25 +56,28 @@ public class HudifyMain implements ClientModInitializer
 		);
 	}
 
-	public static void send_message (String message, int duration) { // todo probably make this a customhud variable instead/as well
+	public static void send_message () { // todo probably make this a customhud variable instead/as well
+		// String message, int duration
 		// be sure to use translatable text! This accepts a string rather than translatableText,
 		// cause otherwise it doesn't check en_us for the string
 		assert MinecraftClient.getInstance().player != null;
-		MinecraftClient.getInstance().player.sendMessage(Text.of(message));
+		MinecraftClient.getInstance().player.sendMessage(Text.translatable("hudify.messages.premium_required"));
 	}
 
 	@Override
 	public void onInitializeClient()
 	{
 		//	HudifyConfig.init("Hudify", lightningtow.hudify.util.HudifyConfig.class);
+//		File authFile = new File(System.getProperty("user.dir") + File.separator +
+//				"config" + File.separator + "HudifyTokens.json");
 
 		LOGGER.info("initializing main loop"); //info
-		if (!SpotifyUtil.isAuthorized()) {
-			LOGGER.info("initializing client. Spotify is not authorized, initiating authorization progress ");
-
-			Util.getOperatingSystem().open(SpotifyUtil.authorize());
-		}
-		else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
+//		if (!SpotifyUtil.isAuthorized()) {
+//			LOGGER.info("initializing client. Spotify is not authorized, initiating authorization progress ");
+//
+//			Util.getOperatingSystem().open(SpotifyUtil.authorize());
+//		}
+//		else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 		Thread requestThread = new Thread( () -> {
 			while (true) {
 				try {

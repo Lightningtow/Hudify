@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 import lightningtow.hudify.HudifyMain;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -329,7 +330,8 @@ public class SpotifyUtil
                 LOGGER.info("PUT Request (" + type + "): " + putRes.statusCode());
             }
             else if (putRes.statusCode() == 403) /* forbidden */ {
-                HudifyMain.send_message(String.valueOf(Text.translatable("hudify.messages.premium_required")), 3);
+//                MutableText msg = Text.translatable("hudify.messages.premium_required");
+                HudifyMain.send_message();
             }
             else if (putRes.statusCode() == 401) /* unauthorized */ {
                 if (refreshAccessToken()) putRequest(type);
@@ -363,7 +365,7 @@ public class SpotifyUtil
                 LOGGER.info("POST Request (" + type + "): " + postRes.statusCode());
             }
             else if (postRes.statusCode() == 403) /* forbidden */ {
-                HudifyMain.send_message(String.valueOf(Text.translatable("hudify.messages.premium_required")), 3);
+                HudifyMain.send_message();
             }
             else if (postRes.statusCode() == 401) /* unauthorized */ {
                 if (refreshAccessToken()) postRequest(type);
@@ -382,57 +384,57 @@ public class SpotifyUtil
         }
     }
 
-    public static String getRequest(String uri) /* get name from uri */ {
-        // gets the name of a playlist/artist/album from their uri
-        // get - Retrieves resources
-        try
-        {
-            String[] splitString = uri.split(":");
-            String link = "https://api.spotify.com/v1/" + splitString[1] + "s/" + splitString[2];
-            LOGGER.info("context link: " + link);
-
-            HttpRequest getReq = HttpRequest.newBuilder(new URI(link))
-                    .GET()
-                    .header("Authorization", "Bearer " + accessToken).build();
-            HttpResponse<String> getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
-//            LOGGER.info("GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
-            if (getRes.statusCode() == 404) /* not found */ {
-                refreshActiveSession();
-                LOGGER.info("Retrying get request...");
-                getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
-                LOGGER.info("GET Request (" + uri + "): " + getRes.statusCode());
-            }
-            else if (getRes.statusCode() == 403) /* forbidden */ {
-               HudifyMain.send_message(String.valueOf(Text.translatable("hudify.messages.premium_required")), 3);
-            }
-            else if (getRes.statusCode() == 401) /* unauthorized */ {
-//                if (refreshAccessToken()) getRequest(uri);
-//                else isAuthorized = false;
-
-            } else if (getRes.statusCode() == 429) { // rate limited
-                // approximately 180 calls per minute without throwing 429, ~3 calls per second
-                LOGGER.error("RATE LIMITED============================================================");
-                Thread.sleep(3000);
-                return "rate limited!";
-    //                        } else if (data[0].equals("Reset")) {
-                // getPlaybackInfo returns this if connection reset
-    //                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
-            }
-            LOGGER.info("get request " + getRes.body()); // prints entire block of returned json
-            JsonObject json = (JsonObject) JsonParser.parseString(getRes.body());
-            return (String.valueOf(json.get("name")).replaceAll("\"", ""));
-        }
-        catch (IOException | InterruptedException | URISyntaxException e) {
-            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-            {
-                LOGGER.info("Attempting to retry get request...");
-                getRequest(uri);
-                LOGGER.info("Successfully sent get request");
-            }
-            else LOGGER.error("exception caught in getRequest():" + e.getMessage());
-        }
-        return "error in getRequest()";
-    }
+//    public static String getRequest(String uri) /* get name from uri */ {
+//        // gets the name of a playlist/artist/album from their uri
+//        // get - Retrieves resources
+//        try
+//        {
+//            String[] splitString = uri.split(":");
+//            String link = "https://api.spotify.com/v1/" + splitString[1] + "s/" + splitString[2];
+//            LOGGER.info("context link: " + link);
+//
+//            HttpRequest getReq = HttpRequest.newBuilder(new URI(link))
+//                    .GET()
+//                    .header("Authorization", "Bearer " + accessToken).build();
+//            HttpResponse<String> getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
+////            LOGGER.info("GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
+//            if (getRes.statusCode() == 404) /* not found */ {
+//                refreshActiveSession();
+//                LOGGER.info("Retrying get request...");
+//                getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
+//                LOGGER.info("GET Request (" + uri + "): " + getRes.statusCode());
+//            }
+//            else if (getRes.statusCode() == 403) /* forbidden */ {
+//               HudifyMain.send_message();
+//            }
+//            else if (getRes.statusCode() == 401) /* unauthorized */ {
+////                if (refreshAccessToken()) getRequest(uri);
+////                else isAuthorized = false;
+//
+//            } else if (getRes.statusCode() == 429) { // rate limited
+//                // approximately 180 calls per minute without throwing 429, ~3 calls per second
+//                LOGGER.error("RATE LIMITED============================================================");
+//                Thread.sleep(3000);
+//                return "rate limited!";
+//    //                        } else if (data[0].equals("Reset")) {
+//                // getPlaybackInfo returns this if connection reset
+//    //                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
+//            }
+//            LOGGER.info("get request " + getRes.body()); // prints entire block of returned json
+//            JsonObject json = (JsonObject) JsonParser.parseString(getRes.body());
+//            return (String.valueOf(json.get("name")).replaceAll("\"", ""));
+//        }
+//        catch (IOException | InterruptedException | URISyntaxException e) {
+//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+//            {
+//                LOGGER.info("Attempting to retry get request...");
+//                getRequest(uri);
+//                LOGGER.info("Successfully sent get request");
+//            }
+//            else LOGGER.error("exception caught in getRequest():" + e.getMessage());
+//        }
+//        return "error in getRequest()";
+//    }
 
     //</editor-fold> put/get/post calls
 
