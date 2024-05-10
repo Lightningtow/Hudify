@@ -24,8 +24,5 @@
 		"java": ">=17",
 		"fabric-api": "*",
 		"custom_hud": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }

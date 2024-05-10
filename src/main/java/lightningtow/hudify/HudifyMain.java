@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,9 +15,12 @@ import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HudifyMain implements ClientModInitializer
 {
+	//<editor-fold desc="variables">
 	public static final String MOD_ID = "Hudify";
 	private static boolean toggleKeyPrevState = false;
 	private static boolean nextKeyPrevState = false;
@@ -31,7 +33,6 @@ public class HudifyMain implements ClientModInitializer
 	// api response code descriptions
 	// https://developer.spotify.com/documentation/web-api/concepts/api-calls
 
-
 	/** the single source of truth for current Spotify state **/
 	public static int sp_status_code = 123456;
 	public static String sp_track = ""; // track or episode name
@@ -40,14 +41,18 @@ public class HudifyMain implements ClientModInitializer
 	public static String sp_album = "";
 	public static String sp_context_type = ""; // "artist", "playlist", "album", "show".
 	public static String sp_context_name = ""; // name of artist, playlist etc
+	public static String sp_prev_context = "";
+	public static String sp_prev_context_uri = "";
 	public static String sp_media_type = ""; // "track" or "episode"
 	public static String sp_repeat_state = "";
+	public static int msg_time_rem = 0;
+	private static String sp_message = "";
+	public static String get_sp_message() { return sp_message; }
 	public static Boolean sp_shuffle_state = false;
 	public static int sp_progress;
 	public static int sp_duration;
 	/** the single source of truth for current Spotify state **/
-
-
+	//</editor-fold> variables
 
 	public static void dump (String source) {
 		if (db) LOGGER.info(String.join(", ",
@@ -56,18 +61,40 @@ public class HudifyMain implements ClientModInitializer
 		);
 	}
 
-	public static void send_message () { // todo probably make this a customhud variable instead/as well
+	private static void tick_message() {
+		if (msg_time_rem > 0) {
+			sp_message = "msg is " + get_sp_message() + " " + msg_time_rem;
+			LOGGER.info("msg is " + get_sp_message() + " " + msg_time_rem);
+			msg_time_rem -= 1;
+
+		}
+		else {
+			sp_message = "";
+		}
+	}
+
+	public static void send_message (String msg, int msg_dur) { // todo probably make this a customhud variable instead/as well
+//		while (msg_dur > 0) {
+//			sp_message = msg + msg_dur;
+//			LOGGER.info("msg is " + get_sp_message());
+//			msg_dur -= 1;
+//		}
+		msg_time_rem = msg_dur;
+		sp_message = msg;
+
+
+
 		// String message, int duration
 		// be sure to use translatable text! This accepts a string rather than translatableText,
 		// cause otherwise it doesn't check en_us for the string
-		assert MinecraftClient.getInstance().player != null;
-		MinecraftClient.getInstance().player.sendMessage(Text.translatable("hudify.messages.premium_required"));
+//		assert MinecraftClient.getInstance().player != null;
+//		MinecraftClient.getInstance().player.sendMessage(Text.translatable("hudify.messages.premium_required"));
 	}
+//	private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
 	@Override
 	public void onInitializeClient()
 	{
-		//	HudifyConfig.init("Hudify", lightningtow.hudify.util.HudifyConfig.class);
 //		File authFile = new File(System.getProperty("user.dir") + File.separator +
 //				"config" + File.separator + "HudifyTokens.json");
 
@@ -79,18 +106,22 @@ public class HudifyMain implements ClientModInitializer
 //		}
 //		else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 		Thread requestThread = new Thread( () -> {
+
 			while (true) {
 				try {
 					Thread.sleep(850);
+//					ContextCount += 1;
 					if (MinecraftClient.getInstance().world != null) {
 //                        Thread.sleep(1000);
 						SpotifyUtil.updatePlaybackInfo();
-
+						tick_message();
 // 204 when app is closed, doesnt immediately go away when app opened
 						if (sp_status_code == 204) { // No Content - The request has succeeded but returns no message body.
 //							sp_progress = 0; // todo this is whats breaking progress when paused
 //							sp_duration = -1; // todo but how do i fix progress bug
 							SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
+							Thread.sleep(1000);
+
 						} else if (sp_status_code == 429) { // rate limited
 							// approximately 180 calls per minute without throwing 429, ~3 calls per second
 							LOGGER.error("RATE LIMITED============================================================");
@@ -98,7 +129,10 @@ public class HudifyMain implements ClientModInitializer
 //                        } else if (data[0].equals("Reset")) {
 							// getPlaybackInfo returns this if connection reset
 //                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
+						} else {
+
 						}
+
 					} else { //when world is null
 						Thread.sleep(3000);
 						sp_progress = 0;
@@ -129,6 +163,7 @@ public class HudifyMain implements ClientModInitializer
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (toggleKey.wasPressed() && !toggleKeyPrevState) {
+				HudifyMain.send_message("congrats you hit pause", 5);
 				if (SpotifyUtil.isAuthorized()) {
 					if (db) LOGGER.info("Toggle key pressed!"); //info
 					SpotifyUtil.togglePlayPause();

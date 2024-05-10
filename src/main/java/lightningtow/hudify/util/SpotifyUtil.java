@@ -27,24 +27,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static lightningtow.hudify.HudifyMain.sp_track;
-import static lightningtow.hudify.HudifyMain.sp_artists;
-import static lightningtow.hudify.HudifyMain.sp_first_artist;
-import static lightningtow.hudify.HudifyMain.sp_album;
-import static lightningtow.hudify.HudifyMain.sp_repeat_state;
-import static lightningtow.hudify.HudifyMain.sp_shuffle_state;
-import static lightningtow.hudify.HudifyMain.sp_context_type;
-import static lightningtow.hudify.HudifyMain.sp_context_name;
-import static lightningtow.hudify.HudifyMain.sp_status_code;
-import static lightningtow.hudify.HudifyMain.sp_duration;
-import static lightningtow.hudify.HudifyMain.sp_progress;
-import static lightningtow.hudify.HudifyMain.sp_media_type;
-
-
-import static lightningtow.hudify.HudifyMain.db;
+import static lightningtow.hudify.HudifyMain.*;
 
 public class SpotifyUtil
 {
+    private static int ContextCount = 0;
     private static final String client_id = "2f8c634ba8cc43a8be450ff3f745886f";
     private static String verifier;
     private static String authCode;
@@ -308,135 +295,63 @@ public class SpotifyUtil
     }
     //</editor-fold> auth utils
 
+//    public boolean
 
-    //<editor-fold desc="put/get/post calls">
 
-    // https://developer.spotify.com/documentation/web-api/concepts/api-calls
 
-    public static void putRequest(String type) /* play, pause */ {
-        // PUT - Changes and/or replaces resources or collections
+    public static String getContext(String uri) /* get name from uri */ {
+        // gets the name of a playlist/artist/album from their uri
+        // get - Retrieves resources
         try
         {
-            HttpRequest putReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
-                    .PUT(HttpRequest.BodyPublishers.ofString(""))
+            String[] splitString = uri.split(":");
+            String link = "https://api.spotify.com/v1/" + splitString[1] + "s/" + splitString[2];
+            LOGGER.info("context link: " + link);
+
+            HttpRequest getReq = HttpRequest.newBuilder(new URI(link))
+                    .GET()
                     .header("Authorization", "Bearer " + accessToken).build();
-            HttpResponse<String> putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
-            LOGGER.error("PUT Request (" + type + "): " + putRes.statusCode());
-
-            if (putRes.statusCode() == 404) /* not found */ {
+            HttpResponse<String> getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
+//            LOGGER.info("GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
+            if (getRes.statusCode() == 404) /* not found */ {
                 refreshActiveSession();
-                LOGGER.info("Retrying put request...");
-                putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
-                LOGGER.info("PUT Request (" + type + "): " + putRes.statusCode());
-            }
-            else if (putRes.statusCode() == 403) /* forbidden */ {
-//                MutableText msg = Text.translatable("hudify.messages.premium_required");
-                HudifyMain.send_message();
-            }
-            else if (putRes.statusCode() == 401) /* unauthorized */ {
-                if (refreshAccessToken()) putRequest(type);
-                else isAuthorized = false;
-            }
-        }
-        catch (IOException | InterruptedException | URISyntaxException e) {
-            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-            {
-                LOGGER.info("Attempting to retry put request...");
-                putRequest(type);
-                LOGGER.info("Successfully sent put request");
-            }
-            else LOGGER.error("exception caught in putRequest():" + e.getMessage());
-        }
-    }
-
-    public static void postRequest(String type) /* skip forward, back */ {
-        // POST - Creates resources
-        try
-        {
-            HttpRequest postReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
-                    .POST(HttpRequest.BodyPublishers.ofString(""))
-                    .header("Authorization", "Bearer " + accessToken).build();
-            HttpResponse<String> postRes = client.send(postReq, HttpResponse.BodyHandlers.ofString());
-            LOGGER.error("POST Request (" + type + "): " + postRes.statusCode());
-            if (postRes.statusCode() == 404) /* not found */ {
-                refreshActiveSession();
-                LOGGER.info("Retrying post request...");
-                postRes = client.send(postReq, HttpResponse.BodyHandlers.ofString());
-                LOGGER.info("POST Request (" + type + "): " + postRes.statusCode());
-            }
-            else if (postRes.statusCode() == 403) /* forbidden */ {
-                HudifyMain.send_message();
-            }
-            else if (postRes.statusCode() == 401) /* unauthorized */ {
-                if (refreshAccessToken()) postRequest(type);
-                else isAuthorized = false;
-            }
-
-        }
-        catch (IOException | InterruptedException | URISyntaxException e) {
-            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-            {
-                LOGGER.info("Attempting to retry post request...");
-                postRequest(type);
-                LOGGER.info("Successfully sent post request");
-            }
-            else LOGGER.error("exception caught in postRequest():" + e.getMessage());
-        }
-    }
-
-//    public static String getRequest(String uri) /* get name from uri */ {
-//        // gets the name of a playlist/artist/album from their uri
-//        // get - Retrieves resources
-//        try
-//        {
-//            String[] splitString = uri.split(":");
-//            String link = "https://api.spotify.com/v1/" + splitString[1] + "s/" + splitString[2];
-//            LOGGER.info("context link: " + link);
-//
-//            HttpRequest getReq = HttpRequest.newBuilder(new URI(link))
-//                    .GET()
-//                    .header("Authorization", "Bearer " + accessToken).build();
-//            HttpResponse<String> getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
-////            LOGGER.info("GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
-//            if (getRes.statusCode() == 404) /* not found */ {
-//                refreshActiveSession();
-//                LOGGER.info("Retrying get request...");
-//                getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
+                LOGGER.info("Retrying get request...");
+                getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
 //                LOGGER.info("GET Request (" + uri + "): " + getRes.statusCode());
-//            }
-//            else if (getRes.statusCode() == 403) /* forbidden */ {
+            }
+            else if (getRes.statusCode() == 403) /* forbidden */ {
 //               HudifyMain.send_message();
-//            }
+            }
 //            else if (getRes.statusCode() == 401) /* unauthorized */ {
 ////                if (refreshAccessToken()) getRequest(uri);
 ////                else isAuthorized = false;
-//
-//            } else if (getRes.statusCode() == 429) { // rate limited
-//                // approximately 180 calls per minute without throwing 429, ~3 calls per second
-//                LOGGER.error("RATE LIMITED============================================================");
-//                Thread.sleep(3000);
-//                return "rate limited!";
-//    //                        } else if (data[0].equals("Reset")) {
-//                // getPlaybackInfo returns this if connection reset
-//    //                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
 //            }
-//            LOGGER.info("get request " + getRes.body()); // prints entire block of returned json
-//            JsonObject json = (JsonObject) JsonParser.parseString(getRes.body());
-//            return (String.valueOf(json.get("name")).replaceAll("\"", ""));
-//        }
-//        catch (IOException | InterruptedException | URISyntaxException e) {
-//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-//            {
-//                LOGGER.info("Attempting to retry get request...");
-//                getRequest(uri);
-//                LOGGER.info("Successfully sent get request");
-//            }
-//            else LOGGER.error("exception caught in getRequest():" + e.getMessage());
-//        }
-//        return "error in getRequest()";
-//    }
+            else if (getRes.statusCode() == 429) { // rate limited
+                // approximately 180 calls per minute without throwing 429, ~3 calls per second
+                LOGGER.error("RATE LIMITED============================================================");
+                Thread.sleep(3000);
+                ContextCount = -10;
+                return "rate limited!";
+    //                        } else if (data[0].equals("Reset")) {
+                // getPlaybackInfo returns this if connection reset
+    //                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
+            }
+//            LOGGER.info("get entire request json " + getRes.body()); // prints entire block of returned json
+            JsonObject json = (JsonObject) JsonParser.parseString(getRes.body());
+            return (String.valueOf(json.get("name")).replaceAll("\"", ""));
+        }
+        catch (IOException | InterruptedException | URISyntaxException e) {
+            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+            {
+                LOGGER.info("Attempting to retry get request...");
+                getContext(uri);
+                LOGGER.info("Successfully sent get request");
+            }
+            else LOGGER.error("exception caught in getRequest():" + e.getMessage());
+        }
+        return "error in getRequest()";
+    }
 
-    //</editor-fold> put/get/post calls
 
 
     //<editor-fold desc="playback functions">
@@ -493,8 +408,6 @@ public class SpotifyUtil
 
                 dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
 
-
-
                 sp_media_type = (json.get("currently_playing_type").getAsString().equals("episode")) ? "episode" : "track";
 
                 sp_progress = (json.get("progress_ms").getAsInt() / 1000);
@@ -504,12 +417,8 @@ public class SpotifyUtil
                 sp_repeat_state = json.get("repeat_state").getAsString(); // if repeat is "context" change to "all"
                 /* repeat */  if (Objects.equals(sp_repeat_state, "context")) sp_repeat_state = "all"; // else leave it
 
-                /* context */ JsonObject context = json.get("context").getAsJsonObject();
-                /* context type */ sp_context_type = context.get("type").getAsString();
-//                /* context name */ EXECUTOR_SERVICE.execute(()-> sp_context_name = getRequest(context.get("uri").getAsString()));
 
                 sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
-
                 isPlaying = json.get("is_playing").getAsBoolean();
 
 
@@ -537,28 +446,122 @@ public class SpotifyUtil
 
                 sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 
+                /* context */ JsonObject context = json.get("context").getAsJsonObject();
+                /* context type */ sp_context_type = context.get("type").getAsString();
+                /* context name */ sp_prev_context = sp_context_name;
+                if (!sp_prev_context_uri.equals(context.get("uri").getAsString())) { // if DOESNT match
+//                    LOGGER.info("contexts do NOT match, updating context");
+                    LOGGER.info("type: " + sp_context_type + ", uris " + sp_prev_context_uri + " / " + context.get("uri").getAsString());
+                    sp_prev_context_uri = context.get("uri").getAsString();
+                    switch (sp_context_type) {
+                        case "album":
+                            sp_context_name = sp_album;  break;
+                        case "show":
+                            sp_context_name = sp_artists;  break;
+                        case "artist":
+                        case "playlist":
+                            EXECUTOR_SERVICE.execute(() -> sp_context_name = getContext(context.get("uri").getAsString()));
+                    }
 
-            }
+                }
+
+            } // if response successful
             else if (playbackResponse.statusCode() == 401) /* unauthorized */ {
                 if (!refreshAccessToken()) isAuthorized = false;
             }
 
         } catch (Exception e)
         {
-            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-            {
-                LOGGER.info("Resetting connection and retrying info get...");
-//                results[0] = "Reset";
-
-            }
-            else LOGGER.error("exception caught in getPlaybackInfo(): " + e.getMessage());
+//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+//            {
+//                LOGGER.info("Resetting connection and retrying info get...");
+////                results[0] = "Reset";
+//
+//            }
+//            else
+                LOGGER.error("exception caught in getPlaybackInfo(): " + e.getMessage());
         }
         HudifyMain.dump(dump_msg);
 //        return;
 
     }
 
+    //<editor-fold desc="put/post calls">
 
+    // https://developer.spotify.com/documentation/web-api/concepts/api-calls
+
+    public static void putRequest(String type) /* play, pause */ {
+        // PUT - Changes and/or replaces resources or collections
+        try
+        {
+            HttpRequest putReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
+                    .PUT(HttpRequest.BodyPublishers.ofString(""))
+                    .header("Authorization", "Bearer " + accessToken).build();
+            HttpResponse<String> putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
+            LOGGER.error("PUT Request (" + type + "): " + putRes.statusCode());
+
+            if (putRes.statusCode() == 404) /* not found */ {
+                refreshActiveSession();
+                LOGGER.info("Retrying put request...");
+                putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
+                LOGGER.info("PUT Request (" + type + "): " + putRes.statusCode());
+            }
+            else if (putRes.statusCode() == 403) /* forbidden */ {
+//                MutableText msg = Text.translatable("hudify.messages.premium_required");
+                HudifyMain.send_message("why does spotify say you're forbidden from pausing", 5);
+            }
+            else if (putRes.statusCode() == 401) /* unauthorized */ {
+                if (refreshAccessToken()) putRequest(type);
+                else isAuthorized = false;
+            }
+        }
+        catch (IOException | InterruptedException | URISyntaxException e) {
+            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+            {
+                LOGGER.info("Attempting to retry put request...");
+                putRequest(type);
+                LOGGER.info("Successfully sent put request");
+            }
+            else LOGGER.error("exception caught in putRequest():" + e.getMessage());
+        }
+    }
+
+    public static void postRequest(String type) /* skip forward, back */ {
+        // POST - Creates resources
+        try
+        {
+            HttpRequest postReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
+                    .POST(HttpRequest.BodyPublishers.ofString(""))
+                    .header("Authorization", "Bearer " + accessToken).build();
+            HttpResponse<String> postRes = client.send(postReq, HttpResponse.BodyHandlers.ofString());
+            LOGGER.error("POST Request (" + type + "): " + postRes.statusCode());
+            if (postRes.statusCode() == 404) /* not found */ {
+                refreshActiveSession();
+                LOGGER.info("Retrying post request...");
+                postRes = client.send(postReq, HttpResponse.BodyHandlers.ofString());
+                LOGGER.info("POST Request (" + type + "): " + postRes.statusCode());
+            }
+            else if (postRes.statusCode() == 403) /* forbidden */ {
+//                HudifyMain.send_message();
+            }
+            else if (postRes.statusCode() == 401) /* unauthorized */ {
+                if (refreshAccessToken()) postRequest(type);
+                else isAuthorized = false;
+            }
+
+        }
+        catch (IOException | InterruptedException | URISyntaxException e) {
+            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+            {
+                LOGGER.info("Attempting to retry post request...");
+                postRequest(type);
+                LOGGER.info("Successfully sent post request");
+            }
+            else LOGGER.error("exception caught in postRequest():" + e.getMessage());
+        }
+    }
+
+    //</editor-fold> put/post calls
 
     public static boolean isAuthorized() { return isAuthorized; }
 
