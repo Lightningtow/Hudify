@@ -8,26 +8,26 @@ You'll be prompted to authorize when you first press a control key
 
 To uninstall, also be sure to also disconnect the app from https://www.spotify.com/us/account/apps
 
+Program messages are displayed in the `{sp_message}` variable rather than in Minecraft chat, for compatibility with more Minecraft versions.
 
 ### Variables added:
 #### String variables:
-`{sp_song}` / `{sp_track}` - Song's title  
-`{sp_album}` - Album of current track  
+`{sp_track}` / `{sp_song}` - Song/episode's title  
+`{sp_album}` - Album of current track. Blank if podcast  
 `{sp_artist}` / `{sp_artists}` - All artists combined into one string  
 `{sp_first_artist}` - The very first artist listed  
-`{sp_context_type}` - Where the track is playing from. Can be "artist", "playlist", "album", "show"  
-`{sp_context_name}` - Name of context's artist/playlist/album/show   
-`{sp_media_type}` - "track" or "episode" - should i remove this in favor of `is_podcast`?  
+`{sp_context_type}` - Where the track is playing from. Can be `artist`, `playlist`, `album`, or `show`  
+`{sp_context_name}` - Name of the artist/playlist/album/show you're playing from  
+~~`{sp_media_type}` - "track" or "episode"~~ - removed in favor of `is_podcast`  
 `{sp_repeat}` - "off", "track", or "all"  
-`{sp_message}` / `{sp_msg}` - Program messages. Put here instead of in Minecraft chat, for compatibility with more Minecraft versions  
 
 #### Special variables:
-`{sp_progress}` / `{sp_prog}` - String: Song progress in MM:SS notation. Number: song progress in seconds  
-`{sp_duration}` / `{sp_dur}`  - String: Song duration in MM:SS notation  Number: song duration in seconds  
-
+`{sp_progress}` / `{sp_prog}` - String: progress in MM:SS notation. Number: number of seconds. Boolean: If progress > 0  
+`{sp_duration}` / `{sp_dur}`  - Song duration. Formatted same as `sp_progress` above  
+`{sp_message}` / `{sp_msg}` -  String: message. Number: seconds remaining till the message is cleared. Boolean: whether a message is being currently displayed.
 #### Boolean variables:
-`{sp_shuffle}` - Boolean. True if shuffling, false if shuffle is off  
-`{sp_is_podcast}` - Boolean. True if podcast, false if not  
+`{sp_shuffle}` - Boolean. True if shuffle is on (including smart shuffle), false if not
+`{sp_is_podcast}` - Boolean. True if currently listening to a podcast, false if not  
 
 ### Example CustomHud Config:
 ```
@@ -36,22 +36,23 @@ To uninstall, also be sure to also disconnect the app from https://www.spotify.c
 {sp_album}
 {sp_artists}
 {sp_progress} / {sp_duration}
+Playing from {sp_context_name} ({sp_context_type})
 
 Shuffle: {sp_shuffle}
 Repeat: {sp_repeat}
+
+{{sp_message, "{sp_msg} {$0, sp_msg}"}}
 =endif=
 ```
 #### Known issues:
 - progress can get thrown off after unpausing
 - at launch, variables are often empty
-- context hitting rate limits, needs to locally cache api-name pairs
-- 'context' doesnt update if playing from queue or search results. 
-  - Most likely a limitation of [Spotify's api](https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback)
+- context doesn't update if playing from queue or search results. 
+  - Most likely a limitation of [Spotify's api](https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback). I don't know if I can fix this
 
 #### Todo list:
 - is playing/ is valid / is app closed etc vars
 - figure out refreshActiveSession
-- "program message" variable
 - truncate long variables
 - scrub "remastered"s and other unnecessary stuff appended to track titles
 - add screenshots to readme

@@ -46,25 +46,18 @@ public class HudifyMain implements ClientModInitializer
 
 	private static void tick_message() {
 		if (msg_time_rem > 0) {
-			set_sp_message("msg is " + get_sp_message() + " " + msg_time_rem);
-			LOGGER.info("msg is " + get_sp_message() + " " + msg_time_rem);
+//			set_sp_message(get_sp_message() + " " + msg_time_rem);
+//			set_sp_message(get_sp_message());
+			LOGGER.info("msg is " + get_sp_message() + " - " + msg_time_rem);
 			msg_time_rem -= 1;
-
 		}
-		else {
+		else
 			set_sp_message("");
-		}
 	}
 
 	public static void send_message (String msg, int msg_dur) {
-//		while (msg_dur > 0) {
-//			sp_message = msg + msg_dur;
-//			LOGGER.info("msg is " + get_sp_message());
-//			msg_dur -= 1;
-//		}
 		msg_time_rem = msg_dur;
 		set_sp_message(msg);
-
 	}
 
 	@Override

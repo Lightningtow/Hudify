@@ -30,13 +30,7 @@ public class AuthServerHandler implements HttpHandler
     private void handleResponse (HttpExchange httpExchange, String requestParamValue) throws IOException, URISyntaxException, InterruptedException
     {
         OutputStream outputStream = httpExchange.getResponseBody();
-        //        htmlBuilder.append("<html>")
-        //                .append("<body>")
-        //                .append("<h1>")
-        //                .append("Success!")
-        //                .append("</h1>")
-        //                .append("</body?")
-        //                .append("</html>");
+        //        htmlBuilder.append("<html>").append("<body>").append("<h1>").append("Success!").append("</h1>").append("</body?").append("</html>");
         //        String htmlResponse = htmlBuilder.toString();
         String htmlResponse = "<html><body><h1>Success!</h1></body?</html>";
         httpExchange.sendResponseHeaders(200, htmlResponse.length());

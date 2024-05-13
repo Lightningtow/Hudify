@@ -32,7 +32,6 @@ import static lightningtow.hudify.HudifyMain.*;
 
 public class SpotifyUtil
 {
-    private static int ContextCount = 0;
     private static final String client_id = "2f8c634ba8cc43a8be450ff3f745886f";
     private static String verifier;
     private static String authCode;
@@ -307,7 +306,7 @@ public class SpotifyUtil
         {
             String[] splitString = uri.split(":");
             String link = "https://api.spotify.com/v1/" + splitString[1] + "s/" + splitString[2];
-            LOGGER.info("context link: " + link);
+            if(db) LOGGER.info("context link: " + link);
 
             HttpRequest getReq = HttpRequest.newBuilder(new URI(link))
                     .GET()
@@ -316,7 +315,7 @@ public class SpotifyUtil
 //            LOGGER.info("GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
             if (getRes.statusCode() == 404) /* not found */ {
                 refreshActiveSession();
-                LOGGER.info("Retrying get request...");
+                if(db) LOGGER.info("Retrying get request...");
                 getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
 //                LOGGER.info("GET Request (" + uri + "): " + getRes.statusCode());
             }
@@ -331,7 +330,6 @@ public class SpotifyUtil
                 // approximately 180 calls per minute without throwing 429, ~3 calls per second
                 LOGGER.error("RATE LIMITED============================================================");
                 Thread.sleep(3000);
-                ContextCount = -10;
                 return "rate limited!";
     //                        } else if (data[0].equals("Reset")) {
                 // getPlaybackInfo returns this if connection reset
@@ -339,7 +337,7 @@ public class SpotifyUtil
             }
 //            LOGGER.info("get entire request json " + getRes.body()); // prints entire block of returned json
             JsonObject json = (JsonObject) JsonParser.parseString(getRes.body());
-            return (String.valueOf(json.get("name")).replaceAll("\"", ""));
+            return (String.valueOf(json.get("name")).replaceAll("\"", "")); // name comes wrapped in quotes
         }
         catch (IOException | InterruptedException | URISyntaxException e) {
             if (e instanceof IOException && e.getMessage().equals("Connection reset"))
@@ -447,7 +445,7 @@ public class SpotifyUtil
 
                 sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 
-                /* context */ JsonObject context = json.get("context").getAsJsonObject();
+                /* get context */ JsonObject context = json.get("context").getAsJsonObject();
                 /* context type */ sp_context_type = context.get("type").getAsString();
                 /* context name */ sp_prev_context = sp_context_name;
                 if (!sp_prev_context_uri.equals(context.get("uri").getAsString())) { // if DOESNT match

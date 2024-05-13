@@ -21,6 +21,7 @@ public class CustomhudIntegration implements ClientModInitializer {
     public void onInitializeClient() {
         LOGGER.info("Integrating with CustomHud");
 
+        /** strings **/
         StringSupplierElement track = new StringSupplierElement(() -> SpotifyData.sp_track.isEmpty() ? null : SpotifyData.sp_track);
         CustomHudRegistry.registerElement("sp_song",  (flags, context) ->  Flags.wrap(track, flags));
         CustomHudRegistry.registerElement("sp_track",  (flags, context) ->  Flags.wrap(track, flags));
@@ -45,52 +46,43 @@ public class CustomhudIntegration implements ClientModInitializer {
         CustomHudRegistry.registerElement("sp_repeat", (flags, context) ->  Flags.wrap(repeat_state, flags));
 //        CustomHudRegistry.registerElement("sp_repeat_state", (_str) -> repeat_state);
 
-
+        /** booleans **/
         BooleanSupplierElement shuffle_state = new BooleanSupplierElement(() -> SpotifyData.sp_shuffle_state);
         CustomHudRegistry.registerElement("sp_shuffle", (flags, context) ->  Flags.wrap(shuffle_state, flags));
 //
         BooleanSupplierElement is_podcast = new BooleanSupplierElement(() -> (Objects.equals(SpotifyData.sp_media_type, "episode")));
         CustomHudRegistry.registerElement("sp_is_podcast", (flags, context) ->  Flags.wrap(is_podcast, flags));
 
+        /** numbers **/
+        NumberSupplierElement status_code = new NumberSupplierElement(() -> SpotifyData.sp_status_code, new Flags());
+        CustomHudRegistry.registerElement("sp_status_code", (flags, context) -> status_code);
 
+//        StringSupplierElement media_type = new StringSupplierElement(() -> SpotifyData.sp_media_type.isEmpty() ? null : SpotifyData.sp_media_type); // track or episode
+//        CustomHudRegistry.registerElement("sp_media_type", (flags, context) ->  Flags.wrap(media_type, flags));  // removed in favor of `is_podcast`
+
+        /** specials **/
         SpecialSupplierElement.Entry progress_entry = SpecialSupplierElement.of(
-                () -> (SpotifyData.sp_progress / 60) + ":" + String.format("%02d", SpotifyData.sp_progress % 60), // string
-                () -> SpotifyData.sp_progress, // number
-                () -> SpotifyData.sp_progress > 0 // bool
-        );
+                () -> (SpotifyData.sp_progress / 60) + ":" + String.format("%02d", SpotifyData.sp_progress % 60), /* string */
+                () -> SpotifyData.sp_progress /* number */ , () -> SpotifyData.sp_progress > 0 /* bool */ );
         CustomHudRegistry.registerElement("sp_progress", (flags, context) -> new SpecialSupplierElement(progress_entry));
         CustomHudRegistry.registerElement("sp_prog",  (flags, context) -> new SpecialSupplierElement(progress_entry));
 
 
-
         SpecialSupplierElement.Entry duration = SpecialSupplierElement.of(
-                () -> (SpotifyData.sp_duration / 60) + ":" + String.format("%02d", SpotifyData.sp_duration % 60), // string
-                () -> SpotifyData.sp_duration, // number
-                () -> SpotifyData.sp_duration > 0 // bool
-        );
+                () -> (SpotifyData.sp_duration / 60) + ":" + String.format("%02d", SpotifyData.sp_duration % 60), /* string */
+                () -> SpotifyData.sp_duration /* number */, () -> SpotifyData.sp_duration > 0 /* bool */ );
         CustomHudRegistry.registerElement("sp_duration", (flags, context) -> new SpecialSupplierElement(duration));
         CustomHudRegistry.registerElement("sp_dur",  (flags, context) -> new SpecialSupplierElement(duration));
 
 
-        StringSupplierElement media_type = new StringSupplierElement(() -> SpotifyData.sp_media_type.isEmpty() ? null : SpotifyData.sp_media_type);
-        CustomHudRegistry.registerElement("sp_media_type", (flags, context) ->  Flags.wrap(media_type, flags));
-
         SpecialSupplierElement.Entry message = SpecialSupplierElement.of(
 //                () -> (SpotifyData.sp_message), // string
-                SpotifyData::get_sp_message, // string
-                () -> SpotifyData.get_sp_message().isEmpty() ? 0 : 1, // number
-                () -> (!SpotifyData.get_sp_message().isEmpty()) // bool
-        );
+                SpotifyData::get_sp_message, /* string */
+                () -> SpotifyData.msg_time_rem /* number */, () -> (!SpotifyData.get_sp_message().isEmpty()) /* bool */ );
         CustomHudRegistry.registerElement("sp_message", (flags, context) -> new SpecialSupplierElement(message));
         CustomHudRegistry.registerElement("sp_msg",  (flags, context) -> new SpecialSupplierElement(message));
 
-        NumberSupplierElement status_code = new NumberSupplierElement(() -> SpotifyData.sp_status_code, new Flags());
-        CustomHudRegistry.registerElement("sp_status_code", (flags, context) -> status_code);
 
-//        StringSupplierElement duration = new StringSupplierElement(() ->
-//                (SpotifyData.sp_duration / 60) + ":" + String.format("%02d", SpotifyData.sp_duration % 60));
-//        CustomHudRegistry.registerElement("sp_duration", (_str) -> duration);
-//        CustomHudRegistry.registerElement("sp_dur",  (_str) ->  duration);
 
 
 
