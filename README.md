@@ -22,7 +22,7 @@ Program messages are displayed in the `{sp_message}` variable rather than in Min
 `{sp_repeat}` - "off", "track", or "all"  
 
 #### Special variables:
-`{sp_progress}` / `{sp_prog}` - String: progress in MM:SS format. Number: number of seconds. Boolean: If progress > 0  
+`{sp_progress}` / `{sp_prog}` - String: progress in MM:SS format. Number: number of seconds. Boolean: If num > 0  
 `{sp_duration}` / `{sp_dur}`  - Song duration. Formatted same as `sp_progress` above  
 `{sp_message}` / `{sp_msg}` -  String: the message. Number: seconds remaining till the message is cleared. Boolean: whether a message is currently being displayed.  
 #### Boolean variables:
