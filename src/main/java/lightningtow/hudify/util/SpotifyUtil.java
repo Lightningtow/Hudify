@@ -5,8 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 import lightningtow.hudify.HudifyMain;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,6 +20,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import static lightningtow.hudify.util.SpotifyData.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -319,9 +319,9 @@ public class SpotifyUtil
                 getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
 //                LOGGER.info("GET Request (" + uri + "): " + getRes.statusCode());
             }
-            else if (getRes.statusCode() == 403) /* forbidden */ {
-//               HudifyMain.send_message();
-            }
+//            else if (getRes.statusCode() == 403) /* forbidden */ {
+////               HudifyMain.send_message();
+//            }
 //            else if (getRes.statusCode() == 401) /* unauthorized */ {
 ////                if (refreshAccessToken()) getRequest(uri);
 ////                else isAuthorized = false;
@@ -351,7 +351,53 @@ public class SpotifyUtil
         return "error in getRequest()";
     }
 
+    public static String scrub(String input) {
+        String output = "";
+        output = input;
 
+//        String[] blacklist = {"bonus track", "bonus", "intro", "outro", "interlude", "original mix", "single version", "recorded at spotify singles nyc",
+//                "spotify singles", "remastere?d? [0-9]{4} \\/ remixed",};
+
+        ArrayList<String> blacklist = new ArrayList<>();
+        blacklist.add("bonus track");
+        blacklist.add("bonus");
+        blacklist.add("intro");
+        blacklist.add("outro");
+        blacklist.add("interlude");
+//        blacklist.add("live with the sfso");
+//        if (sp_first_artist.equals("Metallica") && sp_album.equals("S&M2")) blacklist.add("live");
+        blacklist.add("original mix");
+        blacklist.add("single version");
+        blacklist.add("recorded at spotify singles nyc");
+        blacklist.add("spotify singles");
+        blacklist.add("single mix");
+        blacklist.add("remastere?d? [0-9]{4} \\/ remixed");
+        blacklist.add("remastere?d? [0-9]{4}$");
+        blacklist.add("[0-9]{4} - remastere?d?");
+        blacklist.add("[0-9]{4} remastere?d?");
+        blacklist.add("remastere?d?");
+        blacklist.add("single");
+
+        ArrayList<String> real_blacklist = new ArrayList<>();
+        for (String elem : blacklist) {
+            real_blacklist.add("- " + elem);
+            real_blacklist.add("– " + elem);
+            real_blacklist.add("\\/\\/ " + elem);
+            real_blacklist.add("\\(" + elem + "\\)");
+            real_blacklist.add("\\[" + elem + "\\]");
+//            real_blacklist.add(elem);
+        }
+
+
+        for (String elem : real_blacklist) {
+            String regex = "(?i)" + elem;
+            output = output.replaceAll(regex, "");
+
+        }
+
+
+        return output.trim();
+    }
 
     //<editor-fold desc="playback functions">
     public static void nextSong() {
@@ -431,6 +477,7 @@ public class SpotifyUtil
                     return;
                 }
 
+                sp_fancy_track = scrub(sp_track);
 
                 /** sp_artists + sp_first_artist **/
                     JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
@@ -521,7 +568,7 @@ public class SpotifyUtil
                 putRequest(type);
                 LOGGER.info("Successfully sent put request");
             }
-            else LOGGER.error("exception caught in putRequest():" + e.getMessage());
+            else LOGGER.error("exception caught in putRequest():{}", e.getMessage());
         }
     }
 
@@ -541,6 +588,7 @@ public class SpotifyUtil
                 LOGGER.info("POST Request (" + type + "): " + postRes.statusCode());
             }
             else if (postRes.statusCode() == 403) /* forbidden */ {
+                HudifyMain.send_message("Spotify premium is required for this", 5);
 //                HudifyMain.send_message();
             }
             else if (postRes.statusCode() == 401) /* unauthorized */ {

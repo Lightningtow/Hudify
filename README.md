@@ -13,18 +13,18 @@ Program messages are displayed in the `{sp_message}` variable rather than in Min
 ### Variables added:
 #### String variables:
 `{sp_track}` / `{sp_song}` - Song/episode's title  
+`{sp_fancy_track}` - Song title with stuff like "remastered", "bonus track" etc scrubbed out
 `{sp_album}` - Album of current track. Blank if podcast  
 `{sp_artist}` / `{sp_artists}` - All artists combined into one string  
 `{sp_first_artist}` - The very first artist listed  
 `{sp_context_type}` - Where the track is playing from. Can be `artist`, `playlist`, `album`, or `show`  
 `{sp_context_name}` - Name of the artist/playlist/album/show you're playing from  
-~~`{sp_media_type}` - "track" or "episode"~~ - removed in favor of `is_podcast`  
 `{sp_repeat}` - "off", "track", or "all"  
 
 #### Special variables:
-`{sp_progress}` / `{sp_prog}` - String: progress in MM:SS notation. Number: number of seconds. Boolean: If progress > 0  
+`{sp_progress}` / `{sp_prog}` - String: progress in MM:SS format. Number: number of seconds. Boolean: If progress > 0  
 `{sp_duration}` / `{sp_dur}`  - Song duration. Formatted same as `sp_progress` above  
-`{sp_message}` / `{sp_msg}` -  String: message. Number: seconds remaining till the message is cleared. Boolean: whether a message is being currently displayed.
+`{sp_message}` / `{sp_msg}` -  String: the message. Number: seconds remaining till the message is cleared. Boolean: whether a message is currently being displayed.
 #### Boolean variables:
 `{sp_shuffle}` - Boolean. True if shuffle is on (including smart shuffle), false if not
 `{sp_is_podcast}` - Boolean. True if currently listening to a podcast, false if not  
@@ -54,7 +54,6 @@ Repeat: {sp_repeat}
 - is playing/ is valid / is app closed etc vars
 - figure out refreshActiveSession
 - truncate long variables
-- scrub "remastered"s and other unnecessary stuff appended to track titles
 - add screenshots to readme
 
 #### Credit:  

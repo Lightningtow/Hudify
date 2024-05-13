@@ -14,28 +14,17 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
 import static lightningtow.hudify.util.SpotifyData.*;
-import java.io.File;
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class HudifyMain implements ClientModInitializer
 {
-	//<editor-fold desc="variables">
 	public static final String MOD_ID = "Hudify";
 	private static boolean toggleKeyPrevState = false;
 	private static boolean nextKeyPrevState = false;
 	private static boolean prevKeyPrevState = false;
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
-	final public static boolean db = false; // toggle debug messages. very spammy!
-	// see this link for unofficial estimates of ratelimits
-	// https://community.spotify.com/t5/Spotify-for-Developers/Web-API-ratelimit/m-p/5503153/highlight/true#M7931
+	final public static boolean db = true; // toggle debug messages. very spammy!
 
-	// api response code descriptions
-	// https://developer.spotify.com/documentation/web-api/concepts/api-calls
-
-
-	//</editor-fold> variables
 
 	public static void dump (String source) {
 		if (db) LOGGER.info(String.join(", ",
@@ -46,9 +35,7 @@ public class HudifyMain implements ClientModInitializer
 
 	private static void tick_message() {
 		if (msg_time_rem > 0) {
-//			set_sp_message(get_sp_message() + " " + msg_time_rem);
-//			set_sp_message(get_sp_message());
-			LOGGER.info("msg is " + get_sp_message() + " - " + msg_time_rem);
+//			LOGGER.info("msg is " + get_sp_message() + " - " + msg_time_rem);
 			msg_time_rem -= 1;
 		}
 		else
@@ -103,9 +90,8 @@ public class HudifyMain implements ClientModInitializer
 //                        } else if (data[0].equals("Reset")) {
 							// getPlaybackInfo returns this if connection reset
 //                            LOGGER.error("Reset condition, maintaining HUD until reset"); // was level info and from blockiy
-						} else {
-
 						}
+//						else {}
 
 					}
 				} catch (InterruptedException e) {
