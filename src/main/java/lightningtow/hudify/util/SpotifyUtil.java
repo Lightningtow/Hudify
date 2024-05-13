@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import static lightningtow.hudify.util.SpotifyData.*;
 
 import java.util.Objects;
 import java.util.Scanner;

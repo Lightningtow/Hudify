@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
+import static lightningtow.hudify.util.SpotifyData.*;
 import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -33,25 +34,7 @@ public class HudifyMain implements ClientModInitializer
 	// api response code descriptions
 	// https://developer.spotify.com/documentation/web-api/concepts/api-calls
 
-	/** the single source of truth for current Spotify state **/
-	public static int sp_status_code = 123456;
-	public static String sp_track = ""; // track or episode name
-	public static String sp_artists = ""; // all artists as one string
-	public static String sp_first_artist = ""; // first artist listed. if one artist or podcast, identical to `artists`
-	public static String sp_album = "";
-	public static String sp_context_type = ""; // "artist", "playlist", "album", "show".
-	public static String sp_context_name = ""; // name of artist, playlist etc
-	public static String sp_prev_context = "";
-	public static String sp_prev_context_uri = "";
-	public static String sp_media_type = ""; // "track" or "episode"
-	public static String sp_repeat_state = "";
-	public static int msg_time_rem = 0;
-	private static String sp_message = "";
-	public static String get_sp_message() { return sp_message; }
-	public static Boolean sp_shuffle_state = false;
-	public static int sp_progress;
-	public static int sp_duration;
-	/** the single source of truth for current Spotify state **/
+
 	//</editor-fold> variables
 
 	public static void dump (String source) {
@@ -63,34 +46,26 @@ public class HudifyMain implements ClientModInitializer
 
 	private static void tick_message() {
 		if (msg_time_rem > 0) {
-			sp_message = "msg is " + get_sp_message() + " " + msg_time_rem;
+			set_sp_message("msg is " + get_sp_message() + " " + msg_time_rem);
 			LOGGER.info("msg is " + get_sp_message() + " " + msg_time_rem);
 			msg_time_rem -= 1;
 
 		}
 		else {
-			sp_message = "";
+			set_sp_message("");
 		}
 	}
 
-	public static void send_message (String msg, int msg_dur) { // todo probably make this a customhud variable instead/as well
+	public static void send_message (String msg, int msg_dur) {
 //		while (msg_dur > 0) {
 //			sp_message = msg + msg_dur;
 //			LOGGER.info("msg is " + get_sp_message());
 //			msg_dur -= 1;
 //		}
 		msg_time_rem = msg_dur;
-		sp_message = msg;
+		set_sp_message(msg);
 
-
-
-		// String message, int duration
-		// be sure to use translatable text! This accepts a string rather than translatableText,
-		// cause otherwise it doesn't check en_us for the string
-//		assert MinecraftClient.getInstance().player != null;
-//		MinecraftClient.getInstance().player.sendMessage(Text.translatable("hudify.messages.premium_required"));
 	}
-//	private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
 	@Override
 	public void onInitializeClient()
@@ -110,12 +85,18 @@ public class HudifyMain implements ClientModInitializer
 			while (true) {
 				try {
 					Thread.sleep(850);
-//					ContextCount += 1;
-					if (MinecraftClient.getInstance().world != null) {
+
+					if (MinecraftClient.getInstance().world == null) {
+						Thread.sleep(3000);
+						sp_progress = 0;
+						sp_duration = -1;
+					}
+					else
+					{
 //                        Thread.sleep(1000);
 						SpotifyUtil.updatePlaybackInfo();
 						tick_message();
-// 204 when app is closed, doesnt immediately go away when app opened
+						// 204 when app is closed, doesnt immediately go away when app opened
 						if (sp_status_code == 204) { // No Content - The request has succeeded but returns no message body.
 //							sp_progress = 0; // todo this is whats breaking progress when paused
 //							sp_duration = -1; // todo but how do i fix progress bug
@@ -132,12 +113,6 @@ public class HudifyMain implements ClientModInitializer
 						} else {
 
 						}
-
-					} else { //when world is null
-						Thread.sleep(3000);
-						sp_progress = 0;
-						sp_duration = -1;
-//						LOGGER.error("world null, progress + duration updated in refreshActiveSession"); // spammy af
 
 					}
 				} catch (InterruptedException e) {

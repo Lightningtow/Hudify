@@ -22,25 +22,22 @@ repositories {
 
 
 dependencies {
-	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	modImplementation files("run/mods/custom_hud-${project.customhud_version}.jar")
 //	modImplementation "maven.modrinth:customhud:${project.customhud_version}+${project.minecraft_version}"
 }
 
-tasks.create(name: "generateModInfoJson", type: DefaultTask) {
-	doLast {
-		def output = file("build/resources/client/fabric.mod.json")
-		mkdir output.parentFile
-		output.text = new JsonBuilder(fabricModInfoJson(layers)).toPrettyString()
-	}
-}
+//tasks.create(name: "generateModInfoJson", type: DefaultTask) {
+//	doLast {
+//		def output = file("build/resources/client/fabric.mod.json")
+//		mkdir output.parentFile
+//		output.text = new JsonBuilder(fabricModInfoJson(layers)).toPrettyString()
+//	}
+//}
 
 processResources {
 	inputs.property "version", project.version
@@ -59,4 +56,10 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-jar { from("LICENSE") { rename { "${it}_${project.base.archivesName.get()}"} } }
+jar {
+	from("LICENSE") {
+		rename {
+			"${it}_${project.base.archivesName.get()}"
+		}
+	}
+}
