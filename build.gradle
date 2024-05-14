@@ -18,6 +18,12 @@ repositories {
 		url = "https://api.modrinth.com/maven"
 		content { includeGroup "maven.modrinth" }
 	}
+	maven {
+		url "https://maven.terraformersmc.com/releases/"
+	}
+	maven {
+		url = "https://api.modrinth.com/maven"
+	}
 }
 
 
@@ -27,8 +33,18 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation files("run/mods/custom_hud-${project.customhud_version}.jar")
+//	modImplementation files("run/mods/custom_hud-${project.customhud_version}.jar")
 //	modImplementation "maven.modrinth:customhud:${project.customhud_version}+${project.minecraft_version}"
+	modImplementation "maven.modrinth:customhud:${project.customhud_version}"
+
+	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
+
+	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
+	include "maven.modrinth:midnightlib:${project.midnightlib_version}"
+
+	modImplementation ("com.terraformersmc:modmenu:${project.modmenu_version}") {
+		exclude module: "fabric-api"
+	}
 }
 
 //tasks.create(name: "generateModInfoJson", type: DefaultTask) {

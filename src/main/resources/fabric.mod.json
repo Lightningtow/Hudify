@@ -7,7 +7,9 @@
 	"authors": [ "Lightningtow" ],
 	"contact": {
 		"homepage": "https://github.com/Lightningtow/Hudify",
-		"sources": "https://github.com/Lightningtow/Hudify"
+		"sources": "https://github.com/Lightningtow/Hudify",
+		"issues": "https://github.com/Lightningtow/Hudify/issues"
+
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/hudify/icon.png",
@@ -15,8 +17,10 @@
 	"entrypoints": {
 		"client": [
 			"lightningtow.hudify.HudifyMain",
-			"lightningtow.hudify.CustomhudIntegration"
-		]
+			"lightningtow.hudify.CustomhudIntegrationThree"
+		],
+		"modmenu": [ "ModMenuIntegration" ]
+
 	},
 	"depends": {
 		"fabricloader": ">=0.15.0",
@@ -24,5 +28,15 @@
 		"java": ">=17",
 		"fabric-api": "*",
 		"custom_hud": "*"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.com/invite/BYSCX96fyt"
+			},
+			"badges": [  ],
+
+			"update_checker": true
+		}
 	}
 }

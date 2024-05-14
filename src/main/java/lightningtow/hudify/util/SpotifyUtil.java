@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
+import lightningtow.hudify.HudifyConfig;
 import lightningtow.hudify.HudifyMain;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -461,7 +462,6 @@ public class SpotifyUtil
                 sp_shuffle_state = json.get("shuffle_state").getAsBoolean();
                 sp_repeat_state = json.get("repeat_state").getAsString(); // if repeat is "context" change to "all"
                 /* repeat */  if (Objects.equals(sp_repeat_state, "context")) sp_repeat_state = "all"; // else leave it
-
 
                 sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
                 isPlaying = json.get("is_playing").getAsBoolean();

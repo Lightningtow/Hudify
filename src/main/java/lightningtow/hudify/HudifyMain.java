@@ -52,6 +52,7 @@ public class HudifyMain implements ClientModInitializer
 	{
 //		File authFile = new File(System.getProperty("user.dir") + File.separator +
 //				"config" + File.separator + "HudifyTokens.json");
+		HudifyConfig.init("hudify", HudifyConfig.class);
 
 		LOGGER.info("initializing main loop"); //info
 //		if (!SpotifyUtil.isAuthorized()) {

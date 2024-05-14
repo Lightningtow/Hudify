@@ -6,8 +6,8 @@
   "hudify.messages.premium_required": "Spotify Premium is required for this feature",
   "hudify.midnightconfig.title": "Hudify Config",
   "hudify.midnightconfig.midnightlib_description": "§nMidnightLib",
-  "hudify.midnightconfig.scale": "Scale",
-  "hudify.midnightconfig.posX": "Position X",
-  "hudify.midnightconfig.posY": "Position Y",
-  "hudify.midnightconfig.drawCover": "Display album art"
+  "hudify.midnightconfig.poll_rate": "Poll rate",
+  "hudify.midnightconfig.poll_rate.tooltip":"How often to refresh the API, in milliseconds",
+  "hudify.midnightconfig.scrub_name": "Scrub name",
+  "hudify.midnightconfig.scrub_name.tooltip": "Remove stuff like \"remastered\" from the end of track titles"
 }
