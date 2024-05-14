@@ -1,4 +1,5 @@
 {
+  "hudify.category": "Hudify",
   "hudify.key.category": "Hudify",
   "hudify.key.toggle": "Toggle Play/Pause",
   "hudify.key.next": "Next Song",
@@ -7,7 +8,7 @@
   "hudify.midnightconfig.title": "Hudify Config",
   "hudify.midnightconfig.midnightlib_description": "§nMidnightLib",
   "hudify.midnightconfig.poll_rate": "Poll rate",
-  "hudify.midnightconfig.poll_rate.tooltip":"How often to refresh the API, in milliseconds",
+  "hudify.midnightconfig.poll_rate.tooltip":"How often to refresh the API, in milliseconds\nWARNING: Too low a value can cause you to hit Spotify ratelimits!",
   "hudify.midnightconfig.scrub_name": "Scrub name",
   "hudify.midnightconfig.scrub_name.tooltip": "Remove stuff like \"remastered\" from the end of track titles"
 }

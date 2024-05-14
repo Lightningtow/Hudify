@@ -54,7 +54,7 @@ public class SpotifyUtil
     public static void initialize()
     {
         //LOGGER.info("running SpotifyUtil.initialize()");
-        LOGGER.info("initializing with Spotify");
+        LOGGER.info("initializing Spotify integration");
 
         authFile = new File(System.getProperty("user.dir") + File.separator +
                 "config" + File.separator + "HudifyTokens.json");

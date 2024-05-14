@@ -19,7 +19,7 @@ Program messages are displayed in the `{sp_message}` variable rather than in Min
 `{sp_first_artist}` - The very first artist listed  
 `{sp_context_type}` - Where the track is playing from. Can be `artist`, `playlist`, `album`, or `show`  
 `{sp_context_name}` - Name of the artist/playlist/album/show you're playing from  
-`{sp_repeat}` - "off", "track", or "all"  
+`{sp_repeat}` - `off`, `track`, or `all`  
 
 #### Special variables:
 `{sp_progress}` / `{sp_prog}` - String: progress in MM:SS format. Number: number of seconds. Boolean: If num > 0  

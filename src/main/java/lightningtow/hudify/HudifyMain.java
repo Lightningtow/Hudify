@@ -35,7 +35,6 @@ public class HudifyMain implements ClientModInitializer
 
 	private static void tick_message() {
 		if (msg_time_rem > 0) {
-//			LOGGER.info("msg is " + get_sp_message() + " - " + msg_time_rem);
 			msg_time_rem -= 1;
 		}
 		else
@@ -50,11 +49,22 @@ public class HudifyMain implements ClientModInitializer
 	@Override
 	public void onInitializeClient()
 	{
+
+		try {
+			CustomhudIntegrationThree.initCustomhud();
+//			CustomhudIntegrationThree
+			LOGGER.info("Successfully integrated with CustomHud");
+
+		}
+		catch (Exception e) {
+			LOGGER.error("Error integrating with CustomHud: {}", e.toString());
+		}
 //		File authFile = new File(System.getProperty("user.dir") + File.separator +
 //				"config" + File.separator + "HudifyTokens.json");
 		HudifyConfig.init("hudify", HudifyConfig.class);
 
-		LOGGER.info("initializing main loop"); //info
+//		LOGGER.info("initializing main loop");
+		//info
 //		if (!SpotifyUtil.isAuthorized()) {
 //			LOGGER.info("initializing client. Spotify is not authorized, initiating authorization progress ");
 //
