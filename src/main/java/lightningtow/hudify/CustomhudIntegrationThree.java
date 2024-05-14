@@ -4,10 +4,9 @@ import com.minenash.customhud.HudElements.supplier.NumberSupplierElement;
 import com.minenash.customhud.HudElements.supplier.SpecialSupplierElement;
 import com.minenash.customhud.HudElements.supplier.StringSupplierElement;
 import lightningtow.hudify.util.SpotifyData;
+import lightningtow.hudify.util.SpotifyUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Objects;
 
 import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerElement;
 //import static com.minenash.customhud.data.Flags.wrap;
@@ -20,7 +19,6 @@ public class CustomhudIntegrationThree {//} implements ClientModInitializer {
     public static void initCustomhud() {
 
 
-            LOGGER.info("Beginning integration with CustomHud");
 
             /** strings **/
             StringSupplierElement track = new StringSupplierElement(() -> sp_track.isEmpty() ? null : sp_track);
@@ -51,18 +49,35 @@ public class CustomhudIntegrationThree {//} implements ClientModInitializer {
 
 
             /** booleans **/
-            StringSupplierElement shuffle_state = new StringSupplierElement(() -> String.valueOf(sp_shuffle_state));
+//            BooleanSupplierElement shuffle_state = new BooleanSupplierElement(() -> sp_shuffle_enabled);
+//            registerElement("sp_shuffle", (_str) -> shuffle_state);
+//
+//            BooleanSupplierElement is_podcast = new BooleanSupplierElement(() -> (Objects.equals(sp_media_type, "episode")));
+//            registerElement("sp_is_podcast", (_str) -> is_podcast);
+
+//            BooleanSupplierElement is_playing = new BooleanSupplierElement(() -> is_playing);
+//            registerElement("sp_is_playing", (_str) -> is_playing);
+//
+//            BooleanSupplierElement is_authorized = new BooleanSupplierElement(() -> (is_authorized));
+//            registerElement("sp_is_authorized", (_str) -> is_authorized);
+
+            StringSupplierElement shuffle_state = new StringSupplierElement(() -> sp_shuffle_enabled.toString());
             registerElement("sp_shuffle", (_str) -> shuffle_state);
 //
-            StringSupplierElement is_podcast = new StringSupplierElement(() -> String.valueOf((Objects.equals(sp_media_type, "episode"))));
+            StringSupplierElement is_podcast = new StringSupplierElement(() -> String.valueOf(sp_is_podcast));
             registerElement("sp_is_podcast", (_str) -> is_podcast);
 
+            StringSupplierElement is_playing = new StringSupplierElement(() -> String.valueOf(sp_is_playing));
+            registerElement("sp_is_playing", (_str) -> is_playing);
+
+            StringSupplierElement is_authorized = new StringSupplierElement(() -> String.valueOf(sp_is_authorized));
+            registerElement("sp_is_authorized", (_str) -> is_authorized);
+
+
             /** numbers **/
-            NumberSupplierElement status_code = new NumberSupplierElement(() -> sp_status_code, 0);
+            NumberSupplierElement status_code = new NumberSupplierElement(() -> sp_status_code, 1);
             registerElement("sp_status_code", (_int) -> status_code);
 
-//        StringSupplierElement media_type = new StringSupplierElement(() -> sp_media_type.isEmpty() ? null : sp_media_type); // track or episode
-//        CustomHudRegistry.registerElement("sp_media_type", (flags, context) ->  wrap(media_type, flags));  // removed in favor of `is_podcast`
 
             /** specials **/
             SpecialSupplierElement.Entry progress_entry = SpecialSupplierElement.of(
@@ -82,10 +97,14 @@ public class CustomhudIntegrationThree {//} implements ClientModInitializer {
             SpecialSupplierElement.Entry message = SpecialSupplierElement.of(
 //                () -> (sp_message), // string
                     SpotifyData::get_sp_message, /* string */
-                    () -> msg_time_rem /* number */, () -> (!get_sp_message().isEmpty()) /* bool */);
+                    () -> sp_msg_time_rem /* number */, () -> (!get_sp_message().isEmpty()) /* bool */);
             registerElement("sp_message", (_special) -> new SpecialSupplierElement(message));
             registerElement("sp_msg", (_special) -> new SpecialSupplierElement(message));
 
+
+            NumberSupplierElement message_duration = new NumberSupplierElement(() -> sp_msg_time_rem, 1);
+            registerElement("sp_message_duration", (_int) -> message_duration);
+            registerElement("sp_msg_dur", (_int) -> message_duration); // only needed for customhud 3.3
 
 
 

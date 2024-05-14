@@ -11,21 +11,26 @@ public class SpotifyData {
     public static String sp_album = "";
     public static String sp_context_type = ""; // "artist", "playlist", "album", "show".
     public static String sp_context_name = ""; // name of artist, playlist etc
-    public static String sp_prev_context = "";
-    public static String sp_prev_context_uri = "";
-    public static String sp_media_type = ""; // "track" or "episode"
+
+    public static Boolean sp_is_podcast = false;
     public static String sp_repeat_state = "";
+    public static Boolean sp_is_authorized = false;
 
-
-    public static int msg_time_rem = 0;
     private static String sp_message = "";
+    public static int sp_msg_time_rem = 0;
 
+    public static Boolean sp_is_playing = false;
 
     public static String get_sp_message() { return sp_message; }
-    public static void set_sp_message(String msg) { sp_message = msg; }
+    public static void set_sp_message(String msg) { sp_message = msg; } // should only be used from tickMessage() and setMessage()
 
-    public static Boolean sp_shuffle_state = false;
+    public static Boolean sp_shuffle_enabled = false;
     public static int sp_progress;
     public static int sp_duration;
-    /** the single source of truth for current Spotify state **/
+
+
+
+    public static String sp_prev_context = "";
+    public static String sp_prev_context_uri = "";
+
 }

@@ -22,7 +22,9 @@ repositories {
 //	maven {	url = "https://api.modrinth.com/maven" }
 }
 
-
+loom {
+	runConfigs.server { ideConfigGenerated(false) }
+}
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -32,23 +34,14 @@ dependencies {
 //	modImplementation files("run/mods/custom_hud-${project.customhud_version}.jar")
 	modImplementation "maven.modrinth:customhud:${project.customhud_version}"
 
-	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
-
+//	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
 	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
-	include "maven.modrinth:midnightlib:${project.midnightlib_version}"
+	include "maven.modrinth:midnightlib:${project.midnightlib_version}" // bundles jar-in-jar
 
 	modImplementation ("com.terraformersmc:modmenu:${project.modmenu_version}") {
 		exclude module: "fabric-api"
 	}
 }
-
-//tasks.create(name: "generateModInfoJson", type: DefaultTask) {
-//	doLast {
-//		def output = file("build/resources/client/fabric.mod.json")
-//		mkdir output.parentFile
-//		output.text = new JsonBuilder(fabricModInfoJson(layers)).toPrettyString()
-//	}
-//}
 
 processResources {
 	inputs.property "version", project.version

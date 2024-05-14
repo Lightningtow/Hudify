@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
-import lightningtow.hudify.HudifyConfig;
 import lightningtow.hudify.HudifyMain;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,17 +18,15 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import static lightningtow.hudify.util.SpotifyData.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static lightningtow.hudify.HudifyMain.*;
+import static lightningtow.hudify.util.SpotifyData.*;
+import static lightningtow.hudify.HudifyConfig.db;
 
 public class SpotifyUtil
 {
@@ -40,15 +37,22 @@ public class SpotifyUtil
     private static String refreshToken;
     private static final String tokenAddress = "https://accounts.spotify.com/api/token";
     private static HttpClient client;
+    public static HttpClient getClient() { return client; }
+
     private static HttpServer authServer;
     private static ThreadPoolExecutor threadPoolExecutor;
     private static HttpRequest playbackRequest;
+    public static HttpRequest getPlaybackRequest() { return playbackRequest; }
+
     private static File authFile;
-    private static boolean isAuthorized = false;
-    private static boolean isPlaying = false; // var from spotify. true if music is playing, false if paused, app closed, anything
 
     public static final Logger LOGGER = LogManager.getLogger(HudifyMain.MOD_ID);
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+
+//    private static boolean isAuthorized = false;
+//    public static boolean isAuthorized() { return isAuthorized; }
+//    private static boolean isPlaying = false; // var from spotify. true if music is playing, false if paused, app closed, anything
+//    public static boolean isPlaying() { return isPlaying; }
 
     //<editor-fold desc="auth utils">
     public static void initialize()
@@ -70,7 +74,7 @@ public class SpotifyUtil
                 }
                 accessToken = "";
                 refreshToken = "";
-                isAuthorized = false;
+                sp_is_authorized = false;
             }
             else
             {
@@ -81,13 +85,13 @@ public class SpotifyUtil
                     authJson = JsonParser.parseString(scan.nextLine()).getAsJsonObject();
                     accessToken = authJson.get("access_token").getAsString();
                     refreshToken = authJson.get("refresh_token").getAsString();
-                    isAuthorized = true;
+                    sp_is_authorized = true;
                 }
                 else
                 {
                     accessToken = "";
                     refreshToken = "";
-                    isAuthorized = false;
+                    sp_is_authorized = false;
                 }
                 scan.close();
             }
@@ -101,7 +105,7 @@ public class SpotifyUtil
 
     public static String authorize()
     {
-        if (db) LOGGER.error("running SpotifyUtil.authorize()");
+        if (db) LOGGER.info("running SpotifyUtil.authorize()");
         StringBuilder authURI = null;
         String[] scope_list = {
                 "user-read-playback-state",
@@ -154,7 +158,7 @@ public class SpotifyUtil
 
     private static void requestAccessToken()
     {
-        LOGGER.error("running SpotifyUtil.requestAccessToken");
+        if (db) LOGGER.info("running SpotifyUtil.requestAccessToken");
 
         try
         {
@@ -177,7 +181,7 @@ public class SpotifyUtil
             refreshToken = accessJson.get("refresh_token").getAsString();
             updatePlaybackRequest();
             writeAuthFile();
-            isAuthorized = true;
+            sp_is_authorized = true;
         } catch (Exception e)
         {
             LOGGER.error("exception caught in requestAccessToken():" + e.getMessage());
@@ -187,7 +191,7 @@ public class SpotifyUtil
     public static boolean refreshAccessToken()
     {
         // returns true if refreshed successfully, false if could not refresh
-        if (db) LOGGER.error("running SpotifyUtil.refreshAccessToken");
+        if (db) LOGGER.info("running SpotifyUtil.refreshAccessToken");
 
         try
         {
@@ -242,9 +246,10 @@ public class SpotifyUtil
             {
                 sp_duration = 1;
                 sp_progress = 0;
-                if (db) LOGGER.error("SpotifyUtil.refreshActiveSession: no active device");
+                if (db) LOGGER.info("SpotifyUtil.refreshActiveSession: no active device");
 
-                isPlaying = false;
+                sp_is_playing = false;
+//                isPlaying = false;
                 return;
             }
             for (int i = 0; i < devicesJson.size(); i++)
@@ -262,7 +267,7 @@ public class SpotifyUtil
                     .header("Authorization", "Bearer " + accessToken)
                     .PUT(HttpRequest.BodyPublishers.ofString(deviceIDBody))
                     .build();
-            if (db) LOGGER.error("RefreshActiveSession - API responded with status code: "
+            if (db) LOGGER.info("RefreshActiveSession - API responded with status code: "
                     + client.send(setActive, HttpResponse.BodyHandlers.ofString()).statusCode());
 
         } catch (Exception e)
@@ -307,7 +312,7 @@ public class SpotifyUtil
         {
             String[] splitString = uri.split(":");
             String link = "https://api.spotify.com/v1/" + splitString[1] + "s/" + splitString[2];
-            if(db) LOGGER.info("context link: " + link);
+            if(db) LOGGER.info("context link: {}", link);
 
             HttpRequest getReq = HttpRequest.newBuilder(new URI(link))
                     .GET()
@@ -347,7 +352,7 @@ public class SpotifyUtil
                 getContext(uri);
                 LOGGER.info("Successfully sent get request");
             }
-            else LOGGER.error("exception caught in getRequest():" + e.getMessage());
+            else LOGGER.error("exception caught in getRequest():{}", e.getMessage());
         }
         return "error in getRequest()";
     }
@@ -419,11 +424,13 @@ public class SpotifyUtil
     }
 
     public static void togglePlayPause() {
-        if (isPlaying) {
+        if (sp_is_playing) { // isPlaying
+            if (db) HudifyMain.send_message("Paused playback", 3);
             LOGGER.info("Pausing playback");
             EXECUTOR_SERVICE.execute(() -> putRequest("pause"));
         }
         else {
+            if (db) HudifyMain.send_message("Resumed playback", 3);
             LOGGER.info("Resuming playback");
             EXECUTOR_SERVICE.execute(() -> putRequest("play"));
         }
@@ -432,109 +439,11 @@ public class SpotifyUtil
     }
     //</editor-fold> playback functions
 
-    public static void updatePlaybackInfo() // rename to updatePlaybackInfo?
-    {
-        // todo can I just mash this whole thing into main loop?
-        // probably not a good idea
-        String dump_msg = "getPlaybackInfo";
-        try
-        {
-            HttpResponse<String> playbackResponse = client.send(playbackRequest, HttpResponse.BodyHandlers.ofString());
-            // https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback
-
-            sp_status_code = playbackResponse.statusCode();
-//            LOGGER.info("getPlaybackInfo - status code: " + playbackResponse.statusCode());
-            // app closed returns 204
-
-            if (playbackResponse.statusCode() == 429) return; // rate limited
-            if (playbackResponse.statusCode() == 200) // OK - The request has succeeded
-            {
-                JsonObject json = (JsonObject) JsonParser.parseString(playbackResponse.body());
-                // the `json.get("progress_ms")` is incorrect after pausing then resuming
-
-                dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
-
-                sp_media_type = (json.get("currently_playing_type").getAsString().equals("episode")) ? "episode" : "track";
-
-                sp_progress = (json.get("progress_ms").getAsInt() / 1000);
-                sp_duration = (json.get("item").getAsJsonObject().get("duration_ms").getAsInt() / 1000);
-
-                sp_shuffle_state = json.get("shuffle_state").getAsBoolean();
-                sp_repeat_state = json.get("repeat_state").getAsString(); // if repeat is "context" change to "all"
-                /* repeat */  if (Objects.equals(sp_repeat_state, "context")) sp_repeat_state = "all"; // else leave it
-
-                sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
-                isPlaying = json.get("is_playing").getAsBoolean();
-
-
-                if (Objects.equals(sp_media_type, "episode")) /* for podcasts */ {
-                    String show = json.get("item").getAsJsonObject().get("show").getAsJsonObject().get("name").getAsString();
-                    sp_artists = show;
-                    sp_first_artist = show;
-                    sp_album = "";
-
-                    HudifyMain.dump(dump_msg);
-                    return;
-                }
-
-                sp_fancy_track = scrub(sp_track);
-
-                /** sp_artists + sp_first_artist **/
-                    JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
-                    StringBuilder artistString = new StringBuilder(artistArray.get(0).getAsJsonObject().get("name").getAsString());
-                    sp_first_artist = artistString.toString();
-                    for (int i = 1; i < artistArray.size(); i++) /* skip the first artist */ {
-                        artistString.append(", ").append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
-                    }
-                    sp_artists = artistString.toString();
-                /** sp_artists + sp_first_artist **/
-
-
-                sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
-
-                /* get context */ JsonObject context = json.get("context").getAsJsonObject();
-                /* context type */ sp_context_type = context.get("type").getAsString();
-                /* context name */ sp_prev_context = sp_context_name;
-                if (!sp_prev_context_uri.equals(context.get("uri").getAsString())) { // if DOESNT match
-//                    LOGGER.info("contexts do NOT match, updating context");
-                    LOGGER.info("type: " + sp_context_type + ", uris " + sp_prev_context_uri + " / " + context.get("uri").getAsString());
-                    sp_prev_context_uri = context.get("uri").getAsString();
-                    switch (sp_context_type) {
-                        case "album":
-                            sp_context_name = sp_album;  break;
-                        case "show":
-                            sp_context_name = sp_artists;  break;
-                        case "artist":
-                        case "playlist":
-                            EXECUTOR_SERVICE.execute(() -> sp_context_name = getContext(context.get("uri").getAsString()));
-                    }
-
-                }
-
-            } // if response successful
-            else if (playbackResponse.statusCode() == 401) /* unauthorized */ {
-                if (!refreshAccessToken()) isAuthorized = false;
-            }
-
-        } catch (Exception e)
-        {
-//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-//            {
-//                LOGGER.info("Resetting connection and retrying info get...");
-////                results[0] = "Reset";
-//
-//            }
-//            else
-                LOGGER.error("exception caught in getPlaybackInfo(): " + e.getMessage());
-        }
-        HudifyMain.dump(dump_msg);
-//        return;
-
-    }
-
     //<editor-fold desc="put/post calls">
 
     // https://developer.spotify.com/documentation/web-api/concepts/api-calls
+
+    // todo can i combine the request functions? theyre mostly duplicated
 
     public static void putRequest(String type) /* play, pause */ {
         // PUT - Changes and/or replaces resources or collections
@@ -544,13 +453,13 @@ public class SpotifyUtil
                     .PUT(HttpRequest.BodyPublishers.ofString(""))
                     .header("Authorization", "Bearer " + accessToken).build();
             HttpResponse<String> putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
-            LOGGER.error("PUT Request (" + type + "): " + putRes.statusCode());
+            LOGGER.info("PUT Request ({}): {}", type, putRes.statusCode());
 
             if (putRes.statusCode() == 404) /* not found */ {
                 refreshActiveSession();
                 LOGGER.info("Retrying put request...");
                 putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
-                LOGGER.info("PUT Request (" + type + "): " + putRes.statusCode());
+                LOGGER.info("PUT Request ({}): {}", type, putRes.statusCode());
             }
             else if (putRes.statusCode() == 403) /* forbidden */ {
 //                MutableText msg = Text.translatable("hudify.messages.premium_required");
@@ -558,7 +467,7 @@ public class SpotifyUtil
             }
             else if (putRes.statusCode() == 401) /* unauthorized */ {
                 if (refreshAccessToken()) putRequest(type);
-                else isAuthorized = false;
+                else sp_is_authorized = false;
             }
         }
         catch (IOException | InterruptedException | URISyntaxException e) {
@@ -593,7 +502,7 @@ public class SpotifyUtil
             }
             else if (postRes.statusCode() == 401) /* unauthorized */ {
                 if (refreshAccessToken()) postRequest(type);
-                else isAuthorized = false;
+                else sp_is_authorized = false;
             }
 
         }
@@ -610,9 +519,7 @@ public class SpotifyUtil
 
     //</editor-fold> put/post calls
 
-    public static boolean isAuthorized() { return isAuthorized; }
 
-//    public static boolean isPlaying() { return isPlaying; } // getter, makes it so outer classes can't screw it up
 
 
 //JsonArray imageArray = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").getAsJsonArray();

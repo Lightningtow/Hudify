@@ -11,6 +11,6 @@ public class ModMenuIntegration implements ModMenuApi {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> MidnightConfig.getScreen(parent, "hudify");
+        return parent -> MidnightConfig.getScreen(parent, HudifyMain.MOD_ID.toLowerCase());
     }
 }

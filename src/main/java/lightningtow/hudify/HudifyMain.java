@@ -1,5 +1,8 @@
 package lightningtow.hudify;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lightningtow.hudify.util.SpotifyUtil;
 import net.fabricmc.api.ClientModInitializer;
 
@@ -14,7 +17,11 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
 import static lightningtow.hudify.util.SpotifyData.*;
+import static lightningtow.hudify.HudifyConfig.db;
+import java.net.http.HttpResponse;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HudifyMain implements ClientModInitializer
 {
@@ -22,9 +29,8 @@ public class HudifyMain implements ClientModInitializer
 	private static boolean toggleKeyPrevState = false;
 	private static boolean nextKeyPrevState = false;
 	private static boolean prevKeyPrevState = false;
+	private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
-	final public static boolean db = true; // toggle debug messages. very spammy!
-
 
 	public static void dump (String source) {
 		if (db) LOGGER.info(String.join(", ",
@@ -34,16 +40,28 @@ public class HudifyMain implements ClientModInitializer
 	}
 
 	private static void tick_message() {
-		if (msg_time_rem > 0) {
-			msg_time_rem -= 1;
-		}
+		if (sp_msg_time_rem > 0)
+			sp_msg_time_rem -= 1;
+
 		else
 			set_sp_message("");
 	}
 
 	public static void send_message (String msg, int msg_dur) {
-		msg_time_rem = msg_dur;
+		sp_msg_time_rem = msg_dur;
 		set_sp_message(msg);
+	}
+
+	public static void truncate() {
+		int len = HudifyConfig.truncate_length;
+//		if (db) LOGGER.info("truncating to: {}", sp_artists.substring(0, len));
+
+		sp_artists = (sp_artists.length() > len) ? sp_artists.substring(0, len).trim() + "..." : sp_artists;
+		sp_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
+		sp_fancy_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
+		sp_album = (sp_album.length() > len) ? sp_album.substring(0, len).trim() + "..." : sp_album;
+		// todo make this only run once. use before/after variables to detect if track URI changed
+		// todo attempt to make this cleaner, truncating at word breaks and removing trailing commas
 	}
 
 	@Override
@@ -51,8 +69,8 @@ public class HudifyMain implements ClientModInitializer
 	{
 
 		try {
+			LOGGER.info("Beginning integration with CustomHud");
 			CustomhudIntegrationThree.initCustomhud();
-//			CustomhudIntegrationThree
 			LOGGER.info("Successfully integrated with CustomHud");
 
 		}
@@ -61,7 +79,7 @@ public class HudifyMain implements ClientModInitializer
 		}
 //		File authFile = new File(System.getProperty("user.dir") + File.separator +
 //				"config" + File.separator + "HudifyTokens.json");
-		HudifyConfig.init("hudify", HudifyConfig.class);
+		HudifyConfig.init(MOD_ID.toLowerCase(), HudifyConfig.class);
 
 //		LOGGER.info("initializing main loop");
 		//info
@@ -75,7 +93,7 @@ public class HudifyMain implements ClientModInitializer
 
 			while (true) {
 				try {
-					Thread.sleep(850);
+					Thread.sleep(HudifyConfig.poll_rate);
 
 					if (MinecraftClient.getInstance().world == null) {
 						Thread.sleep(3000);
@@ -84,15 +102,14 @@ public class HudifyMain implements ClientModInitializer
 					}
 					else
 					{
-//                        Thread.sleep(1000);
-						SpotifyUtil.updatePlaybackInfo();
+						updatePlaybackInfo();
 						tick_message();
 						// 204 when app is closed, doesnt immediately go away when app opened
 						if (sp_status_code == 204) { // No Content - The request has succeeded but returns no message body.
 //							sp_progress = 0; // todo this is whats breaking progress when paused
 //							sp_duration = -1; // todo but how do i fix progress bug
 							SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
-							Thread.sleep(1000);
+							Thread.sleep(3000);
 
 						} else if (sp_status_code == 429) { // rate limited
 							// approximately 180 calls per minute without throwing 429, ~3 calls per second
@@ -106,7 +123,7 @@ public class HudifyMain implements ClientModInitializer
 
 					}
 				} catch (InterruptedException e) {
-					LOGGER.error("error in main loop: " + Arrays.toString(e.getStackTrace()));
+                    LOGGER.error("error in main loop: {}", Arrays.toString(e.getStackTrace()));
 				}
 			}
 		});
@@ -116,6 +133,115 @@ public class HudifyMain implements ClientModInitializer
 		registerKeyBindings();
 
 	}
+
+	public static void updatePlaybackInfo() // rename to updatePlaybackInfo?
+	{
+
+		String dump_msg = "getPlaybackInfo";
+		try
+		{
+			HttpResponse<String> playbackResponse = SpotifyUtil.getClient().send(SpotifyUtil.getPlaybackRequest(), HttpResponse.BodyHandlers.ofString());
+			// https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback
+
+			sp_status_code = playbackResponse.statusCode();
+//            LOGGER.info("getPlaybackInfo - status code: " + playbackResponse.statusCode());
+			// app closed returns 204
+
+			if (playbackResponse.statusCode() == 429) return; // rate limited
+			if (playbackResponse.statusCode() == 200) // OK - The request has succeeded
+			{
+				JsonObject json = (JsonObject) JsonParser.parseString(playbackResponse.body());
+				// the `json.get("progress_ms")` is incorrect after pausing then resuming
+
+				dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
+
+				sp_is_podcast = (json.get("currently_playing_type").getAsString().equals("episode"));
+
+				sp_progress = (json.get("progress_ms").getAsInt() / 1000);
+				sp_duration = (json.get("item").getAsJsonObject().get("duration_ms").getAsInt() / 1000);
+
+				sp_shuffle_enabled = json.get("shuffle_state").getAsBoolean();
+				sp_repeat_state = json.get("repeat_state").getAsString(); // if repeat is "context" change to "all"
+				/* repeat */  if (sp_repeat_state.equals("context")) sp_repeat_state = "all"; // else leave it
+
+				sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
+				if (HudifyConfig.scrub_name) sp_track = SpotifyUtil.scrub(sp_track);
+				sp_fancy_track = SpotifyUtil.scrub(sp_track);
+
+
+				sp_is_playing = json.get("is_playing").getAsBoolean();
+
+				/* get context */ JsonObject context = json.get("context").getAsJsonObject();
+				/* context type */ sp_context_type = context.get("type").getAsString();
+				/* context name */ sp_prev_context = sp_context_name;
+				if (!sp_prev_context_uri.equals(context.get("uri").getAsString())) { // if context changed
+//                    LOGGER.info("contexts do NOT match, updating context");
+					SpotifyUtil.LOGGER.info("type: " + sp_context_type + ", uris " + sp_prev_context_uri + " / " + context.get("uri").getAsString());
+					sp_prev_context_uri = context.get("uri").getAsString();
+					switch (sp_context_type) {
+						case "album":
+							sp_context_name = sp_album;  break;
+						case "show":
+							sp_context_name = sp_artists;  break;
+						case "artist":
+						case "playlist":
+							EXECUTOR_SERVICE.execute(() -> sp_context_name = SpotifyUtil.getContext(context.get("uri").getAsString()));
+					}
+
+				}
+
+				if (sp_is_podcast) {
+					String show = json.get("item").getAsJsonObject().get("show").getAsJsonObject().get("name").getAsString();
+					sp_artists = show;
+					sp_first_artist = show;
+					sp_album = "";
+
+					HudifyMain.dump(dump_msg);
+					return;
+				}
+
+
+				/** sp_artists + sp_first_artist **/
+				JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
+				StringBuilder artistString = new StringBuilder(artistArray.get(0).getAsJsonObject().get("name").getAsString());
+				sp_first_artist = artistString.toString();
+				for (int i = 1; i < artistArray.size(); i++) /* skip the first artist */ {
+					artistString.append(", ").append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
+				}
+				sp_artists = artistString.toString();
+				/** sp_artists + sp_first_artist **/
+
+
+//				sp_album = sp_is_podcast ? "" : json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
+				sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
+
+
+
+			} // if response successful
+			else if (playbackResponse.statusCode() == 401) /* unauthorized */ {
+				if (!SpotifyUtil.refreshAccessToken()) sp_is_authorized = false;
+				////	 SpotifyUtil.isAuthorized doesn't get used anywhere, just the value set
+			}
+			if (HudifyConfig.truncate_length != -1) {
+				truncate();
+			}
+
+		} catch (Exception e)
+		{
+//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+//            {
+//                LOGGER.info("Resetting connection and retrying info get...");
+////                results[0] = "Reset";
+//
+//            }
+//            else
+			SpotifyUtil.LOGGER.error("exception caught in getPlaybackInfo(): " + e.getMessage());
+		}
+		HudifyMain.dump(dump_msg);
+//        return;
+
+	}
+
 	//<editor-fold desc="register keybindings">
 	public static void registerKeyBindings() {
 		registerToggleKey();
@@ -128,8 +254,7 @@ public class HudifyMain implements ClientModInitializer
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (toggleKey.wasPressed() && !toggleKeyPrevState) {
-				HudifyMain.send_message("congrats you hit pause", 5);
-				if (SpotifyUtil.isAuthorized()) {
+				if (sp_is_authorized) {
 					if (db) LOGGER.info("Toggle key pressed!"); //info
 					SpotifyUtil.togglePlayPause();
 				}
@@ -144,7 +269,7 @@ public class HudifyMain implements ClientModInitializer
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 		if (nextKey.wasPressed() && !nextKeyPrevState) {
-			if (SpotifyUtil.isAuthorized()) {
+			if (sp_is_authorized) {
 				if (db) LOGGER.info("Next key pressed");
 				SpotifyUtil.nextSong();
 			}
@@ -160,7 +285,7 @@ public class HudifyMain implements ClientModInitializer
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (prevKey.wasPressed() && !prevKeyPrevState) {
-				if (SpotifyUtil.isAuthorized()) {
+				if (sp_is_authorized) {
 					if (db) LOGGER.info("Prev key pressed");
 					SpotifyUtil.prevSong();
 				}

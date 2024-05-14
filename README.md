@@ -13,7 +13,6 @@ Program messages are displayed in the `{sp_message}` variable rather than in Min
 ### Variables added:
 #### String variables:
 `{sp_track}` / `{sp_song}` - Song/episode's title  
-`{sp_fancy_track}` - Song title with stuff like "remastered", "bonus track" etc scrubbed out  
 `{sp_album}` - Album of current track. Blank if podcast  
 `{sp_artist}` / `{sp_artists}` - All artists combined into one string  
 `{sp_first_artist}` - The very first artist listed  
@@ -23,11 +22,26 @@ Program messages are displayed in the `{sp_message}` variable rather than in Min
 
 #### Special variables:
 `{sp_progress}` / `{sp_prog}` - String: progress in MM:SS format. Number: number of seconds. Boolean: If num > 0  
-`{sp_duration}` / `{sp_dur}`  - Song duration. Formatted same as `sp_progress` above  
+`{sp_duration}` / `{sp_dur}`  - Song duration. Formatted same as `{sp_progress}` above  
 `{sp_message}` / `{sp_msg}` -  String: the message. Number: seconds remaining till the message is cleared. Boolean: whether a message is currently being displayed.  
+`{sp_message_duration}` / `{sp_msg_dur}` - Number. Seconds remaining till the message clears. Placeholder for `{sp_msg}` number output above, for customhud 3.3.
+
 #### Boolean variables:
 `{sp_shuffle}` - Boolean. True if shuffle is on (including smart shuffle), false if not  
 `{sp_is_podcast}` - Boolean. True if currently listening to a podcast, false if not  
+
+<details>
+<summary>Internal variables</summary>
+
+These were added by me for debugging, I can't think of any reason you'd need them.   
+`{sp_status_code}` - Number. Status code from the header of the most recent Spotify API call.  
+`{sp_is_playing}` - Boolean. Whether Spotify is playing. Returns true if actively playing music, returns false if paused, app shut, unauthorized etc.  
+`{sp_is_authorized}` - Boolean    
+`{sp_fancy_track}` - Song title with stuff like "remastered", "bonus track" etc scrubbed out. For testing the config option, will be removed in a later update  
+
+</details>
+
+
 
 ### Example CustomHud Config:
 ```
@@ -53,7 +67,6 @@ Repeat: {sp_repeat}
 #### Todo list:
 - is playing/ is valid / is app closed etc vars
 - figure out refreshActiveSession
-- truncate long variables
 - add screenshots to readme
 
 #### Credit:  
