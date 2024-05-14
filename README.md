@@ -18,7 +18,7 @@ Program messages are displayed in the `{sp_message}` variable rather than in Min
 `{sp_first_artist}` - The very first artist listed  
 `{sp_context_type}` - Where the track is playing from. Can be `artist`, `playlist`, `album`, or `show`  
 `{sp_context_name}` - Name of the artist/playlist/album/show you're playing from  
-`{sp_repeat}` - `off`, `track`, or `all`  
+`{sp_repeat}` / `{sp_repeat_state}` - One of `track`, `off`, or `all`  
 
 #### Special variables:
 `{sp_progress}` / `{sp_prog}` - String: progress in MM:SS format. Number: number of seconds. Boolean: If num > 0  
@@ -29,15 +29,21 @@ Program messages are displayed in the `{sp_message}` variable rather than in Min
 #### Boolean variables:
 `{sp_shuffle}` - Boolean. True if shuffle is on (including smart shuffle), false if not  
 `{sp_is_podcast}` - Boolean. True if currently listening to a podcast, false if not  
-
+`{sp_is_playing}` - Boolean. Whether Spotify is playing. Returns true if actively playing music, returns false if paused, app shut, unauthorized etc.  
+(the best way of checking if it's loaded is using `{{sp_track, "if playing", "if not playing"}}`,
+which checks whether `sp_track` exists. Useful because it returns true while paused)    
 <details>
 <summary>Internal variables</summary>
 
-These were added by me for debugging, I can't think of any reason you'd need them.   
+These were added by me for debugging, I can't think of any reason you'd need them, but you can use them if you like   
+`{sp_device_id}` - ID of device. Gibberish string of random digits  
+`{sp_device_name}` - What you named the device you're playing from  
+`{sp_device_is_active}` - Whether the device is active  
+
 `{sp_status_code}` - Number. Status code from the header of the most recent Spotify API call.  
-`{sp_is_playing}` - Boolean. Whether Spotify is playing. Returns true if actively playing music, returns false if paused, app shut, unauthorized etc.  
-`{sp_is_authorized}` - Boolean    
-`{sp_fancy_track}` - Song title with stuff like "remastered", "bonus track" etc scrubbed out. For testing the config option, will be removed in a later update  
+`{sp_status_string}` - String. Description of the status code according to [Spotify's docs](https://developer.spotify.com/documentation/web-api/concepts/api-calls)  
+`{sp_is_authorized}` - Boolean. Whether currently authed with Spotify, (I believe)   
+`{sp_fancy_track}` - Song title with stuff like "remastered", "bonus track" etc scrubbed out. Added for testing the config option, this will be removed in a later update.  
 
 </details>
 
@@ -65,7 +71,7 @@ Repeat: {sp_repeat}
   - Most likely a limitation of [Spotify's api](https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback). I don't know if I can fix this
 
 #### Todo list:
-- is playing/ is valid / is app closed etc vars
+- active device variable
 - figure out refreshActiveSession
 - add screenshots to readme
 

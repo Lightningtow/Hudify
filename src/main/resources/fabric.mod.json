@@ -16,14 +16,13 @@
 	"entrypoints": {
 		"client": [ "lightningtow.hudify.HudifyMain" ],
 		"modmenu": [ "ModMenuIntegration" ]
-
 	},
 	"depends": {
 		"fabricloader": ">=0.15.0",
 		"minecraft": "~1.20.4",
 		"java": ">=17",
 		"fabric-api": "*",
-		"custom_hud": ">=3.3.0- <4.0-"
+		"custom_hud": "*"
 	},
 	"custom": {
 		"modmenu": {

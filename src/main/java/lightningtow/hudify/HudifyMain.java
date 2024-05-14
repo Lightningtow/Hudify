@@ -70,7 +70,7 @@ public class HudifyMain implements ClientModInitializer
 
 		try {
 			LOGGER.info("Beginning integration with CustomHud");
-			CustomhudIntegrationThree.initCustomhud();
+			CustomhudIntegrationFour.initCustomhud();
 			LOGGER.info("Successfully integrated with CustomHud");
 
 		}
@@ -134,7 +134,7 @@ public class HudifyMain implements ClientModInitializer
 
 	}
 
-	public static void updatePlaybackInfo() // rename to updatePlaybackInfo?
+	public static void updatePlaybackInfo()
 	{
 
 		String dump_msg = "getPlaybackInfo";
@@ -168,6 +168,9 @@ public class HudifyMain implements ClientModInitializer
 				if (HudifyConfig.scrub_name) sp_track = SpotifyUtil.scrub(sp_track);
 				sp_fancy_track = SpotifyUtil.scrub(sp_track);
 
+				sp_device_id = json.get("device").getAsJsonObject().get("id").getAsString();
+				sp_device_is_active = json.get("device").getAsJsonObject().get("is_active").getAsBoolean();
+				sp_device_name = json.get("device").getAsJsonObject().get("name").getAsString();
 
 				sp_is_playing = json.get("is_playing").getAsBoolean();
 

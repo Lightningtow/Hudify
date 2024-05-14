@@ -9,5 +9,4 @@ public class HudifyConfig extends MidnightConfig {
     @Entry public static boolean scrub_name = true;
 
 
-
 }

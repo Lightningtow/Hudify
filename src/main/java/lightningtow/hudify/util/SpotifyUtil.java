@@ -319,6 +319,7 @@ public class SpotifyUtil
                     .header("Authorization", "Bearer " + accessToken).build();
             HttpResponse<String> getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
 //            LOGGER.info("GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
+            sp_status_code = getRes.statusCode();
             if (getRes.statusCode() == 404) /* not found */ {
                 refreshActiveSession();
                 if(db) LOGGER.info("Retrying get request...");
@@ -454,7 +455,7 @@ public class SpotifyUtil
                     .header("Authorization", "Bearer " + accessToken).build();
             HttpResponse<String> putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
             LOGGER.info("PUT Request ({}): {}", type, putRes.statusCode());
-
+            sp_status_code = putRes.statusCode();
             if (putRes.statusCode() == 404) /* not found */ {
                 refreshActiveSession();
                 LOGGER.info("Retrying put request...");
@@ -490,6 +491,8 @@ public class SpotifyUtil
                     .header("Authorization", "Bearer " + accessToken).build();
             HttpResponse<String> postRes = client.send(postReq, HttpResponse.BodyHandlers.ofString());
             LOGGER.error("POST Request (" + type + "): " + postRes.statusCode());
+            sp_status_code = postRes.statusCode();
+
             if (postRes.statusCode() == 404) /* not found */ {
                 refreshActiveSession();
                 LOGGER.info("Retrying post request...");
