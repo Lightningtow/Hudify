@@ -3,6 +3,7 @@ package lightningtow.hudify;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lightningtow.hudify.util.SpotifyData;
 import lightningtow.hudify.util.SpotifyUtil;
 import net.fabricmc.api.ClientModInitializer;
 
@@ -67,7 +68,7 @@ public class HudifyMain implements ClientModInitializer
 	@Override
 	public void onInitializeClient()
 	{
-
+		CustomhudIntegrationFour.RegisterStrings();
 		try {
 			LOGGER.info("Beginning integration with CustomHud");
 			CustomhudIntegrationFour.initCustomhud();
@@ -218,7 +219,7 @@ public class HudifyMain implements ClientModInitializer
 //				sp_album = sp_is_podcast ? "" : json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 				sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 
-
+				CustomhudIntegrationFour.UpdateMaps();
 
 			} // if response successful
 			else if (playbackResponse.statusCode() == 401) /* unauthorized */ {
