@@ -69,7 +69,6 @@ public class SpotifyData {
     public static HashMap<String, Boolean> boolmap = new HashMap<>();
     public static HashMap<String, Integer> intmap = new HashMap<>();
     public static HashMap<String, Triplet<String, Integer, Boolean>> specialmap = new HashMap<>();
-    // string number bool
 
     public static void UpdateMaps() {
 
@@ -110,35 +109,6 @@ public class SpotifyData {
 
         intmap.put("sp_message_duration", sp_msg_time_rem);
         intmap.put("sp_msg_dur", sp_msg_time_rem);
-
-//        Triplet<String, Integer, Boolean> dur = ;
-//        specialmap.put("sp_progress", new Triplet<>(
-//                ((sp_progress / 60) + ":" + String.format("%02d", sp_progress % 60)),
-//                sp_progress,
-//                sp_progress > 0));
-//        specialmap.put("sp_duration", new Triplet<>(
-//                ((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)),
-//                sp_duration,
-//                sp_duration > 0));
-
-//        specialmap.put("sp_message", new Triplet<>(
-//                ((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)),
-//                sp_duration,
-//                sp_duration > 0));
-
-//        SpecialSupplierElement.Entry duration = SpecialSupplierElement.of(
-//                () -> (sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60), /* string */
-//                () -> sp_duration /* number */, () -> sp_duration > 0 /* bool */);
-//        registerElement("sp_duration", (_special) -> new SpecialSupplierElement(duration));
-//        registerElement("sp_dur", (_special) -> new SpecialSupplierElement(duration));
-//
-//
-//        SpecialSupplierElement.Entry message = SpecialSupplierElement.of(
-////                () -> (sp_message), // string
-//                SpotifyData::get_sp_message, /* string */
-//                () -> sp_msg_time_rem /* number */, () -> (!get_sp_message().isEmpty()) /* bool */);
-//        registerElement("sp_message", (_special) -> new SpecialSupplierElement(message));
-//        registerElement("sp_msg", (_special) -> new SpecialSupplierElement(message));
 
     }
 

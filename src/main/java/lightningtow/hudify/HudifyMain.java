@@ -16,6 +16,7 @@ import net.minecraft.util.Util;
 import org.apache.logging.log4j.Level;
 import org.lwjgl.glfw.GLFW;
 
+import static lightningtow.hudify.HudifyConfig.inactive_poll_rate;
 import static lightningtow.hudify.util.SpotifyData.*;
 import static lightningtow.hudify.HudifyConfig.db;
 import java.net.http.HttpResponse;
@@ -60,7 +61,7 @@ public class HudifyMain implements ClientModInitializer
 		sp_fancy_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
 		sp_album = (sp_album.length() > len) ? sp_album.substring(0, len).trim() + "..." : sp_album;
 		// todo make this only run once. use before/after variables to detect if track URI changed
-		// todo attempt to make this cleaner, truncating at word breaks and removing trailing commas
+		// todo attempt to make the outputted variable cleaner, truncating at word breaks and removing trailing commas
 	}
 
 //	public enum Level { INFO, ERROR, TRACE, DEBUG, LOG, FATAL, WARN, OFF, ALL }
@@ -119,7 +120,7 @@ public class HudifyMain implements ClientModInitializer
 					Thread.sleep(HudifyConfig.poll_rate);
 
 					if (MinecraftClient.getInstance().world == null) {
-						Thread.sleep(3000);
+						Thread.sleep(1000); // you can just leave this as one second cause it doesn't poll anything
 						sp_progress = 0;
 						sp_duration = -1;
 					}
@@ -131,7 +132,7 @@ public class HudifyMain implements ClientModInitializer
 						if (sp_status_code == 204) { // No Content - The request has succeeded but returns no message body.
 //							sp_progress = 0; // dont reset progress and duration here, it breaks it when app is paused
 							SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
-							Thread.sleep(3000);
+							Thread.sleep(inactive_poll_rate);
 
 						} else if (sp_status_code == 429) { // rate limited
 							// approximately 180 calls per minute without throwing 429, ~3 calls per second
@@ -225,8 +226,7 @@ public class HudifyMain implements ClientModInitializer
                                 else sp_context_name = fullContextJson.get("name").getAsString().replaceAll("\"", "");
 
 					});
-					//		JsonObject json = (JsonObject) JsonParser.parseString(response.body());
-					//		return (String.valueOf(json.get("name")).replaceAll("\"", ""));
+
 					}
 
 				}
@@ -256,7 +256,6 @@ public class HudifyMain implements ClientModInitializer
 //				sp_album = sp_is_podcast ? "" : json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 				sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 
-//				CustomhudIntegrationFour.UpdateMaps();
 				SpotifyData.UpdateMaps();
 
 			} // if response successful
