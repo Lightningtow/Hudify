@@ -280,8 +280,10 @@ public class HudifyMain implements ClientModInitializer
 		}
 		HudifyMain.dump(dump_msg);
 //        return;
-
 	}
+
+
+
 
 	//<editor-fold desc="register keybindings">
 	public static void registerKeyBindings() {
