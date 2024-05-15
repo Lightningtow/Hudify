@@ -91,8 +91,8 @@ public class HudifyMain implements ClientModInitializer
 
 		try {
 			Log(Level.INFO,"Beginning integration with CustomHud");
-//			CustomhudIntegrationThree.initCustomhud();
-			CustomhudIntegrationFour.initCustomhud();
+			CustomhudIntegrationThree.initCustomhud();
+//			CustomhudIntegrationFour.initCustomhud();
 
 			Log(Level.INFO,"Successfully integrated with CustomHud");
 

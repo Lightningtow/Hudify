@@ -68,12 +68,10 @@ public class SpotifyData {
     public static HashMap<String, String> stringmap = new HashMap<>();
     public static HashMap<String, Boolean> boolmap = new HashMap<>();
     public static HashMap<String, Integer> intmap = new HashMap<>();
-//     special;
     public static HashMap<String, Triplet<String, Integer, Boolean>> specialmap = new HashMap<>();
     // string number bool
 
     public static void UpdateMaps() {
-//                HashMap<String, Integer> map = new HashMap<>();
 
         stringmap.put("sp_song", sp_track);
         stringmap.put("sp_track", sp_track);
@@ -98,27 +96,18 @@ public class SpotifyData {
 
         intmap.put("sp_status_code", sp_status_code);
 
-        Triplet<String, Integer, Boolean> prog = new Triplet<>(
-                ((sp_progress / 60) + ":" + String.format("%02d", sp_progress % 60)),
-                sp_progress,
-                sp_progress > 0);
+        Triplet<String, Integer, Boolean> prog = new Triplet<>(((sp_progress / 60) + ":" + String.format("%02d", sp_progress % 60)), sp_progress, sp_progress > 0);
         specialmap.put("sp_progress", prog);
         specialmap.put("sp_prog", prog);
 
-        Triplet<String, Integer, Boolean> dur = new Triplet<>(
-                ((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)),
-                sp_duration,
-                sp_duration > 0);
+        Triplet<String, Integer, Boolean> dur = new Triplet<>(((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)), sp_duration, sp_duration > 0);
         specialmap.put("sp_duration", dur);
         specialmap.put("sp_dur", dur);
 
-        Triplet<String, Integer, Boolean> msg = new Triplet<>(
-                get_sp_message(),
-                sp_msg_time_rem,
-                !get_sp_message().isEmpty()
-        );
+        Triplet<String, Integer, Boolean> msg = new Triplet<>(get_sp_message(), sp_msg_time_rem, !get_sp_message().isEmpty());
         specialmap.put("sp_message", msg);
         specialmap.put("sp_msg", msg);
+
         intmap.put("sp_message_duration", sp_msg_time_rem);
         intmap.put("sp_msg_dur", sp_msg_time_rem);
 
