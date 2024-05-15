@@ -16,6 +16,8 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
+
 import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
@@ -301,64 +303,153 @@ public class SpotifyUtil
 
 //    public boolean
 
+    public enum reqType {GET, POST, PUT, DELETE}
 
+    public static JsonObject apiRequest(reqType type, String url)  { /** THIS CAN RETURN NULL */
 
-    public static String getContext(String uri) /* get name from uri */ {
-        // gets the name of a playlist/artist/album from their uri
-        // get - Retrieves resources
         try
         {
-            String[] splitString = uri.split(":");
-            String link = "https://api.spotify.com/v1/" + splitString[1] + "s/" + splitString[2];
-            if(db) Log(Level.INFO,"context link: " + link);
 
-            HttpRequest getReq = HttpRequest.newBuilder(new URI(link))
-                    .GET()
-                    .header("Authorization", "Bearer " + accessToken).build();
-            HttpResponse<String> getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
+            if(db) Log(Level.INFO,"link: " + url);
+
+            HttpRequest.Builder reqBuilder = HttpRequest.newBuilder(new URI(url));
+            switch (type) {
+                case GET: reqBuilder.GET();  break;
+                case PUT: reqBuilder.PUT(HttpRequest.BodyPublishers.ofString(""));  break;
+                case POST: reqBuilder.POST(HttpRequest.BodyPublishers.ofString(""));  break;
+                case DELETE: reqBuilder.DELETE();  break; // check this call is right if i ever use delete
+            }
+            reqBuilder.header("Authorization", "Bearer " + accessToken).build();
+            HttpRequest request = reqBuilder.build();
+
+//            HttpRequest putReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
+//                    .PUT(HttpRequest.BodyPublishers.ofString(""))
+//                    .header("Authorization", "Bearer " + accessToken).build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 //            Log(Level.INFO,"GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
-            sp_status_code = getRes.statusCode();
-            if (getRes.statusCode() == 404) /* not found */ {
+            sp_status_code = response.statusCode();
+
+            if (response.statusCode() == 401) /* unauthorized */ {
+                if (refreshAccessToken()) apiRequest(type, url);
+                else sp_is_authorized = false;
+            }
+            else if (response.statusCode() == 403) /* forbidden */ {
+//               HudifyMain.send_message("");
+                if(db) Log(Level.INFO,type + " request " + url + " returned 403 forbidden");
+
+            }
+            else if (response.statusCode() == 404) /* not found */ {
                 refreshActiveSession();
                 if(db) Log(Level.INFO,"Retrying get request...");
-                getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
 //                Log(Level.INFO,"GET Request (" + uri + "): " + getRes.statusCode());
             }
-//            else if (getRes.statusCode() == 403) /* forbidden */ {
-////               HudifyMain.send_message();
-//            }
-//            else if (getRes.statusCode() == 401) /* unauthorized */ {
-////                if (refreshAccessToken()) getRequest(uri);
-////                else isAuthorized = false;
-//            }
-            else if (getRes.statusCode() == 429) { // rate limited
+            else if (response.statusCode() == 429) { // rate limited
                 // approximately 180 calls per minute without throwing 429, ~3 calls per second
                 Log(Level.ERROR,"RATE LIMITED============================================================");
                 Thread.sleep(3000);
-                return "rate limited!";
-    //                        } else if (data[0].equals("Reset")) {
+                return null;
+//                return "rate limited!";
+                //                        } else if (data[0].equals("Reset")) {
                 // getPlaybackInfo returns this if connection reset
-    //                            Log(Level.ERROR,"Reset condition, maintaining HUD until reset"); // was level info and from blockiy
+                //                            Log(Level.ERROR,"Reset condition, maintaining HUD until reset"); // was level info and from blockiy
             }
 //            Log(Level.INFO,"get entire request json " + getRes.body()); // prints entire block of returned json
-            JsonObject json = (JsonObject) JsonParser.parseString(getRes.body());
-            return (String.valueOf(json.get("name")).replaceAll("\"", "")); // name comes wrapped in quotes
+            if (response.body().isEmpty()) {
+                return null;
+            }
+            else {
+                try {
+                    JsonObject json;
+                    json = (JsonObject) JsonParser.parseString(response.body());
+                    return (json);
+
+                } catch (Exception e) {
+                    Log(Level.ERROR, "Error parsing api request:" + type + " request " + url + " returned 403 forbidden");
+                    return null;
+                }
+
+            }
+//            JsonObject json = !(response.body() instanceof JsonNull);
+//            String buildName= (response.body().isJsonNull ?  null : jsonObject.get("buildingName").getAsString());
+//            JsonElement element = source.get(propertyName);
+//            if (!(element instanceof JsonNull)) {
+//                JsonObject propertyToBeCopied = (JsonObject) element;
+//            }
+      // name comes wrapped in quotes
         }
         catch (IOException | InterruptedException | URISyntaxException e) {
             if (e instanceof IOException && e.getMessage().equals("Connection reset"))
             {
                 Log(Level.INFO,"Attempting to retry get request...");
-                getContext(uri);
+                apiRequest(type, url); // just reruns the method using what was passed the first time, no need to edit this call
                 Log(Level.INFO,"Successfully sent get request");
             }
             else Log(Level.ERROR,"exception caught in getRequest(): " + e.getMessage());
         }
-        return "error in getRequest()";
+        return null;//"error in getRequest()";
     }
 
+
+//
+//    public static String getContext(String uri) /* get name from uri */ {
+//        // gets the name of a playlist/artist/album from their uri
+//        // get - Retrieves resources
+//        try
+//        {
+//            String[] splitString = uri.split(":");
+//            String link = "https://api.spotify.com/v1/" + splitString[1] + "s/" + splitString[2];
+//            if(db) Log(Level.INFO,"context link: " + link);
+//
+//            HttpRequest getReq = HttpRequest.newBuilder(new URI(link))
+//                    .GET()
+//                    .header("Authorization", "Bearer " + accessToken).build();
+//            HttpResponse<String> getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
+////            Log(Level.INFO,"GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
+//            sp_status_code = getRes.statusCode();
+//            if (getRes.statusCode() == 404) /* not found */ {
+//                refreshActiveSession();
+//                if(db) Log(Level.INFO,"Retrying get request...");
+//                getRes = client.send(getReq, HttpResponse.BodyHandlers.ofString());
+////                Log(Level.INFO,"GET Request (" + uri + "): " + getRes.statusCode());
+//            }
+////            else if (getRes.statusCode() == 403) /* forbidden */ {
+//////               HudifyMain.send_message();
+////            }
+////            else if (getRes.statusCode() == 401) /* unauthorized */ {
+//////                if (refreshAccessToken()) getRequest(uri);
+//////                else isAuthorized = false;
+////            }
+//            else if (getRes.statusCode() == 429) { // rate limited
+//                // approximately 180 calls per minute without throwing 429, ~3 calls per second
+//                Log(Level.ERROR,"RATE LIMITED============================================================");
+//                Thread.sleep(3000);
+//                return "rate limited!";
+//    //                        } else if (data[0].equals("Reset")) {
+//                // getPlaybackInfo returns this if connection reset
+//    //                            Log(Level.ERROR,"Reset condition, maintaining HUD until reset"); // was level info and from blockiy
+//            }
+////            Log(Level.INFO,"get entire request json " + getRes.body()); // prints entire block of returned json
+//            JsonObject json = (JsonObject) JsonParser.parseString(getRes.body());
+//            return (String.valueOf(json.get("name")).replaceAll("\"", "")); // name comes wrapped in quotes
+//        }
+//        catch (IOException | InterruptedException | URISyntaxException e) {
+//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+//            {
+//                Log(Level.INFO,"Attempting to retry get request...");
+//                getContext(uri);
+//                Log(Level.INFO,"Successfully sent get request");
+//            }
+//            else Log(Level.ERROR,"exception caught in getRequest(): " + e.getMessage());
+//        }
+//        return "error in getRequest()";
+//    }
+
     public static String scrub(String input) {
-        String output = "";
-        output = input;
+//        String output = "";
+//        output = input;
+        String output = input;
 
 //        String[] blacklist = {"bonus track", "bonus", "intro", "outro", "interlude", "original mix", "single version", "recorded at spotify singles nyc",
 //                "spotify singles", "remastere?d? [0-9]{4} \\/ remixed",};
@@ -407,7 +498,8 @@ public class SpotifyUtil
     //<editor-fold desc="playback functions">
     public static void nextSong() {
         EXECUTOR_SERVICE.execute(() -> {
-            postRequest("next");
+//            postRequest("next");
+            apiRequest(reqType.POST,"https://api.spotify.com/v1/me/player/next");
             sp_duration = -2;
             Log(Level.INFO,"Skipping to next song");
             // Log(Level.ERROR,"duration set to -2000 from nextSong");
@@ -415,8 +507,9 @@ public class SpotifyUtil
     }
     public static void prevSong() {
         EXECUTOR_SERVICE.execute(() -> {
-            postRequest("previous");
-            sp_duration = -2; // was -2000
+//            postRequest("previous");
+            apiRequest(reqType.POST,"https://api.spotify.com/v1/me/player/previous");
+            sp_duration = -2;
             Log(Level.INFO,"Skipping to previous song");
             //Log(Level.ERROR,"duration set to -2000 from prevSong");
         });
@@ -426,12 +519,12 @@ public class SpotifyUtil
         if (sp_is_playing) { // isPlaying
             if (db) HudifyMain.send_message("Paused playback", 3);
             Log(Level.INFO,"Pausing playback");
-            EXECUTOR_SERVICE.execute(() -> putRequest("pause"));
+            EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT,"https://api.spotify.com/v1/me/player/pause"));
         }
         else {
             if (db) HudifyMain.send_message("Resumed playback", 3);
             Log(Level.INFO,"Resuming playback");
-            EXECUTOR_SERVICE.execute(() -> putRequest("play"));
+            EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT, "https://api.spotify.com/v1/me/player/play"));
         }
 
 //        isPlaying = !isPlaying; // this should update automatically
@@ -444,79 +537,79 @@ public class SpotifyUtil
 
     // todo can i combine the request functions? theyre mostly duplicated
 
-    public static void putRequest(String type) /* play, pause */ {
-        // PUT - Changes and/or replaces resources or collections
-        try
-        {
-            HttpRequest putReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
-                    .PUT(HttpRequest.BodyPublishers.ofString(""))
-                    .header("Authorization", "Bearer " + accessToken).build();
-            HttpResponse<String> putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
-            Log(Level.INFO,"PUT Request ( +" + type + ")" + putRes.statusCode());
-            sp_status_code = putRes.statusCode();
-            if (putRes.statusCode() == 404) /* not found */ {
-                refreshActiveSession();
-                Log(Level.INFO,"Retrying put request...");
-                putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
-                Log(Level.INFO,"PUT Request ( +" + type + ")" + putRes.statusCode());
-            }
-            else if (putRes.statusCode() == 403) /* forbidden */ {
-//                MutableText msg = Text.translatable("hudify.messages.premium_required");
-                HudifyMain.send_message("why does spotify say you're forbidden from pausing", 5);
-            }
-            else if (putRes.statusCode() == 401) /* unauthorized */ {
-                if (refreshAccessToken()) putRequest(type);
-                else sp_is_authorized = false;
-            }
-        }
-        catch (IOException | InterruptedException | URISyntaxException e) {
-            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-            {
-                Log(Level.INFO,"Attempting to retry put request...");
-                putRequest(type);
-                Log(Level.INFO,"Successfully sent put request");
-            }
-            else Log(Level.ERROR,"exception caught in putRequest(): " + e.getMessage());
-        }
-    }
-
-    public static void postRequest(String type) /* skip forward, back */ {
-        // POST - Creates resources
-        try
-        {
-            HttpRequest postReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
-                    .POST(HttpRequest.BodyPublishers.ofString(""))
-                    .header("Authorization", "Bearer " + accessToken).build();
-            HttpResponse<String> postRes = client.send(postReq, HttpResponse.BodyHandlers.ofString());
-            Log(Level.ERROR,"POST Request (" + type + "): " + postRes.statusCode());
-            sp_status_code = postRes.statusCode();
-
-            if (postRes.statusCode() == 404) /* not found */ {
-                refreshActiveSession();
-                Log(Level.INFO,"Retrying post request...");
-                postRes = client.send(postReq, HttpResponse.BodyHandlers.ofString());
-                Log(Level.INFO,"POST Request (" + type + "): " + postRes.statusCode());
-            }
-            else if (postRes.statusCode() == 403) /* forbidden */ {
-                HudifyMain.send_message("Spotify premium is required for this", 5);
-//                HudifyMain.send_message();
-            }
-            else if (postRes.statusCode() == 401) /* unauthorized */ {
-                if (refreshAccessToken()) postRequest(type);
-                else sp_is_authorized = false;
-            }
-
-        }
-        catch (IOException | InterruptedException | URISyntaxException e) {
-            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-            {
-                Log(Level.INFO,"Attempting to retry post request...");
-                postRequest(type);
-                Log(Level.INFO,"Successfully sent post request");
-            }
-            else Log(Level.ERROR,"exception caught in postRequest():" + e.getMessage());
-        }
-    }
+//    public static void putRequest(String type) /* play, pause */ {
+//        // PUT - Changes and/or replaces resources or collections
+//        try
+//        {
+//            HttpRequest putReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
+//                    .PUT(HttpRequest.BodyPublishers.ofString(""))
+//                    .header("Authorization", "Bearer " + accessToken).build();
+//            HttpResponse<String> putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
+//            Log(Level.INFO,"PUT Request ( +" + type + ")" + putRes.statusCode());
+//            sp_status_code = putRes.statusCode();
+//            if (putRes.statusCode() == 404) /* not found */ {
+//                refreshActiveSession();
+//                Log(Level.INFO,"Retrying put request...");
+//                putRes = client.send(putReq, HttpResponse.BodyHandlers.ofString());
+//                Log(Level.INFO,"PUT Request ( +" + type + ")" + putRes.statusCode());
+//            }
+//            else if (putRes.statusCode() == 403) /* forbidden */ {
+////                MutableText msg = Text.translatable("hudify.messages.premium_required");
+//                HudifyMain.send_message("why does spotify say you're forbidden from pausing", 5);
+//            }
+//            else if (putRes.statusCode() == 401) /* unauthorized */ {
+//                if (refreshAccessToken()) putRequest(type);
+//                else sp_is_authorized = false;
+//            }
+//        }
+//        catch (IOException | InterruptedException | URISyntaxException e) {
+//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+//            {
+//                Log(Level.INFO,"Attempting to retry put request...");
+//                putRequest(type);
+//                Log(Level.INFO,"Successfully sent put request");
+//            }
+//            else Log(Level.ERROR,"exception caught in putRequest(): " + e.getMessage());
+//        }
+//    }
+//
+//    public static void postRequest(String type) /* skip forward, back */ {
+//        // POST - Creates resources
+//        try
+//        {
+//            HttpRequest postReq = HttpRequest.newBuilder(new URI("https://api.spotify.com/v1/me/player/" + type))
+//                    .POST(HttpRequest.BodyPublishers.ofString(""))
+//                    .header("Authorization", "Bearer " + accessToken).build();
+//            HttpResponse<String> postRes = client.send(postReq, HttpResponse.BodyHandlers.ofString());
+//            Log(Level.ERROR,"POST Request (" + type + "): " + postRes.statusCode());
+//            sp_status_code = postRes.statusCode();
+//
+//            if (postRes.statusCode() == 404) /* not found */ {
+//                refreshActiveSession();
+//                Log(Level.INFO,"Retrying post request...");
+//                postRes = client.send(postReq, HttpResponse.BodyHandlers.ofString());
+//                Log(Level.INFO,"POST Request (" + type + "): " + postRes.statusCode());
+//            }
+//            else if (postRes.statusCode() == 403) /* forbidden */ {
+//                HudifyMain.send_message("Spotify premium is required for this", 5);
+////                HudifyMain.send_message();
+//            }
+//            else if (postRes.statusCode() == 401) /* unauthorized */ {
+//                if (refreshAccessToken()) postRequest(type);
+//                else sp_is_authorized = false;
+//            }
+//
+//        }
+//        catch (IOException | InterruptedException | URISyntaxException e) {
+//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+//            {
+//                Log(Level.INFO,"Attempting to retry post request...");
+//                postRequest(type);
+//                Log(Level.INFO,"Successfully sent post request");
+//            }
+//            else Log(Level.ERROR,"exception caught in postRequest():" + e.getMessage());
+//        }
+//    }
 
     //</editor-fold> put/post calls
 

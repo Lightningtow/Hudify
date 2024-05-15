@@ -162,21 +162,26 @@ public class HudifyMain implements ClientModInitializer
 		String dump_msg = "getPlaybackInfo";
 		try
 		{
+
 			HttpResponse<String> playbackResponse = SpotifyUtil.getClient().send(SpotifyUtil.getPlaybackRequest(), HttpResponse.BodyHandlers.ofString());
 			// https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback
 
 			sp_status_code = playbackResponse.statusCode();
 //            Log(Level.INFO,"getPlaybackInfo - status code: " + playbackResponse.statusCode());
 			// app closed returns 204
-			if (playbackResponse.statusCode() == 204) { // no content - returned when app is closed
-
-			}
+//			if (playbackResponse.statusCode() == 204) { // no content - returned when app is closed
+//
+//			}
 
 			if (playbackResponse.statusCode() == 429) return; // rate limited
 			if (playbackResponse.statusCode() == 200) // OK - The request has succeeded
 			{
 				JsonObject json = (JsonObject) JsonParser.parseString(playbackResponse.body());
 				// the `json.get("progress_ms")` is incorrect after pausing then resuming
+//				Log(Level.ERROR,"external url spotify: " + json.get("context").getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify"));
+//				Log(Level.ERROR,"context href: " + json.get("context").getAsJsonObject().get("href"));
+//				Log(Level.ERROR,"context uri: " + json.get("context").getAsJsonObject().get("uri"));
+
 
 				dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
 
@@ -199,13 +204,13 @@ public class HudifyMain implements ClientModInitializer
 
 				sp_is_playing = json.get("is_playing").getAsBoolean();
 
-				/* get context */ JsonObject context = json.get("context").getAsJsonObject();
-				/* context type */ sp_context_type = context.get("type").getAsString();
+				/* get context */ JsonObject contextJson = json.get("context").getAsJsonObject();
+				/* context type */ sp_context_type = contextJson.get("type").getAsString();
 				/* context name */ sp_prev_context = sp_context_name;
-				if (!sp_prev_context_uri.equals(context.get("uri").getAsString())) { // if context changed
+				if (!sp_prev_context_uri.equals(contextJson.get("uri").getAsString())) { // if context changed
 //                    Log(Level.INFO,"contexts do NOT match, updating context");
-					Log(Level.INFO,"type: " + sp_context_type + ", uris " + sp_prev_context_uri + " / " + context.get("uri").getAsString());
-					sp_prev_context_uri = context.get("uri").getAsString();
+					Log(Level.INFO,"type: " + sp_context_type + ", uris " + sp_prev_context_uri + " / " + contextJson.get("uri").getAsString());
+					sp_prev_context_uri = contextJson.get("uri").getAsString();
 					switch (sp_context_type) {
 						case "album":
 							sp_context_name = sp_album;  break;
@@ -213,7 +218,15 @@ public class HudifyMain implements ClientModInitializer
 							sp_context_name = sp_artists;  break;
 						case "artist":
 						case "playlist":
-							EXECUTOR_SERVICE.execute(() -> sp_context_name = SpotifyUtil.getContext(context.get("uri").getAsString()));
+							EXECUTOR_SERVICE.execute(() -> { // this does this single func async
+								// href is the exact url needed to get the string like "https://api.spotify.com/v1/playlists/3PXFZxy8QdBmvFHCYyErw3"
+								JsonObject fullContextJson = SpotifyUtil.apiRequest(SpotifyUtil.reqType.GET, contextJson.get("href").getAsString());
+								if (fullContextJson == null) sp_context_name = "";
+                                else sp_context_name = fullContextJson.get("name").getAsString().replaceAll("\"", "");
+
+					});
+					//		JsonObject json = (JsonObject) JsonParser.parseString(response.body());
+					//		return (String.valueOf(json.get("name")).replaceAll("\"", ""));
 					}
 
 				}
