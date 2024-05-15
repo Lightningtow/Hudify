@@ -1,6 +1,10 @@
 package lightningtow.hudify.util;
 
-import java.util.Map;
+import com.minenash.customhud.HudElements.supplier.SpecialSupplierElement;
+import oshi.util.tuples.Triplet;
+
+import java.util.HashMap;
+
 
 public class SpotifyData {
     /** the single source of truth for current Spotify state **/
@@ -41,7 +45,8 @@ public class SpotifyData {
     public static String sp_prev_context_uri = "";
 
     public static String get_status_string(int code) {
-        String msg = switch (code) {
+        String msg = "stop telling me to inline this";
+        msg = switch (code) {
             case 200 -> "OK - The request has succeeded. The client can read the result of the request in the body and the headers of the response.";
             case 201 -> "Created - The request has been fulfilled and resulted in a new resource being created.";
             case 202 -> "Accepted - The request has been accepted for processing, but the processing has not been completed.";
@@ -60,8 +65,93 @@ public class SpotifyData {
         return msg;
     }
 
+    public static HashMap<String, String> stringmap = new HashMap<>();
+    public static HashMap<String, Boolean> boolmap = new HashMap<>();
+    public static HashMap<String, Integer> intmap = new HashMap<>();
+//     special;
+    public static HashMap<String, Triplet<String, Integer, Boolean>> specialmap = new HashMap<>();
+    // string number bool
 
+    public static void UpdateMaps() {
+//                HashMap<String, Integer> map = new HashMap<>();
 
+        stringmap.put("sp_song", sp_track);
+        stringmap.put("sp_track", sp_track);
+        stringmap.put("sp_fancy_track", sp_fancy_track);
+        stringmap.put("sp_artist", sp_artists);
+        stringmap.put("sp_artists", sp_artists);
+        stringmap.put("sp_first_artist", sp_first_artist);
+        stringmap.put("sp_context_type", sp_context_type);
+        stringmap.put("sp_context_name", sp_context_name);
+        stringmap.put("sp_album", sp_album);
+        stringmap.put("sp_repeat", sp_repeat_state);
+        stringmap.put("sp_repeat_state", sp_repeat_state);
+        stringmap.put("sp_device_id", sp_device_id);
+        stringmap.put("sp_device_name", sp_device_name);
+        stringmap.put("sp_status_string", get_status_string(sp_status_code));
+
+        boolmap.put("sp_device_is_active", sp_device_is_active);
+        boolmap.put("sp_shuffle", sp_shuffle_enabled);
+        boolmap.put("sp_is_podcast", sp_is_podcast);
+        boolmap.put("sp_is_playing", sp_is_playing);
+        boolmap.put("sp_is_authorized", sp_is_authorized);
+
+        intmap.put("sp_status_code", sp_status_code);
+
+        Triplet<String, Integer, Boolean> prog = new Triplet<>(
+                ((sp_progress / 60) + ":" + String.format("%02d", sp_progress % 60)),
+                sp_progress,
+                sp_progress > 0);
+        specialmap.put("sp_progress", prog);
+        specialmap.put("sp_prog", prog);
+
+        Triplet<String, Integer, Boolean> dur = new Triplet<>(
+                ((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)),
+                sp_duration,
+                sp_duration > 0);
+        specialmap.put("sp_duration", dur);
+        specialmap.put("sp_dur", dur);
+
+        Triplet<String, Integer, Boolean> msg = new Triplet<>(
+                get_sp_message(),
+                sp_msg_time_rem,
+                !get_sp_message().isEmpty()
+        );
+        specialmap.put("sp_message", msg);
+        specialmap.put("sp_msg", msg);
+        intmap.put("sp_message_duration", sp_msg_time_rem);
+        intmap.put("sp_msg_dur", sp_msg_time_rem);
+
+//        Triplet<String, Integer, Boolean> dur = ;
+//        specialmap.put("sp_progress", new Triplet<>(
+//                ((sp_progress / 60) + ":" + String.format("%02d", sp_progress % 60)),
+//                sp_progress,
+//                sp_progress > 0));
+//        specialmap.put("sp_duration", new Triplet<>(
+//                ((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)),
+//                sp_duration,
+//                sp_duration > 0));
+
+//        specialmap.put("sp_message", new Triplet<>(
+//                ((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)),
+//                sp_duration,
+//                sp_duration > 0));
+
+//        SpecialSupplierElement.Entry duration = SpecialSupplierElement.of(
+//                () -> (sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60), /* string */
+//                () -> sp_duration /* number */, () -> sp_duration > 0 /* bool */);
+//        registerElement("sp_duration", (_special) -> new SpecialSupplierElement(duration));
+//        registerElement("sp_dur", (_special) -> new SpecialSupplierElement(duration));
+//
+//
+//        SpecialSupplierElement.Entry message = SpecialSupplierElement.of(
+////                () -> (sp_message), // string
+//                SpotifyData::get_sp_message, /* string */
+//                () -> sp_msg_time_rem /* number */, () -> (!get_sp_message().isEmpty()) /* bool */);
+//        registerElement("sp_message", (_special) -> new SpecialSupplierElement(message));
+//        registerElement("sp_msg", (_special) -> new SpecialSupplierElement(message));
+
+    }
 
 
 // see this link for unofficial estimates of ratelimits

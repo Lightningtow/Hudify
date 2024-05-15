@@ -1,11 +1,11 @@
 package lightningtow.hudify.util;
 
+import lightningtow.hudify.HudifyMain;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -28,7 +28,6 @@ public class URLImage
     private int width;
     private int height;
     private static MinecraftClient client;
-    public static final Logger LOGGER = LogManager.getLogger("Hudify");
 
     public URLImage(int width, int height)
     {
@@ -73,7 +72,7 @@ public class URLImage
             img.flush();
         } catch (IOException e)
         {
-            LOGGER.error("error in setImage: " + e.getMessage());
+            HudifyMain.Log(Level.ERROR,"error in setImage: " + e.getMessage());
         }
     }
 

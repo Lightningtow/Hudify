@@ -6,11 +6,10 @@ import java.net.URISyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lightningtow.hudify.HudifyMain;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
+
 public class AuthServerHandler implements HttpHandler
 {
-    public static final Logger LOGGER = LogManager.getLogger(HudifyMain.MOD_ID);
     @Override
     public void handle(HttpExchange httpExchange) throws IOException
     {
@@ -19,7 +18,7 @@ public class AuthServerHandler implements HttpHandler
         try {
             handleResponse(httpExchange, requestParamValue);
         } catch (URISyntaxException | InterruptedException e) {
-            LOGGER.error(e.getMessage());
+            HudifyMain.Log(Level.ERROR, e.getMessage());
         }
     }
     private String handleGetRequest(HttpExchange httpExchange) {

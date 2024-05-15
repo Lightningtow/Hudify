@@ -5,10 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * Credit to
- * https://www.appsdeveloperblog.com/pkce-code-verifier-and-code-challenge-in-java/
- */
+// Credit to https://www.appsdeveloperblog.com/pkce-code-verifier-and-code-challenge-in-java/  - from Blockify
 
 import java.security.SecureRandom;
 import java.util.Base64;

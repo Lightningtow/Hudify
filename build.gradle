@@ -31,8 +31,13 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation files("run/mods/custom_hud-${project.customhud_version}.jar")
+//	modImplementation files("run/mods/custom_hud-${project.customhud_version}.jar")
 //	modImplementation "maven.modrinth:customhud:${project.customhud_version}"
+
+	modImplementation files("run/mods/custom_hud-4.0.0-beta.331.20.4.jar")       // 4.0
+//	modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"  // 3.3
+
+
 
 //	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
 	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
