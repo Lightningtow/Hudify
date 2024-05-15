@@ -51,7 +51,7 @@ public class HudifyMain implements ClientModInitializer
 		set_sp_message(msg);
 	}
 
-	public static void truncate() {
+	public static void truncate() { // chop the ends off variables after a user-specified number of characters
 		int len = HudifyConfig.truncate_length;
 //		if (db) Log(Level.INFO,"truncating to: {}", sp_artists.substring(0, len));
 
@@ -129,8 +129,7 @@ public class HudifyMain implements ClientModInitializer
 						tick_message();
 						// 204 when app is closed, doesnt immediately go away when app opened
 						if (sp_status_code == 204) { // No Content - The request has succeeded but returns no message body.
-//							sp_progress = 0; // todo this is whats breaking progress when paused
-//							sp_duration = -1; // todo but how do i fix progress bug
+//							sp_progress = 0; // dont reset progress and duration here, it breaks it when app is paused
 							SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
 							Thread.sleep(3000);
 
@@ -169,6 +168,9 @@ public class HudifyMain implements ClientModInitializer
 			sp_status_code = playbackResponse.statusCode();
 //            Log(Level.INFO,"getPlaybackInfo - status code: " + playbackResponse.statusCode());
 			// app closed returns 204
+			if (playbackResponse.statusCode() == 204) { // no content - returned when app is closed
+
+			}
 
 			if (playbackResponse.statusCode() == 429) return; // rate limited
 			if (playbackResponse.statusCode() == 200) // OK - The request has succeeded

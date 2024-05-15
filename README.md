@@ -42,7 +42,7 @@ These were added by me for debugging, I can't think of any reason you'd need the
 
 `{sp_status_code}` - Number. Status code from the header of the most recent Spotify API call.  
 `{sp_status_string}` - String. Description of the status code according to [Spotify's docs](https://developer.spotify.com/documentation/web-api/concepts/api-calls)  
-`{sp_is_authorized}` - Boolean. Whether currently authed with Spotify, (I believe)   
+`{sp_is_authorized}` - Boolean. Whether currently authed with Spotify ~~in theory~~  
 `{sp_fancy_track}` - Song title with stuff like "remastered", "bonus track" etc scrubbed out. Added for testing the config option, this will be removed in a later update.  
 
 </details>
@@ -66,13 +66,11 @@ Repeat: {sp_repeat}
 ```
 #### Known issues:
 - progress can get thrown off after unpausing
-- at launch, variables are often empty
+- at launch, variables are empty if app is open but paused
 - context doesn't update if playing from queue or search results. 
   - Most likely a limitation of [Spotify's api](https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback). I don't know if I can fix this
 
 #### Todo list:
-- active device variable
-- figure out refreshActiveSession
 - add screenshots to readme
 
 #### Credit:  
