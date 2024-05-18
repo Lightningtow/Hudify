@@ -1,5 +1,7 @@
+package lightningtow.hudify;
+
+//import eu.midnightdust.lib.config.MidnightConfig;
 import eu.midnightdust.lib.config.MidnightConfig;
-import lightningtow.hudify.HudifyMain;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 

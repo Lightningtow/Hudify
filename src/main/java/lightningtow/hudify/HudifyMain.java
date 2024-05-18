@@ -19,6 +19,8 @@ import org.lwjgl.glfw.GLFW;
 import static lightningtow.hudify.HudifyConfig.inactive_poll_rate;
 import static lightningtow.hudify.util.SpotifyData.*;
 import static lightningtow.hudify.HudifyConfig.db;
+
+import java.io.File;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -92,8 +94,10 @@ public class HudifyMain implements ClientModInitializer
 
 		try {
 			Log(Level.INFO,"Beginning integration with CustomHud");
-			CustomhudIntegrationThree.initCustomhud();
-//			CustomhudIntegrationFour.initCustomhud();
+			/*? if =3.3 */
+			CustomhudIntegrationThree.initCustomhudThree();
+			/*? if =4.0 */
+			/*CustomhudIntegrationFour.initCustomhudFour();*/
 
 			Log(Level.INFO,"Successfully integrated with CustomHud");
 
@@ -101,9 +105,8 @@ public class HudifyMain implements ClientModInitializer
 		catch (Exception e) {
 			Log(Level.ERROR,"Error integrating with CustomHud: " + e);
 		}
-//		File authFile = new File(System.getProperty("user.dir") + File.separator +
-//				"config" + File.separator + "HudifyTokens.json");
-		HudifyConfig.init(MOD_ID.toLowerCase(), HudifyConfig.class);
+//		File authFile = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + "HudifyTokens.json");
+		HudifyConfig.init(MOD_ID.toLowerCase(), HudifyConfig.class); //todo uncomment me
 
 //		Log(Level.INFO,"initializing main loop");
 		//info
@@ -159,12 +162,12 @@ public class HudifyMain implements ClientModInitializer
 
 	public static void updatePlaybackInfo()
 	{
-
 		String dump_msg = "getPlaybackInfo";
 		try
 		{
 
-			HttpResponse<String> playbackResponse = SpotifyUtil.getClient().send(SpotifyUtil.getPlaybackRequest(), HttpResponse.BodyHandlers.ofString());
+			HttpResponse<String> playbackResponse =
+					SpotifyUtil.getClient().send(SpotifyUtil.getPlaybackRequest(), HttpResponse.BodyHandlers.ofString());
 			// https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback
 
 			sp_status_code = playbackResponse.statusCode();
@@ -179,7 +182,8 @@ public class HudifyMain implements ClientModInitializer
 			{
 				JsonObject json = (JsonObject) JsonParser.parseString(playbackResponse.body());
 				// the `json.get("progress_ms")` is incorrect after pausing then resuming
-//				Log(Level.ERROR,"external url spotify: " + json.get("context").getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify"));
+//				Log(Level.ERROR,"external url spotify: "
+//				+ json.get("context").getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify"));
 //				Log(Level.ERROR,"context href: " + json.get("context").getAsJsonObject().get("href"));
 //				Log(Level.ERROR,"context uri: " + json.get("context").getAsJsonObject().get("uri"));
 
@@ -210,7 +214,8 @@ public class HudifyMain implements ClientModInitializer
 				/* context name */ sp_prev_context = sp_context_name;
 				if (!sp_prev_context_uri.equals(contextJson.get("uri").getAsString())) { // if context changed
 //                    Log(Level.INFO,"contexts do NOT match, updating context");
-					Log(Level.INFO,"type: " + sp_context_type + ", uris " + sp_prev_context_uri + " / " + contextJson.get("uri").getAsString());
+					Log(Level.INFO,"type: " + sp_context_type + ", uris "
+							+ sp_prev_context_uri + " / " + contextJson.get("uri").getAsString());
 					sp_prev_context_uri = contextJson.get("uri").getAsString();
 					switch (sp_context_type) {
 						case "album":
@@ -220,15 +225,14 @@ public class HudifyMain implements ClientModInitializer
 						case "artist":
 						case "playlist":
 							EXECUTOR_SERVICE.execute(() -> { // this does this single func async
-								// href is the exact url needed to get the string like "https://api.spotify.com/v1/playlists/3PXFZxy8QdBmvFHCYyErw3"
-								JsonObject fullContextJson = SpotifyUtil.apiRequest(SpotifyUtil.reqType.GET, contextJson.get("href").getAsString());
+								// href is the exact url needed to get the string like
+								// "https://api.spotify.com/v1/playlists/3PXFZxy8QdBmvFHCYyErw3"
+								JsonObject fullContextJson =
+										SpotifyUtil.apiRequest(SpotifyUtil.reqType.GET, contextJson.get("href").getAsString());
 								if (fullContextJson == null) sp_context_name = "";
                                 else sp_context_name = fullContextJson.get("name").getAsString().replaceAll("\"", "");
-
 					});
-
 					}
-
 				}
 
 				if (sp_is_podcast) {
@@ -253,7 +257,7 @@ public class HudifyMain implements ClientModInitializer
 				/** sp_artists + sp_first_artist **/
 
 
-//				sp_album = sp_is_podcast ? "" : json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
+//		sp_album = sp_is_podcast ? "" : json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 				sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 
 				SpotifyData.UpdateMaps();
@@ -263,12 +267,10 @@ public class HudifyMain implements ClientModInitializer
 				if (!SpotifyUtil.refreshAccessToken()) sp_is_authorized = false;
 				////	 SpotifyUtil.isAuthorized doesn't get used anywhere, just the value set
 			}
-			if (HudifyConfig.truncate_length != -1) {
-				truncate();
-			}
+			if (HudifyConfig.truncate_length != -1) truncate();
 
-		} catch (Exception e)
-		{
+		} catch (Exception e) {
+			Log(Level.ERROR,"exception caught in getPlaybackInfo(): " + e.getMessage());
 //            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
 //            {
 //                Log(Level.INFO,"Resetting connection and retrying info get...");
@@ -276,7 +278,6 @@ public class HudifyMain implements ClientModInitializer
 //
 //            }
 //            else
-			Log(Level.ERROR,"exception caught in getPlaybackInfo(): " + e.getMessage());
 		}
 		HudifyMain.dump(dump_msg);
 //        return;

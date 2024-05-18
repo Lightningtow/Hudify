@@ -8,6 +8,8 @@ import java.util.HashMap;
 
 public class SpotifyData {
     /** the single source of truth for current Spotify state **/
+    //<editor-fold desc="variables">
+
     public static String sp_track = ""; // track or episode name
     public static String sp_fancy_track = ""; // track with 'bonus track, remastered' etc scrubbed out
 
@@ -39,8 +41,6 @@ public class SpotifyData {
     public static Boolean sp_device_is_active = false;
     public static String sp_device_name = "";
 
-
-
     public static String sp_prev_context = "";
     public static String sp_prev_context_uri = "";
 
@@ -69,6 +69,8 @@ public class SpotifyData {
     public static HashMap<String, Boolean> boolmap = new HashMap<>();
     public static HashMap<String, Integer> intmap = new HashMap<>();
     public static HashMap<String, Triplet<String, Integer, Boolean>> specialmap = new HashMap<>();
+
+    //</editor-fold> variables
 
     public static void UpdateMaps() {
 

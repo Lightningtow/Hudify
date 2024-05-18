@@ -1,3 +1,5 @@
+/*? if =3.3 {*/ // <- opener
+
 package lightningtow.hudify;
 import com.minenash.customhud.HudElements.supplier.BooleanSupplierElement;
 import com.minenash.customhud.HudElements.supplier.NumberSupplierElement;
@@ -9,14 +11,14 @@ import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerElemen
 import static lightningtow.hudify.util.SpotifyData.*;
 
 public class CustomhudIntegrationThree {
-    public static void initCustomhud() {
+    public static void initCustomhudThree() {
 
         UpdateMaps();
         // don't put log messages here, messages already in HudifyMain
         for ( String key : stringmap.keySet() ) {
             registerElement(key, (_str) -> new StringSupplierElement(() -> stringmap.get(key).isEmpty() ? null : stringmap.get(key))); }
 
-        for ( String key : boolmap.keySet() ) {
+        for ( String key : boolmap.keySet() ) { // make this bool when jakob fixes
             registerElement(key, (_str) -> new StringSupplierElement(() -> boolmap.get(key).toString())); }
 
         for ( String key : intmap.keySet() ) {
@@ -31,3 +33,4 @@ public class CustomhudIntegrationThree {
         }
     }
 }
+/*?} */
