@@ -3,6 +3,7 @@ package lightningtow.hudify;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lightningtow.hudify.integrations.CustomhudIntegration;
 import lightningtow.hudify.util.SpotifyData;
 import lightningtow.hudify.util.SpotifyUtil;
 import net.fabricmc.api.ClientModInitializer;
@@ -90,14 +91,10 @@ public class HudifyMain implements ClientModInitializer
 	@Override
 	public void onInitializeClient()
 	{
-//		CustomhudIntegrationFour.RegisterStrings();
 
 		try {
 			Log(Level.INFO,"Beginning integration with CustomHud");
-			/*? if =3.3 */
-			CustomhudIntegrationThree.initCustomhudThree();
-			/*? if =4.0 */
-			/*CustomhudIntegrationFour.initCustomhudFour();*/
+			CustomhudIntegration.initCustomhud();
 
 			Log(Level.INFO,"Successfully integrated with CustomHud");
 

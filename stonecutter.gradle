@@ -5,3 +5,5 @@ stonecutter.registerChiseled tasks.register("chiseledBuild", stonecutter.chisele
 
     ofTask "build"
 }
+// to regenerate run tasks: for each version, 'gradle->stonecutter->set active project to xx', then 'refresh active project'
+// dont use `Tasks -> project -> runActive` since this doesnt work with the shared directory
