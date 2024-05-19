@@ -4,6 +4,7 @@
   "hudify.key.toggle": "Toggle Play/Pause",
   "hudify.key.next": "Next Song",
   "hudify.key.prev": "Previous Song",
+  "hudify.key.refresh": "Refresh Playback Info",
   "hudify.messages.premium_required": "Spotify Premium is required for this feature",
   "hudify.midnightconfig.title": "Hudify Config",
   "hudify.midnightconfig.midnightlib_description": "§nMidnightLib",

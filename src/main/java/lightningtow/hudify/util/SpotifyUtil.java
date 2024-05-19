@@ -26,9 +26,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static lightningtow.hudify.HudifyMain.MOD_ID;
 import static lightningtow.hudify.util.SpotifyData.*;
 import static lightningtow.hudify.HudifyConfig.db;
-import static lightningtow.hudify.HudifyMain.Log;
+import static lightningtow.hudify.HudifyMain.LogThis;
 public class SpotifyUtil
 {
     private static final String client_id = "2f8c634ba8cc43a8be450ff3f745886f";
@@ -54,10 +55,12 @@ public class SpotifyUtil
     public static void initialize()
     {
         //Log(Level.INFO,"running SpotifyUtil.initialize()");
-        Log(Level.INFO,"initializing Spotify integration");
+        LogThis(Level.INFO,"initializing Spotify integration");
 
-        authFile = new File(System.getProperty("user.dir") + File.separator +
-                "config" + File.separator + "HudifyTokens.json");
+//        authFile = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + "HudifyTokens.json");
+        authFile = new File(System.getProperty("user.dir") + File.separator
+                + "config" + File.separator + MOD_ID.toLowerCase() + File.separator + "HudifyTokens.json");
+
         try
         {
             if (!authFile.exists())
@@ -66,7 +69,7 @@ public class SpotifyUtil
                 boolean fileCreated = authFile.createNewFile();
                 // Validate that file actually got created
                 if (fileCreated) {
-                    Log(Level.INFO,"Created new token file at: " + authFile.getAbsolutePath());
+                    LogThis(Level.INFO,"Created new token file at: " + authFile.getAbsolutePath());
                 }
                 accessToken = "";
                 refreshToken = "";
@@ -93,7 +96,7 @@ public class SpotifyUtil
             }
         } catch (IOException e)
         {
-            Log(Level.ERROR,"exception caught in initialize():" + e.getMessage());
+            LogThis(Level.ERROR,"exception caught in initialize():" + e.getMessage());
         }
         client = HttpClient.newHttpClient();
         updatePlaybackRequest();
@@ -101,7 +104,7 @@ public class SpotifyUtil
 
     public static String authorize()
     {
-        if (db) Log(Level.INFO,"running SpotifyUtil.authorize()");
+        if (db) LogThis(Level.INFO,"running SpotifyUtil.authorize()");
         StringBuilder authURI = null;
         String[] scope_list = {
                 "user-read-playback-state",
@@ -124,8 +127,8 @@ public class SpotifyUtil
                 authURI.append("%20").append(scope);
             }
             authURI.append("&code_challenge_method=S256");
-            verifier = PKCEUtil.generateCodeVerifier();
-            String challenge = PKCEUtil.generateCodeChallenge(verifier);
+            verifier = AuthServerHandler.generateCodeVerifier();
+            String challenge = AuthServerHandler.generateCodeChallenge(verifier);
             authURI.append("&code_challenge=").append(challenge);
             authServer = HttpServer.create(new InetSocketAddress("127.0.0.1", 8001), 0);
             threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
@@ -134,7 +137,7 @@ public class SpotifyUtil
             authServer.start();
         } catch (Exception e)
         {
-            Log(Level.ERROR,"exception caught in SpotifyUtil.authorize():" + e.getMessage());
+            LogThis(Level.ERROR,"exception caught in SpotifyUtil.authorize():" + e.getMessage());
         }
         if (authURI == null)
         {
@@ -154,7 +157,7 @@ public class SpotifyUtil
 
     private static void requestAccessToken()
     {
-        if (db) Log(Level.INFO,"running SpotifyUtil.requestAccessToken");
+        if (db) LogThis(Level.INFO,"running SpotifyUtil.requestAccessToken");
 
         try
         {
@@ -170,7 +173,7 @@ public class SpotifyUtil
                     .header("Accept", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(accessBody.toString()))
                     .build();
-            Log(Level.INFO,"url request" + accessBody);
+            LogThis(Level.INFO,"url request" + accessBody);
             HttpResponse<String> accessResponse = client.send(accessRequest, HttpResponse.BodyHandlers.ofString());
             JsonObject accessJson = JsonParser.parseString(accessResponse.body()).getAsJsonObject();
             accessToken = accessJson.get("access_token").getAsString();
@@ -180,14 +183,14 @@ public class SpotifyUtil
             sp_is_authorized = true;
         } catch (Exception e)
         {
-            Log(Level.ERROR,"exception caught in requestAccessToken():" + e.getMessage());
+            LogThis(Level.ERROR,"exception caught in requestAccessToken():" + e.getMessage());
         }
     }
 
     public static boolean refreshAccessToken()
     {
         // returns true if refreshed successfully, false if could not refresh
-        if (db) Log(Level.INFO,"running SpotifyUtil.refreshAccessToken");
+        if (db) LogThis(Level.INFO,"running SpotifyUtil.refreshAccessToken");
 
         try
         {
@@ -214,7 +217,7 @@ public class SpotifyUtil
             }
         } catch (Exception e)
         {
-            if (db) Log(Level.ERROR,"exception caught in refreshAccessToken():" + e.getMessage());
+            if (db) LogThis(Level.ERROR,"exception caught in refreshAccessToken():" + e.getMessage());
         }
         return false;
     }
@@ -222,6 +225,7 @@ public class SpotifyUtil
     public static void refreshActiveSession()
     {
     // todo this gets devices? is this only needed for the volume thing?
+        // todo this can likely be abstracted into apiRequest
     // https://developer.spotify.com/documentation/web-api/reference/get-a-users-available-devices
         //        if (db) Log(Level.INFO,"running SpotifyUtil.refreshActiveSession");
 
@@ -242,7 +246,7 @@ public class SpotifyUtil
             {
                 sp_duration = 1;
                 sp_progress = 0;
-                if (db) Log(Level.INFO,"SpotifyUtil.refreshActiveSession: no active device");
+                if (db) LogThis(Level.INFO,"SpotifyUtil.refreshActiveSession: no active device");
 
                 sp_is_playing = false;
 //                isPlaying = false;
@@ -263,12 +267,12 @@ public class SpotifyUtil
                     .header("Authorization", "Bearer " + accessToken)
                     .PUT(HttpRequest.BodyPublishers.ofString(deviceIDBody))
                     .build();
-            if (db) Log(Level.INFO,"RefreshActiveSession - API responded with status code: "
+            if (db) LogThis(Level.INFO,"RefreshActiveSession - API responded with status code: "
                     + client.send(setActive, HttpResponse.BodyHandlers.ofString()).statusCode());
 
         } catch (Exception e)
         {
-            if (db) Log(Level.ERROR,"exception caught in refreshActiveSession():" + e.getMessage());
+            if (db) LogThis(Level.ERROR,"exception caught in refreshActiveSession():" + e.getMessage());
         }
 //        Log(Level.INFO,"Successfully refreshed active session"); // lol this runs even with 404s
     }
@@ -283,7 +287,7 @@ public class SpotifyUtil
             jsonWriter.close();
         } catch (IOException e)
         {
-            Log(Level.ERROR,e.getMessage());
+            LogThis(Level.ERROR,e.getMessage());
         }
     }
 
@@ -307,7 +311,7 @@ public class SpotifyUtil
         try
         {
 
-            if(db) Log(Level.INFO,"link: " + url);
+            if(db) LogThis(Level.INFO,"link: " + url);
 
             HttpRequest.Builder reqBuilder = HttpRequest.newBuilder(new URI(url));
             switch (type) {
@@ -330,18 +334,18 @@ public class SpotifyUtil
             }
             else if (response.statusCode() == 403) /* forbidden */ {
 //               HudifyMain.send_message("");
-                if(db) Log(Level.INFO,type + " request " + url + " returned 403 forbidden");
+                if(db) LogThis(Level.INFO,type + " request " + url + " returned 403 forbidden");
 
             }
             else if (response.statusCode() == 404) /* not found */ {
                 refreshActiveSession();
-                if(db) Log(Level.INFO,"Retrying get request...");
+                if(db) LogThis(Level.INFO,"Retrying get request...");
                 response = client.send(request, HttpResponse.BodyHandlers.ofString());
 //                Log(Level.INFO,"GET Request (" + uri + "): " + getRes.statusCode());
             }
             else if (response.statusCode() == 429) { // rate limited
                 // approximately 180 calls per minute without throwing 429, ~3 calls per second
-                Log(Level.ERROR,"RATE LIMITED============================================================");
+                LogThis(Level.ERROR,"RATE LIMITED============================================================");
                 Thread.sleep(3000);
                 return null;
 //                return "rate limited!";
@@ -357,7 +361,7 @@ public class SpotifyUtil
                 try {
                     return (JsonObject) JsonParser.parseString(response.body());
                 } catch (Exception e) {
-                    Log(Level.ERROR, "Error parsing api request:" + type + " request " + url + " returned 403 forbidden");
+                    LogThis(Level.ERROR, "Error parsing api request:" + type + " request " + url + " returned 403 forbidden");
                     return null;
                 }
 
@@ -366,11 +370,11 @@ public class SpotifyUtil
         catch (IOException | InterruptedException | URISyntaxException e) {
             if (e instanceof IOException && e.getMessage().equals("Connection reset"))
             {
-                Log(Level.INFO,"Attempting to retry get request...");
+                LogThis(Level.INFO,"Attempting to retry get request...");
                 apiRequest(type, url); // just reruns the method using what was passed the first time, no need to edit this call
-                Log(Level.INFO,"Successfully sent get request");
+                LogThis(Level.INFO,"Successfully sent get request");
             }
-            else Log(Level.ERROR,"exception caught in getRequest(): " + e.getMessage());
+            else LogThis(Level.ERROR,"exception caught in getRequest(): " + e.getMessage());
         }
         return null;//"error in getRequest()";
     }
@@ -429,26 +433,26 @@ public class SpotifyUtil
         EXECUTOR_SERVICE.execute(() -> {
             apiRequest(reqType.POST,"https://api.spotify.com/v1/me/player/next");
             sp_duration = -2;
-            Log(Level.INFO,"Skipping to next song");
+            LogThis(Level.INFO,"Skipping to next song");
         });
     }
     public static void prevSong() {
         EXECUTOR_SERVICE.execute(() -> {
             apiRequest(reqType.POST,"https://api.spotify.com/v1/me/player/previous");
             sp_duration = -2;
-            Log(Level.INFO,"Skipping to previous song");
+            LogThis(Level.INFO,"Skipping to previous song");
         });
     }
 
     public static void togglePlayPause() {
         if (sp_is_playing) { // isPlaying
             if (db) HudifyMain.send_message("Paused playback", 3);
-            Log(Level.INFO,"Pausing playback");
+            LogThis(Level.INFO,"Pausing playback");
             EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT,"https://api.spotify.com/v1/me/player/pause"));
         }
         else {
             if (db) HudifyMain.send_message("Resumed playback", 3);
-            Log(Level.INFO,"Resuming playback");
+            LogThis(Level.INFO,"Resuming playback");
             EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT, "https://api.spotify.com/v1/me/player/play"));
         }
 
