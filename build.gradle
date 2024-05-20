@@ -13,7 +13,7 @@ base { archivesName = property("archives_base_name") }
 repositories {	// You should only use this when depending on other mods
 	maven {
 		url = "https://api.modrinth.com/maven"
-//		content { includeGroup "maven.modrinth" }
+//		content { includeGroup "maven.modrinth" } // only needed if using forgegradle
 	}
 	maven { url "https://maven.terraformersmc.com/releases/" }
 //	maven {	url = "https://api.modrinth.com/maven" }
@@ -38,9 +38,10 @@ dependencies {
 //	modImplementation "maven.modrinth:customhud:${project.customhud_version}"
 
 //	modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"  // 3.3
+//	modImplementation "maven.modrinth:hudify:3.3.2+1.20.4"
 
 	if (stonecutter.current.version == "4.0") {
-//		modImplementation files("../../run/mods/custom_hud-4.0.0-beta.381.20.4.jar") // todo you need to comment this for 3.3 to work
+//		modImplementation files("../../run/mods/custom_hud-4.0.0-beta.391.20.4.jar") // todo you need to comment this for 3.3 to work
 	} else {
 		modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"
 	}
@@ -87,7 +88,7 @@ def fabricModInfoJson() {
 			"environment": "client",
 			"entrypoints": [
 					"client": [ "lightningtow.hudify.HudifyMain" ],
-					"modmenu": [ "lightningtow.hudify.ModMenuIntegration.ModMenuIntegration" ]
+//					"modmenu": [ "lightningtow.hudify.integrations.ModMenuIntegration" ]
 			],
 			"depends": [
 					"fabricloader": ">=0.15.0",

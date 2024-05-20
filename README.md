@@ -1,10 +1,10 @@
 # Hudify - A Spotify integration for CustomHud
-## Requires the 4.0 beta of [CustomHud](https://modrinth.com/mod/customhud), found on the CustomHud discord
+## Requires [CustomHud](https://modrinth.com/mod/customhud)
 
 
 You'll need to authorize the third party app Hudify to your Spotify account to use this mod.   
 Some features are locked behind a Spotify Premium subscription, which is out of my control  
-You'll be prompted to authorize when you first press a control key
+You'll be prompted to authorize on your first startup
 
 To uninstall, also be sure to also disconnect the app from https://www.spotify.com/us/account/apps
 
@@ -13,6 +13,7 @@ Program messages are displayed in the `{sp_message}` variable rather than in Min
 ### Variables added:
 #### String variables:
 `{sp_track}` / `{sp_song}` - Song/episode's title  
+`{sp_fancy_track}` - Track title with stuff like "remastered", "bonus track" etc scrubbed out.
 `{sp_album}` - Album of current track. Blank if podcast  
 `{sp_artist}` / `{sp_artists}` - All artists combined into one string  
 `{sp_first_artist}` - The very first artist listed  
@@ -43,7 +44,6 @@ These were added by me for debugging, I can't think of any reason you'd need the
 `{sp_status_code}` - Number. Status code from the header of the most recent Spotify API call.  
 `{sp_status_string}` - String. Description of the status code according to [Spotify's docs](https://developer.spotify.com/documentation/web-api/concepts/api-calls)  
 `{sp_is_authorized}` - Boolean. Whether currently authed with Spotify ~~in theory~~  
-`{sp_fancy_track}` - Song title with stuff like "remastered", "bonus track" etc scrubbed out. Added for testing the config option, this will be removed in a later update.  
 
 </details>
 

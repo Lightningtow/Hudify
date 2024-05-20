@@ -9,19 +9,15 @@ import java.util.HashMap;
 public class SpotifyData {
     /** the single source of truth for current Spotify state **/
     //<editor-fold desc="variables">
+    public static int sp_progress = 0;
+    public static int sp_duration = 0;
 
-    public static String sp_track = ""; // track or episode name
-    public static String sp_fancy_track = ""; // track with 'bonus track, remastered' etc scrubbed out
+    public static int sp_status_code = 123456;
+    public static String sp_prev_context = "";
+    public static String sp_prev_context_uri = "";
+//    public static Boolean sp_needs_refresh = false;
 
-    public static String sp_artists = ""; // all artists as one string
-    public static String sp_first_artist = ""; // first artist listed. if one artist or podcast, identical to `artists`
-    public static String sp_album = "";
-    public static String sp_context_type = ""; // "artist", "playlist", "album", "show".
-    public static String sp_context_name = ""; // name of artist, playlist etc
-
-    public static Boolean sp_is_podcast = false;
-    public static String sp_repeat_state = "";
-    public static Boolean sp_is_authorized = false;
+ 
 
     private static String sp_message = "";
     public static int sp_msg_time_rem = 0;
@@ -29,21 +25,8 @@ public class SpotifyData {
     public static Boolean sp_is_playing = false;
 
     public static String get_sp_message() { return sp_message; }
-    public static void set_sp_message(String msg) { sp_message = msg; } // should only be used from tickMessage() and setMessage()
-
-    public static Boolean sp_shuffle_enabled = false;
-    public static int sp_progress = 0;
-    public static int sp_duration = 0;
-
-    public static int sp_status_code = 123456;
-
-    public static String sp_device_id = "";
-    public static Boolean sp_device_is_active = false;
-    public static String sp_device_name = "";
-
-    public static String sp_prev_context = "";
-    public static String sp_prev_context_uri = "";
-
+    public static void set_sp_message(String msg) { sp_message = msg; }
+    // set_sp_message() should only be used from tickMessage() and setMessage()
     public static String get_status_string(int code) {
         String msg = "stop telling me to inline this";
         msg = switch (code) {
@@ -65,13 +48,68 @@ public class SpotifyData {
         return msg;
     }
 
+    public static Boolean sp_shuffle_enabled = false;
+
+
+    public static String sp_device_id = "";
+    public static Boolean sp_device_is_active = false;
+    public static String sp_device_name = "";
+    
+    public static String sp_track = ""; // track or episode name
+    public static String sp_fancy_track = ""; // track with 'bonus track, remastered' etc scrubbed out
+
+    public static String sp_artists = ""; // all artists as one string
+    public static String sp_first_artist = ""; // first artist listed. if one artist or podcast, identical to `artists`
+    public static String sp_album = "";
+    public static String sp_context_type = ""; // "artist", "playlist", "album", "show".
+    public static String sp_context_name = ""; // name of artist, playlist etc
+
+    public static Boolean sp_is_podcast = false;
+    public static String sp_repeat_state = "";
+    public static Boolean sp_is_authorized = false;
+
+
     public static HashMap<String, String> stringmap = new HashMap<>();
     public static HashMap<String, Boolean> boolmap = new HashMap<>();
     public static HashMap<String, Integer> intmap = new HashMap<>();
     public static HashMap<String, Triplet<String, Integer, Boolean>> specialmap = new HashMap<>();
-
     //</editor-fold> variables
+    public static void resetData() { resetData(false); }
+    public static void resetData(boolean resetALL) {
+         sp_device_id = "";
+         sp_device_is_active = false;
+         sp_device_name = "";
 
+         sp_track = "";
+         sp_fancy_track = "";
+
+         sp_artists = "";
+         sp_first_artist = "";
+         sp_album = "";
+         sp_context_type = "";
+         sp_context_name = "";
+
+         sp_is_podcast = false;
+         sp_repeat_state = "";
+//         sp_is_authorized = false;  // DO NOT RESET THIS, IT WILL SPAM YOU WITH REFRESHES EVERY TIME
+
+         if (resetALL) {
+              sp_progress = 0;
+              sp_duration = 0;
+
+              sp_status_code = 123456;
+              sp_prev_context = "";
+              sp_prev_context_uri = "";
+//              sp_needs_refresh = false;
+
+              sp_message = "";
+              sp_msg_time_rem = 0;
+
+              sp_is_playing = false;
+         }
+         
+    }
+    
     public static void UpdateMaps() {
 
         stringmap.put("sp_song", sp_track);
@@ -97,15 +135,18 @@ public class SpotifyData {
 
         intmap.put("sp_status_code", sp_status_code);
 
-        Triplet<String, Integer, Boolean> prog = new Triplet<>(((sp_progress / 60) + ":" + String.format("%02d", sp_progress % 60)), sp_progress, sp_progress > 0);
+        Triplet<String, Integer, Boolean> prog
+                = new Triplet<>(((sp_progress / 60) + ":" + String.format("%02d", sp_progress % 60)), sp_progress, sp_progress > 0);
         specialmap.put("sp_progress", prog);
         specialmap.put("sp_prog", prog);
 
-        Triplet<String, Integer, Boolean> dur = new Triplet<>(((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)), sp_duration, sp_duration > 0);
+        Triplet<String, Integer, Boolean> dur
+                = new Triplet<>(((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)), sp_duration, sp_duration > 0);
         specialmap.put("sp_duration", dur);
         specialmap.put("sp_dur", dur);
 
-        Triplet<String, Integer, Boolean> msg = new Triplet<>(get_sp_message(), sp_msg_time_rem, !get_sp_message().isEmpty());
+        Triplet<String, Integer, Boolean> msg
+                = new Triplet<>(get_sp_message(), sp_msg_time_rem, !get_sp_message().isEmpty());
         specialmap.put("sp_message", msg);
         specialmap.put("sp_msg", msg);
 

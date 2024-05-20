@@ -17,9 +17,6 @@
     "entrypoints": {
         "client": [
             "lightningtow.hudify.HudifyMain"
-        ],
-        "modmenu": [
-            "lightningtow.hudify.ModMenuIntegration.ModMenuIntegration"
         ]
     },
     "depends": {
