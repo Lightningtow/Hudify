@@ -57,7 +57,6 @@ dependencies {
 }
 
 if (stonecutter.current.isActive) { // run configs for non-active version would be invalid
-
 	loom {
 
 //		runConfigs.all // generate IDE tasks for running client, server and testmod, datagen if those are present
@@ -96,6 +95,7 @@ def fabricModInfoJson() {
 					"java": ">=17",
 					"fabric-api": "*",
 			],
+//			    "minecraft": ">=1.20.4- <1.20.5-"
 			"custom": [
 					"hudify_notes": "This fabric.mod.json file is auto-generated from build.gradle",
 
@@ -108,11 +108,12 @@ def fabricModInfoJson() {
 			]
 	]
 //	info.depends += [ "custom_hud": "${project.customhud_version}" ] // this doesnt work because local file
-	info.depends += [ "custom_hud": "*" ]
+	if (stonecutter.current.version == "4.0") {
+		info.depends += [ "custom_hud": "*" ]
 
-
-//		info += [ "version": "${version}__ch3.3" ] // this doesnt rename the jar
-
+	} else {
+		info.depends += [ "custom_hud": ">=2.0.0- <4.0.0" ]
+	}
 
 	return info
 }
@@ -141,10 +142,30 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17 // if it is present. If you remove this line, sources will not be generated.
 }
 
-jar {
-	from("LICENSE") {
-		rename {
-			"${it}_${project.base.archivesName.get()}"
-		}
-	}
-}
+jar { from("LICENSE") { rename { "${it}_${project.base.archivesName.get()}" }}}
+
+
+//projectDir = stonecutter.current.project
+//projectVariant = projectDir.split('-')[1] // v1 or v2
+//stonecutter.expression {
+////	when(it) {
+////		"v1" -> projectVariant == "v1"
+////		"v2" -> projectVariant == "v2"
+////		else -> null
+////	}
+//	if (it == "v3") projectVariant == "v3"
+//	else if (it == "v4") projectVariant == "v4"
+//	else return null
+//}
+//val projectDir = stonecutter.current.project
+//val projectVariant = projectDir.split('-')[1] // v1 or v2
+//
+//stonecutter.expression {
+//	when(it) {
+//		"v1" -> projectVariant == "v1"
+//		"v2" -> projectVariant == "v2"
+//		else -> null
+//	}
+//}
+
+// code

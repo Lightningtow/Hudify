@@ -6,15 +6,16 @@ import com.minenash.customhud.HudElements.supplier.StringSupplierElement;
 import static lightningtow.hudify.util.SpotifyData.*;
 
 
-/*? if =3.3 {*/ // <- opener
+/*? if =3.3 {*/
 import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerElement;
 public class CustomhudIntegration {
         public static void initCustomhud() {
 
         UpdateMaps();
-        // don't put log messages here, messages already in HudifyMain
+        // don't put log messages here, already logged in HudifyMain
         for ( String key : stringmap.keySet() ) {
-            registerElement(key, (_str) -> new StringSupplierElement(() -> stringmap.get(key).isEmpty() ? null : stringmap.get(key))); }
+            registerElement(key, (_str) -> new StringSupplierElement(
+                    () -> stringmap.get(key).isEmpty() ? null : stringmap.get(key))); }
 
         for ( String key : boolmap.keySet() ) {
 //            registerElement(key, (_str) -> new StringSupplierElement(() -> boolmap.get(key).toString())); }
@@ -34,7 +35,7 @@ public class CustomhudIntegration {
 }
 /*?} */
 
-/*? if =4.0 {*//* // <- opener
+/*? if =4.0 {*//*
 import com.minenash.customhud.data.Flags;
 import com.minenash.customhud.HudElements.supplier.BooleanSupplierElement;
 import static com.minenash.customhud.data.Flags.wrap;

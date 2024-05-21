@@ -53,7 +53,7 @@ public class SpotifyUtil
     //<editor-fold desc="auth utils">
     public static void initialize()
     {
-        //Log(Level.INFO,"running SpotifyUtil.initialize()");
+        // initial startup stuff, called ONLY at minecraft startup. checks for token file and prompts user to auth if it doesnt exist
         LogThis(Level.INFO,"initializing Spotify integration");
 //        try {
 //            Files.createDirectories(Paths.get("hudify"));
@@ -107,7 +107,6 @@ public class SpotifyUtil
                 }
                 scan.close();
 
-                // todo is this the right place to put it lol
 
             }
         } catch (IOException e)
@@ -134,7 +133,7 @@ public class SpotifyUtil
         {
             authURI = new StringBuilder();
             authURI.append("https://accounts.spotify.com/authorize");
-            authURI.append("?client_id=" + CLIENT_ID); // %3A is : and &2F is /, looks like
+            authURI.append("?client_id=" + CLIENT_ID); // %3A is : and &2F is /, looks like. but just tell people to use localhost8001
             authURI.append("&response_type=code"); // http://localhost:8001/callback
             authURI.append("&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fcallback");
             authURI.append("&scope=");
@@ -323,11 +322,13 @@ public class SpotifyUtil
 
 
     public enum reqType {GET, POST, PUT, DELETE}
-    /** make calls to spotify's api
+    /** the backbone of the program. Makes calls to spotify's api
      * pass this a URL, like in the "request sample" part of
      * <a href="https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback">...</a>
      * THIS CAN RETURN NULL
      * and is supposed to return null, if you're doing stuff that doesn't need a response like play/pause, skip etc
+     * currently this is used for play/pause, skip forward and skip back.
+     * the call to get playback info is made in HudifyMain.updatePlaybackInfo()
     **/
     public static JsonObject apiRequest(reqType type, String url)  {
         try
@@ -378,7 +379,7 @@ public class SpotifyUtil
                 //      Log(Level.ERROR,"Reset condition, maintaining HUD until reset"); // was level info and from blockiy
             }
 //            Log(Level.INFO,"get entire request json " + getRes.body()); // prints entire block of returned json
-            if (response.body().isEmpty()) {
+            if (response.body().isEmpty()) { // this is supposed to happen with calls like play/pause/skip
                 return null;
             }
             else {
@@ -455,12 +456,9 @@ public class SpotifyUtil
             apiRequest(reqType.POST,"https://api.spotify.com/v1/me/player/next");
             LogThis(Level.INFO,"Skipping to next song");
             sp_duration = -2;
-            try {
-                Thread.sleep(DELAY_BEFORE_REFRESH);
-                HudifyMain.updatePlaybackInfo();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+
+            delayedRefresh();
+
         });
     }
     public static void prevSong() {
@@ -473,17 +471,7 @@ public class SpotifyUtil
 
         });
     }
-    private static void delayedRefresh() {
-        // sleeps for DELAY_BEFORE_REFRESH ms then refresh. if you refresh too soon after skipping, it gets old, now-incorrect info
-        try {
-            Thread.sleep(DELAY_BEFORE_REFRESH);
-            HudifyMain.updatePlaybackInfo();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            // this catch is necessary, see
-            // https://stackoverflow.com/questions/24104313/how-do-i-make-a-delay-in-java#comment131988717_24104332
-        }
-    }
+
 
     public static void togglePlayPause() {
         // THESE CALLS WILL RETURN 401 FORBIDDEN IF YOU TRY TO PLAY WHEN ALREADY PLAYING, OR VICE VERSA
@@ -501,6 +489,19 @@ public class SpotifyUtil
         delayedRefresh();
 //        sp_is_playing = !sp_is_playing; // nope this just toggles it and gets it stuck
     }
+
+    private static void delayedRefresh() {
+        // sleeps for DELAY_BEFORE_REFRESH ms then refresh. if you refresh too soon after skipping, it gets old, now-incorrect info
+        try {
+            Thread.sleep(DELAY_BEFORE_REFRESH);
+            HudifyMain.updatePlaybackInfo();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            // this catch is necessary, see
+            // https://stackoverflow.com/questions/24104313/how-do-i-make-a-delay-in-java#comment131988717_24104332
+        }
+    }
+
     //</editor-fold> playback functions
 
 

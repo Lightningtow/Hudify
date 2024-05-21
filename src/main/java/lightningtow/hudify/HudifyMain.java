@@ -13,12 +13,10 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Util;
 import org.apache.logging.log4j.Level;
 import org.lwjgl.glfw.GLFW;
 
 import static lightningtow.hudify.util.SpotifyData.*;
-//import static lightningtow.hudify.HudifyConfig.db;
 
 import java.net.http.HttpResponse;
 import java.util.Arrays;
@@ -158,7 +156,6 @@ public class HudifyMain implements ClientModInitializer
 		requestThread.setName("Spotify Thread");
 		requestThread.start();
 
-
 	}
 
 	public static void updatePlaybackInfo()
@@ -273,12 +270,10 @@ public class HudifyMain implements ClientModInitializer
 
 		} catch (Exception e) {
 			LogThis(Level.ERROR,"exception caught in updatePlaybackInfo(): " + e.getMessage());
-//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
-//            {
+//            if (e instanceof IOException && e.getMessage().equals("Connection reset")) {
 //                Log(Level.INFO,"Resetting connection and retrying info get...");
-////                results[0] = "Reset";
-//            }
-//            else
+////                results[0] = "Reset"; }
+//            else, catch generic exception ig
 		}
 		HudifyMain.dump(dump_msg);
 //        return;
@@ -295,12 +290,12 @@ public class HudifyMain implements ClientModInitializer
 		registerNextKey();
 		registerPrevKey();
 	}
-	private static boolean refreshKeyPrevState = false;
-	private static boolean toggleKeyPrevState = false;
-	private static boolean nextKeyPrevState = false;
+	private static boolean refreshKeyPrevState = false; // these are necessary,
+	private static boolean toggleKeyPrevState = false;  // to prevent one key press
+	private static boolean nextKeyPrevState = false;    // from making the thing run a few dozen times
 	private static boolean prevKeyPrevState = false;
-	// todo can i abstract out the below into a single function with arguments
-//	private static void registerKeyBinding(String name, Boolean prevStateVar, () -> test ) {	}
+	// don't waste time abstracting these, they work perfectly as they are
+	// and the duplicated code is isolated and very easy to collapse and ignore and work around
 
 	private static void registerRefreshKey() {
 		KeyBinding newKey = new KeyBinding("hudify.key.refresh", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify");
