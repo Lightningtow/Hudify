@@ -1,11 +1,7 @@
 plugins {
 	id 'fabric-loom' version '1.6-SNAPSHOT'
-//	id 'maven-publish'
-//	id 'stonecuttter'
-
 }
-version = "${property("hudify_version")}__ch${stonecutter.current.version}" // include game version in the mod filename
-//version = project.hudify_version
+//version = project.chyma_version
 group = project.maven_group
 
 base { archivesName = property("archives_base_name") }
@@ -15,124 +11,50 @@ repositories {	// You should only use this when depending on other mods
 		url = "https://api.modrinth.com/maven"
 //		content { includeGroup "maven.modrinth" } // only needed if using forgegradle
 	}
-	maven { url "https://maven.terraformersmc.com/releases/" }
+	maven {
+		name = "JourneyMap (Public)"
+		url = "https://jm.gserv.me/repository/maven-public/"
+	}
+	maven {
+		url "https://www.cursemaven.com"
+	}
+//	maven { url "https://maven.terraformersmc.com/releases/" }
+
 //	maven {	url = "https://api.modrinth.com/maven" }
 }
-
-
+configurations.all {
+	// Check for snapshots more frequently than Gradle's default of 1 day. 0 = every build.
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
 dependencies {
-//	minecraft "com.mojang:minecraft:${stonecutter.current.minecraft_version}" // provide version with stonecutter
-
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}" // { exclude module: "fabric-api" }
-	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
 
-//	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
-	// bundles jar-in-jar which is bad for stonecutter apparently
-//	include "maven.modrinth:midnightlib:${project.midnightlib_version}"
+//	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}" // { exclude module: "fabric-api" }
 
-//	modImplementation files("run/mods/custom_hud-${project.customhud_version}.jar")
+	modImplementation files("run/mods/custom_hud-4.0.0-beta.421.20.4.jar")
 //	modImplementation "maven.modrinth:customhud:${project.customhud_version}"
 
-//	modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"  // 3.3
-//	modImplementation "maven.modrinth:hudify:3.3.2+1.20.4"
+	modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api', version: project.journeymap_api_version, changing: true
+	modRuntimeOnly "curse.maven:journeymap-${project.jm_project_id}:${project.jm_file_id}"
 
-	if (stonecutter.current.version == "4.0") {
-//		modImplementation files("../../run/mods/custom_hud-4.0.0-beta.391.20.4.jar") // todo you need to comment this for 3.3 to work
-	} else {
-		modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"
-	}
+}
+loom {
+	runConfigs.client { ideConfigGenerated(true) }
+
+	runConfigs.server { ideConfigGenerated(false) } }
+// prevent intelliJ from auto-creating the 'Minecraft Server' run config, you can safely delete this
 
 
-//	if (stonecutter.current.isActive) {
-//		if (stonecutter.current.version == "4.0") {
-//		} else {
-//			modImplementation "${project.customhud_version}"  // 3.3
-//		}
+processResources {}
+//processResources {
+//	inputs.property "version", project.version
+//	filesMatching("fabric.mod.json") {
+//		expand "version": project.version
 //	}
-
-}
-
-if (stonecutter.current.isActive) { // run configs for non-active version would be invalid
-	loom {
-
-//		runConfigs.all // generate IDE tasks for running client, server and testmod, datagen if those are present
-		runConfigs.client {
-			ideConfigGenerated(true)
-			runDir = "../../run"
-		}
-		runConfigs.server { ideConfigGenerated(false) }
-		// prevent intelliJ from auto-creating the 'Minecraft Server' run config, you can safely delete this
-	}
-
-}
-def fabricModInfoJson() {
-	Map info = [
-			"schemaVersion": 1,
-			"id": "hudify",
-			"version": "${version}",
-			"name": "Hudify",
-			"description": "Passes Spotify info to CustomHud",
-			"authors": [ "Lightningtow" ],
-			"contact": [
-					"homepage": "https://github.com/Lightningtow/Hudify",
-//					"sources": "https://github.com/Lightningtow/Hudify",
-					"issues": "https://github.com/Lightningtow/Hudify/issues"
-			],
-			"license": "CC0-1.0",
-			"icon": "assets/hudify/icon.png",
-			"environment": "client",
-			"entrypoints": [
-					"client": [ "lightningtow.hudify.HudifyMain" ],
-//					"modmenu": [ "lightningtow.hudify.integrations.ModMenuIntegration" ]
-			],
-			"depends": [
-					"fabricloader": ">=0.15.0",
-					"minecraft": "~1.20.4",
-					"java": ">=17",
-					"fabric-api": "*",
-			],
-//			    "minecraft": ">=1.20.4- <1.20.5-"
-			"custom": [
-					"hudify_notes": "This fabric.mod.json file is auto-generated from build.gradle",
-
-					"modmenu": [
-							"links": [
-									"modmenu.discord": "https://discord.com/invite/BYSCX96fyt"
-							],
-							"update_checker": true
-					]
-			]
-	]
-//	info.depends += [ "custom_hud": "${project.customhud_version}" ] // this doesnt work because local file
-	if (stonecutter.current.version == "4.0") {
-		info.depends += [ "custom_hud": "*" ]
-
-	} else {
-		info.depends += [ "custom_hud": ">=2.0.0- <4.0.0" ]
-	}
-
-	return info
-}
-tasks.create(name: "generateModInfoJson", type: DefaultTask) {
-	doLast {
-		def output = file("../../src/main/resources/fabric.mod.json")
-		mkdir output.parentFile
-		output.text = new groovy.json.JsonBuilder(fabricModInfoJson()).toPrettyString()
-	}
-}
-//processResources {}
-processResources {
-	dependsOn(generateModInfoJson)
-
-	inputs.property "version", project.version
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
-	}
-}
+//}
 
 tasks.withType(JavaCompile).configureEach { it.options.release = 17 }
 
@@ -143,29 +65,3 @@ java {
 }
 
 jar { from("LICENSE") { rename { "${it}_${project.base.archivesName.get()}" }}}
-
-
-//projectDir = stonecutter.current.project
-//projectVariant = projectDir.split('-')[1] // v1 or v2
-//stonecutter.expression {
-////	when(it) {
-////		"v1" -> projectVariant == "v1"
-////		"v2" -> projectVariant == "v2"
-////		else -> null
-////	}
-//	if (it == "v3") projectVariant == "v3"
-//	else if (it == "v4") projectVariant == "v4"
-//	else return null
-//}
-//val projectDir = stonecutter.current.project
-//val projectVariant = projectDir.split('-')[1] // v1 or v2
-//
-//stonecutter.expression {
-//	when(it) {
-//		"v1" -> projectVariant == "v1"
-//		"v2" -> projectVariant == "v2"
-//		else -> null
-//	}
-//}
-
-// code

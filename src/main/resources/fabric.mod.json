@@ -1,22 +1,24 @@
 {
     "schemaVersion": 1,
-    "id": "hudify",
-    "version": "2.1.0__ch3.3",
-    "name": "Hudify",
-    "description": "Passes Spotify info to CustomHud",
+    "id": "chyma",
+    "version": "1.0.0",
+    "name": "CHYMA",
+    "description": "Adds a \"is minimap displayed\" boolean to CustomHud",
     "authors": [
         "Lightningtow"
     ],
     "contact": {
-        "homepage": "https://github.com/Lightningtow/Hudify",
-        "issues": "https://github.com/Lightningtow/Hudify/issues"
+        "homepage": "https://github.com/Lightningtow/Hudify"
     },
     "license": "CC0-1.0",
-    "icon": "assets/hudify/icon.png",
+    "icon": "assets/chyma/icon.png",
     "environment": "client",
     "entrypoints": {
         "client": [
-            "lightningtow.hudify.HudifyMain"
+            "lightningtow.chyma.ChymaMain"
+        ],
+        "journeymap": [
+            "lightningtow.chyma.integrations.JourneymapIntegration"
         ]
     },
     "depends": {
@@ -27,7 +29,6 @@
         "custom_hud": "*"
     },
     "custom": {
-        "hudify_notes": "This fabric.mod.json file is auto-generated from build.gradle",
         "modmenu": {
             "links": {
                 "modmenu.discord": "https://discord.com/invite/BYSCX96fyt"
