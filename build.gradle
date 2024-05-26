@@ -4,8 +4,8 @@ plugins {
 //	id 'stonecuttter'
 
 }
-version = "${property("hudify_version")}__ch${stonecutter.current.version}" // include game version in the mod filename
-//version = project.hudify_version
+//version = "${property("hudify_version")}__ch${stonecutter.current.version}" // include game version in the mod filename
+version = project.hudify_version
 group = project.maven_group
 
 base { archivesName = property("archives_base_name") }
@@ -13,7 +13,7 @@ base { archivesName = property("archives_base_name") }
 repositories {	// You should only use this when depending on other mods
 	maven {
 		url = "https://api.modrinth.com/maven"
-//		content { includeGroup "maven.modrinth" } // only needed if using forgegradle
+		content { includeGroup "maven.modrinth" }
 	}
 	maven { url "https://maven.terraformersmc.com/releases/" }
 //	maven {	url = "https://api.modrinth.com/maven" }
@@ -29,6 +29,12 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}" // { exclude module: "fabric-api" }
 	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
+	modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"
+
+//	modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api', version: project.journeymap_api_version, changing: true
+//	modCompileOnlyApi group: 'maven.modrinth', name: 'customhud', version: project.customhud_v3_version, changing: true
+//	modRuntimeOnly "maven.modrinth:customhud:${project.customhud_v3_version}"
+
 
 //	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
 	// bundles jar-in-jar which is bad for stonecutter apparently
@@ -38,13 +44,12 @@ dependencies {
 //	modImplementation "maven.modrinth:customhud:${project.customhud_version}"
 
 //	modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"  // 3.3
-//	modImplementation "maven.modrinth:hudify:3.3.2+1.20.4"
 
-	if (stonecutter.current.version == "4.0") {
-//		modImplementation files("../../run/mods/custom_hud-4.0.0-beta.391.20.4.jar") // todo you need to comment this for 3.3 to work
-	} else {
-		modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"
-	}
+//	if (stonecutter.current.version == "4.0") {
+////		modImplementation files("../../run/mods/custom_hud-4.0.0-beta.381.20.4.jar") // todo you need to comment this for 3.3 to work
+//	} else {
+//		modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"
+//	}
 
 
 //	if (stonecutter.current.isActive) {
@@ -56,24 +61,24 @@ dependencies {
 
 }
 
-if (stonecutter.current.isActive) { // run configs for non-active version would be invalid
+//if (stonecutter.current.isActive) { // run configs for non-active version would be invalid
 	loom {
 
-//		runConfigs.all // generate IDE tasks for running client, server and testmod, datagen if those are present
-		runConfigs.client {
-			ideConfigGenerated(true)
-			runDir = "../../run"
-		}
+//			runConfigs.all // generate IDE tasks for running client, server and testmod, datagen if those are present
+//		runConfigs.client {
+//			ideConfigGenerated(true)
+//			runDir = "/run"
+//		}
 		runConfigs.server { ideConfigGenerated(false) }
 		// prevent intelliJ from auto-creating the 'Minecraft Server' run config, you can safely delete this
 	}
-
-}
+//
+//}
 def fabricModInfoJson() {
 	Map info = [
 			"schemaVersion": 1,
 			"id": "hudify",
-			"version": "${version}",
+			"version": "1",
 			"name": "Hudify",
 			"description": "Passes Spotify info to CustomHud",
 			"authors": [ "Lightningtow" ],
@@ -87,15 +92,16 @@ def fabricModInfoJson() {
 			"environment": "client",
 			"entrypoints": [
 					"client": [ "lightningtow.hudify.HudifyMain" ],
-//					"modmenu": [ "lightningtow.hudify.integrations.ModMenuIntegration" ]
+					"modmenu": [ "lightningtow.hudify.integrations.ModMenuIntegration" ]
 			],
 			"depends": [
 					"fabricloader": ">=0.15.0",
 					"minecraft": "~1.20.4",
 					"java": ">=17",
 					"fabric-api": "*",
+					"custom_hud": "*"
 			],
-//			    "minecraft": ">=1.20.4- <1.20.5-"
+			    "minecraft": ">=1.20.4- <1.20.5-",
 			"custom": [
 					"hudify_notes": "This fabric.mod.json file is auto-generated from build.gradle",
 
@@ -108,18 +114,19 @@ def fabricModInfoJson() {
 			]
 	]
 //	info.depends += [ "custom_hud": "${project.customhud_version}" ] // this doesnt work because local file
-	if (stonecutter.current.version == "4.0") {
-		info.depends += [ "custom_hud": "*" ]
-
-	} else {
-		info.depends += [ "custom_hud": ">=2.0.0- <4.0.0" ]
-	}
+//	if (stonecutter.current.version == "4.0") {
+//		info.depends += [ "custom_hud": "*" ]
+//
+//	} else {
+//		info.depends += [ "custom_hud": ">=2.0.0- <4.0.0" ]
+//	}
 
 	return info
 }
 tasks.create(name: "generateModInfoJson", type: DefaultTask) {
 	doLast {
-		def output = file("../../src/main/resources/fabric.mod.json")
+//		def output = file("../../src/main/resources/fabric.mod.json")
+		def output = file("src/main/resources/fabric.mod.json")
 		mkdir output.parentFile
 		output.text = new groovy.json.JsonBuilder(fabricModInfoJson()).toPrettyString()
 	}

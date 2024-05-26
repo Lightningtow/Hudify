@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 import lightningtow.hudify.HudifyMain;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,8 +16,6 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
-import net.minecraft.util.Util;
 import org.apache.logging.log4j.Level;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -24,13 +23,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static java.lang.Thread.sleep;
+import static lightningtow.hudify.HudifyMain.MOD_ID;
 import static lightningtow.hudify.util.SpotifyData.*;
-import static lightningtow.hudify.HudifyMain.db;
+import static lightningtow.hudify.HudifyConfig.db;
 import static lightningtow.hudify.HudifyMain.LogThis;
 public class SpotifyUtil
 {
-    private static final String CLIENT_ID = "2f8c634ba8cc43a8be450ff3f745886f";
+    private static final String client_id = "2f8c634ba8cc43a8be450ff3f745886f";
     private static String verifier;
     private static String authCode;
     private static String accessToken;
@@ -48,30 +47,19 @@ public class SpotifyUtil
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
-    private static final int DELAY_BEFORE_REFRESH = 1000;
 
     //<editor-fold desc="auth utils">
     public static void initialize()
     {
-        // initial startup stuff, called ONLY at minecraft startup. checks for token file and prompts user to auth if it doesnt exist
+        //Log(Level.INFO,"running SpotifyUtil.initialize()");
         LogThis(Level.INFO,"initializing Spotify integration");
-//        try {
-//            Files.createDirectories(Paths.get("hudify"));
-//        } catch (Exception e) {
-//
-//        }
-//        File directory = new File(System.getProperty("user.dir") + File.separator
-//                + "config" + File.separator + MOD_ID.toLowerCase());
-//        if (!directory.exists()) directory.mkdir();
 
+        authFile = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + "HudifyTokens.json");
 //        authFile = new File(System.getProperty("user.dir") + File.separator
-//                + "config" + File.separator + MOD_ID.toLowerCase() + File.separator + "hudify_tokens.json");
-//        authFile = new File(directory + File.separator + "hudify_tokens.json");
+//                + "config" + File.separator + MOD_ID+ File.separator + "HudifyTokens.json");
+
         try
         {
-            authFile = new File(System.getProperty("user.dir")
-                    + File.separator + "config" + File.separator + "hudify_tokens.json");
-
             if (!authFile.exists())
             {
 //                authFile.createNewFile();
@@ -83,8 +71,6 @@ public class SpotifyUtil
                 accessToken = "";
                 refreshToken = "";
                 sp_is_authorized = false;
-                Util.getOperatingSystem().open(SpotifyUtil.authorize());
-
             }
             else
             {
@@ -102,12 +88,8 @@ public class SpotifyUtil
                     accessToken = "";
                     refreshToken = "";
                     sp_is_authorized = false;
-                    Util.getOperatingSystem().open(SpotifyUtil.authorize());
-
                 }
                 scan.close();
-
-
             }
         } catch (IOException e)
         {
@@ -119,27 +101,22 @@ public class SpotifyUtil
 
     public static String authorize()
     {
-        // this is what opens the webpage with the authorization prompt
         if (db) LogThis(Level.INFO,"running SpotifyUtil.authorize()");
         StringBuilder authURI = null;
         String[] scope_list = {
                 "user-read-playback-state",
-                "user-read-currently-playing",
+//                "user-read-currently-playing", // kinda redundant with user-read-playback-state
                 "user-modify-playback-state",
-                "playlist-read-private"
-        };
+                "playlist-read-private"  };
         // https://developer.spotify.com/documentation/web-api/concepts/scopes
         try
         {
             authURI = new StringBuilder();
             authURI.append("https://accounts.spotify.com/authorize");
-            authURI.append("?client_id=" + CLIENT_ID); // %3A is : and &2F is /, looks like. but just tell people to use localhost8001
+            authURI.append("?client_id=" + client_id);
             authURI.append("&response_type=code"); // http://localhost:8001/callback
             authURI.append("&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fcallback");
             authURI.append("&scope=");
-//            authURI.append("&scope=user-read-playback-state%20user-read-currently-playing");
-//            authURI.append("%20user-modify-playback-state");
-//            authURI.append("%20playlist-read-private");
             for (String scope : scope_list) {
                 authURI.append("%20").append(scope);
             }
@@ -182,7 +159,7 @@ public class SpotifyUtil
             accessBody.append("grant_type=authorization_code");
             accessBody.append("&code=").append(authCode);
             accessBody.append("&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fcallback");
-            accessBody.append("&client_id=" + CLIENT_ID);
+            accessBody.append("&client_id=" + client_id);
             accessBody.append("&code_verifier=").append(verifier);
             HttpRequest accessRequest = HttpRequest.newBuilder(
                     new URI(tokenAddress))
@@ -191,7 +168,6 @@ public class SpotifyUtil
                     .POST(HttpRequest.BodyPublishers.ofString(accessBody.toString()))
                     .build();
             LogThis(Level.INFO,"url request" + accessBody);
-            //request access token
             HttpResponse<String> accessResponse = client.send(accessRequest, HttpResponse.BodyHandlers.ofString());
             JsonObject accessJson = JsonParser.parseString(accessResponse.body()).getAsJsonObject();
             accessToken = accessJson.get("access_token").getAsString();
@@ -214,7 +190,7 @@ public class SpotifyUtil
         {
             String refreshRequestBody = "grant_type=refresh_token" +
                     "&refresh_token=" + refreshToken +
-                    "&client_id=" + CLIENT_ID;
+                    "&client_id=" + client_id;
 
             HttpRequest refreshRequest = HttpRequest.newBuilder(
                     new URI(tokenAddress))
@@ -223,7 +199,6 @@ public class SpotifyUtil
                     .POST(HttpRequest.BodyPublishers.ofString(refreshRequestBody))
                     .build();
 
-            // refresh access token
             HttpResponse<String> refreshResponse = client.send(refreshRequest, HttpResponse.BodyHandlers.ofString());
             if (refreshResponse.statusCode() == 200) // successful
             {
@@ -243,7 +218,7 @@ public class SpotifyUtil
 
     public static void refreshActiveSession()
     {
-        // todo whatever this does, its necessary lol, without it youre made to refresh all the time
+    // todo this gets devices? is this only needed for the volume thing?
         // todo this can likely be abstracted into apiRequest
     // https://developer.spotify.com/documentation/web-api/reference/get-a-users-available-devices
         //        if (db) Log(Level.INFO,"running SpotifyUtil.refreshActiveSession");
@@ -267,7 +242,7 @@ public class SpotifyUtil
                 sp_progress = 0;
                 if (db) LogThis(Level.INFO,"SpotifyUtil.refreshActiveSession: no active device");
 
-//                sp_is_playing = false;
+                sp_is_playing = false;
 //                isPlaying = false;
                 return;
             }
@@ -322,13 +297,12 @@ public class SpotifyUtil
 
 
     public enum reqType {GET, POST, PUT, DELETE}
-    /** the backbone of the program. Makes calls to spotify's api
-     * pass this a URL, like in the "request sample" part of
-     * <a href="https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback">...</a>
+    /** pass this a URL, like in the "request sample" part of <a href="https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback">...</a>
      * THIS CAN RETURN NULL
      * and is supposed to return null, if you're doing stuff that doesn't need a response like play/pause, skip etc
-     * currently this is used for play/pause, skip forward and skip back.
-     * the call to get playback info is made in HudifyMain.updatePlaybackInfo()
+     * example call:  EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT,"https:/ /api.spotify.com/v1/me/player/pause"));
+     * (remove the whitespace between the slashes in the link above, thats to stop javadocs from throwing warnings)
+     /** be sure to call this using an executor, something not on the main thread, so as to not freeze the main thread
     **/
     public static JsonObject apiRequest(reqType type, String url)  {
         try
@@ -346,11 +320,10 @@ public class SpotifyUtil
             reqBuilder.header("Authorization", "Bearer " + accessToken).build();
             HttpRequest request = reqBuilder.build();
 
-            //api request
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 //            Log(Level.INFO,"GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
-
-            // update status code only within updatePlaybackInfo which makes its own api call
+            sp_status_code = response.statusCode();
 
             if (response.statusCode() == 401) /* unauthorized */ {
                 if (refreshAccessToken()) apiRequest(type, url);
@@ -362,24 +335,23 @@ public class SpotifyUtil
 
             }
             else if (response.statusCode() == 404) /* not found */ {
-//                refreshActiveSession();
-                if(db) LogThis(Level.INFO,"Retrying API request...");
-                // API request
+                refreshActiveSession();
+                if(db) LogThis(Level.INFO,"Retrying get request...");
                 response = client.send(request, HttpResponse.BodyHandlers.ofString());
 //                Log(Level.INFO,"GET Request (" + uri + "): " + getRes.statusCode());
             }
             else if (response.statusCode() == 429) { // rate limited
                 // approximately 180 calls per minute without throwing 429, ~3 calls per second
                 LogThis(Level.ERROR,"RATE LIMITED============================================================");
-                sleep(3000);
+                Thread.sleep(3000);
                 return null;
 //                return "rate limited!";
                 //                        } else if (data[0].equals("Reset")) {
                 // getPlaybackInfo returns this if connection reset
-                //      Log(Level.ERROR,"Reset condition, maintaining HUD until reset"); // was level info and from blockiy
+                //                            Log(Level.ERROR,"Reset condition, maintaining HUD until reset"); // was level info and from blockiy
             }
 //            Log(Level.INFO,"get entire request json " + getRes.body()); // prints entire block of returned json
-            if (response.body().isEmpty()) { // this is supposed to happen with calls like play/pause/skip
+            if (response.body().isEmpty()) {
                 return null;
             }
             else {
@@ -406,8 +378,11 @@ public class SpotifyUtil
 
 
     public static String scrub(String input) {
-        // take info that isnt super relevant like "bonus track" or "remastered" and remove it from the song title
+
         String output = input;
+
+//        String[] blacklist = {"bonus track", "bonus", "intro", "outro", "interlude", "original mix", "single version", "recorded at spotify singles nyc",
+//                "spotify singles", "remastere?d? [0-9]{4} \\/ remixed",};
 
         ArrayList<String> blacklist = new ArrayList<>();
         blacklist.add("bonus track");
@@ -454,54 +429,32 @@ public class SpotifyUtil
     public static void nextSong() {
         EXECUTOR_SERVICE.execute(() -> {
             apiRequest(reqType.POST,"https://api.spotify.com/v1/me/player/next");
-            LogThis(Level.INFO,"Skipping to next song");
             sp_duration = -2;
-
-            delayedRefresh();
-
+            LogThis(Level.INFO,"Skipping to next song");
         });
     }
     public static void prevSong() {
         EXECUTOR_SERVICE.execute(() -> {
             apiRequest(reqType.POST,"https://api.spotify.com/v1/me/player/previous");
-            LogThis(Level.INFO,"Skipping to previous song");
             sp_duration = -2;
-
-            delayedRefresh();
-
+            LogThis(Level.INFO,"Skipping to previous song");
         });
     }
 
-
     public static void togglePlayPause() {
-        // THESE CALLS WILL RETURN 401 FORBIDDEN IF YOU TRY TO PLAY WHEN ALREADY PLAYING, OR VICE VERSA
         if (sp_is_playing) { // isPlaying
             if (db) HudifyMain.send_message("Paused playback", 3);
             LogThis(Level.INFO,"Pausing playback");
             EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT,"https://api.spotify.com/v1/me/player/pause"));
         }
         else {
-            EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT, "https://api.spotify.com/v1/me/player/play"));
             if (db) HudifyMain.send_message("Resumed playback", 3);
             LogThis(Level.INFO,"Resuming playback");
+            EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT, "https://api.spotify.com/v1/me/player/play"));
         }
 
-        delayedRefresh();
-//        sp_is_playing = !sp_is_playing; // nope this just toggles it and gets it stuck
+//        isPlaying = !isPlaying; // this should update automatically
     }
-
-    private static void delayedRefresh() {
-        // sleeps for DELAY_BEFORE_REFRESH ms then refresh. if you refresh too soon after skipping, it gets old, now-incorrect info
-        try {
-            Thread.sleep(DELAY_BEFORE_REFRESH);
-            HudifyMain.updatePlaybackInfo();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            // this catch is necessary, see
-            // https://stackoverflow.com/questions/24104313/how-do-i-make-a-delay-in-java#comment131988717_24104332
-        }
-    }
-
     //</editor-fold> playback functions
 
 

@@ -1,12 +1,26 @@
 # Hudify - A Spotify integration for CustomHud
 ## Requires [CustomHud](https://modrinth.com/mod/customhud)
 
+<details>
+<summary>Installation</summary>
 
-You'll need to authorize the third party app Hudify to your Spotify account to use this mod.   
+You'll need to create a Spotify developer app to use this mod.  
+Why? In short, because it's easier for everyone. Since Spotify's API ratelimits are per app, not per user,
+if everyone has their own app, Hudify can poll the API much more frequently without worrying about hitting ratelimits.
+This allows Hudify to display far more accurate info, with much less risk of getting desynchronized.  
 Playback controls are locked behind a Spotify Premium subscription, which is out of my control  
-You'll be prompted to authorize on your first startup
+### Installation instructions:
+1) Create a Spotify app according to [this](https://developer.spotify.com/documentation/web-api/tutorials/getting-started#create-an-app).  
+2) Set your app name and description to anything you want, but be sure to set your Redirect URI to `http://localhost:8001/callback`.  
+3) Get your Client ID from your newly created app  
+4) And that's it, as far as Spotify goes. No need to request an access token like the docs prompt you to, Hudify takes care of that for you.  
+5) 
 
 To uninstall, also be sure to also disconnect the app from https://www.spotify.com/us/account/apps
+
+</details>
+
+
 
 Program messages are displayed in the `{sp_message}` variable rather than in Minecraft chat, for compatibility with more Minecraft versions.
 

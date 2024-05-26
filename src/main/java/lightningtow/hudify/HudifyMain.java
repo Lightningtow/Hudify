@@ -13,10 +13,13 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Util;
 import org.apache.logging.log4j.Level;
 import org.lwjgl.glfw.GLFW;
 
+import static lightningtow.hudify.HudifyConfig.inactive_poll_rate;
 import static lightningtow.hudify.util.SpotifyData.*;
+import static lightningtow.hudify.HudifyConfig.db;
 
 import java.net.http.HttpResponse;
 import java.util.Arrays;
@@ -25,13 +28,13 @@ import java.util.concurrent.Executors;
 
 public class HudifyMain implements ClientModInitializer
 {
-
-	public static final Boolean db = true;
-	//<editor-fold desc="data and util funcs">
-
 	public static final String MOD_ID = "hudify";
 	public static final String MOD_DISPLAY_NAME = "Hudify";
 
+	private static boolean refreshKeyPrevState = false;
+	private static boolean toggleKeyPrevState = false;
+	private static boolean nextKeyPrevState = false;
+	private static boolean prevKeyPrevState = false;
 	private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
 	public static void dump (String source) {
@@ -40,6 +43,7 @@ public class HudifyMain implements ClientModInitializer
 				sp_track, sp_first_artist, "(" + sp_artists + ")", sp_context_type)
 		);
 	}
+
 	private static void tick_message() {
 		if (sp_msg_time_rem > 0)
 			sp_msg_time_rem -= 1;
@@ -47,21 +51,23 @@ public class HudifyMain implements ClientModInitializer
 		else
 			set_sp_message("");
 	}
+
 	public static void send_message (String msg, int msg_dur) {
 		sp_msg_time_rem = msg_dur;
 		set_sp_message(msg);
 	}
-//	public static void truncate() { // chop the ends off variables after a user-specified number of characters
-//		int len = HudifyConfig.truncate_length;
-////		if (db) Log(Level.INFO,"truncating to: {}", sp_artists.substring(0, len));
-//
-//		sp_artists = (sp_artists.length() > len) ? sp_artists.substring(0, len).trim() + "..." : sp_artists;
-//		sp_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
-//		sp_fancy_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
-//		sp_album = (sp_album.length() > len) ? sp_album.substring(0, len).trim() + "..." : sp_album;
-//		// make this only run once. use before/after variables to detect if track URI changed
-//		// attempt to make the outputted variable cleaner, truncating at word breaks and removing trailing commas
-//	}
+
+	public static void truncate() { // chop the ends off variables after a user-specified number of characters
+		int len = HudifyConfig.truncate_length;
+//		if (db) Log(Level.INFO,"truncating to: {}", sp_artists.substring(0, len));
+
+		sp_artists = (sp_artists.length() > len) ? sp_artists.substring(0, len).trim() + "..." : sp_artists;
+		sp_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
+		sp_fancy_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
+		sp_album = (sp_album.length() > len) ? sp_album.substring(0, len).trim() + "..." : sp_album;
+		// todo make this only run once. use before/after variables to detect if track URI changed
+		// todo attempt to make the outputted variable cleaner, truncating at word breaks and removing trailing commas
+	}
 
 //	public enum Level { INFO, ERROR, TRACE, DEBUG, LOG, FATAL, WARN, OFF, ALL }
 	public static void LogThis(org.apache.logging.log4j.Level lvl, String msg) {
@@ -81,7 +87,6 @@ public class HudifyMain implements ClientModInitializer
 		}
 	}
 
-	//</editor-fold> data and util funcs
 
 	@Override
 	public void onInitializeClient()
@@ -96,83 +101,75 @@ public class HudifyMain implements ClientModInitializer
 			LogThis(Level.ERROR,"Error integrating with CustomHud: " + e);
 		}
 //		File authFile = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + "HudifyTokens.json");
-//		HudifyConfig.init(MOD_ID, HudifyConfig.class);
-		SpotifyUtil.initialize();
-		registerKeyBindings();
-		updatePlaybackInfo();
-		SpotifyData.resetData(true);
+		HudifyConfig.init(MOD_ID, HudifyConfig.class); //todo uncomment me
 
+//		Log(Level.INFO,"initializing main loop");
+		//info
+		if (!SpotifyData.sp_is_authorized) {
+			LogThis(Level.INFO,"initializing client. Spotify is not authorized, initiating authorization progress ");
+
+			Util.getOperatingSystem().open(SpotifyUtil.authorize());
+		}
+//		else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 		Thread requestThread = new Thread( () -> {
-		boolean worldNullAlreadyReset = false;
+
 			while (true) {
 				try {
-					Thread.sleep(1000);
-					if (db) HudifyMain.dump("Main loop");
-					UpdateMaps();
-//					if (sp_needs_refresh) {
-//						updatePlaybackInfo();
-//						sp_needs_refresh = false;
-//					}
+					Thread.sleep(HudifyConfig.poll_rate);
 
 					if (MinecraftClient.getInstance().world == null) {
-						Thread.sleep(3000); // you can just leave this as one second cause it doesn't poll anything
-//						sp_progress = 0;
-//						sp_duration = -1;
-						if (!worldNullAlreadyReset) { // only
-							SpotifyData.resetData(true);
-							worldNullAlreadyReset = true;
-						}
+						Thread.sleep(1000); // you can just leave this as one second cause it doesn't poll anything
+						sp_progress = 0;
+						sp_duration = -1;
 					}
-					else  {
-						worldNullAlreadyReset = false;
+					else {
+						updatePlaybackInfo();
 						tick_message();
+						// 204 when app is closed, doesnt immediately go away when app opened
 						if (sp_status_code == 204) { // No Content - The request has succeeded but returns no message body.
 //							sp_progress = 0; // dont reset progress and duration here, it breaks it when app is paused
 							SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
-							SpotifyData.resetData();
-						}
-						if (sp_progress > sp_duration) { // 204 when app is closed, doesnt immediately go away when app opened
-							sp_progress = 0;
-							updatePlaybackInfo();
-							if (sp_status_code == 429) { // rate limited
-								// approximately 180 calls per minute without throwing 429, ~3 calls per second
-								LogThis(Level.ERROR, "RATE LIMITED============================================================");
-								Thread.sleep(3000);
-							}
+							Thread.sleep(inactive_poll_rate);
+
+						} else if (sp_status_code == 429) { // rate limited
+							// approximately 180 calls per minute without throwing 429, ~3 calls per second
+							LogThis(Level.ERROR,"RATE LIMITED============================================================");
+							Thread.sleep(3000);
 //                        } else if (data[0].equals("Reset")) {
-								// getPlaybackInfo returns this if connection reset
+							// getPlaybackInfo returns this if connection reset
 //                            Log(Level.ERROR,"Reset condition, maintaining HUD until reset"); // was level info and from blockiy
-
-						} else if (sp_is_playing) {
-							sp_progress += 1;
 						}
-					}
+//						else {}
 
+					}
 				} catch (InterruptedException e) {
                     LogThis(Level.ERROR,"error in main loop: " + Arrays.toString(e.getStackTrace()));
 				}
 			}
 		});
-		requestThread.setName("Spotify Thread");
+		requestThread.setName("Spotify Thread"); //spotify thread
 		requestThread.start();
+		SpotifyUtil.initialize();
+		registerKeyBindings();
 
 	}
 
 	public static void updatePlaybackInfo()
 	{
-		// make the api call to get playback info
 		String dump_msg = "getPlaybackInfo";
 		try
 		{
+
 			HttpResponse<String> playbackResponse =
 					SpotifyUtil.getClient().send(SpotifyUtil.getPlaybackRequest(), HttpResponse.BodyHandlers.ofString());
 			// https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback
 
 			sp_status_code = playbackResponse.statusCode();
-
 //            Log(Level.INFO,"getPlaybackInfo - status code: " + playbackResponse.statusCode());
 			// app closed returns 204
-//			if (playbackResponse.statusCode() == 204) { }  // no content - returned when app is closed
+//			if (playbackResponse.statusCode() == 204) { // no content - returned when app is closed
+//
+//			}
 
 			if (playbackResponse.statusCode() == 429) return; // rate limited
 			else if (playbackResponse.statusCode() == 401) /* unauthorized */ {
@@ -183,9 +180,11 @@ public class HudifyMain implements ClientModInitializer
 			{
 				JsonObject json = (JsonObject) JsonParser.parseString(playbackResponse.body());
 				// the `json.get("progress_ms")` is incorrect after pausing then resuming
+//				Log(Level.ERROR,"external url spotify: "
+//				+ json.get("context").getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify"));
+//				Log(Level.ERROR,"context href: " + json.get("context").getAsJsonObject().get("href"));
+//				Log(Level.ERROR,"context uri: " + json.get("context").getAsJsonObject().get("uri"));
 
-
-				//<editor-fold desc="update individual variables">
 
 				dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
 
@@ -199,7 +198,7 @@ public class HudifyMain implements ClientModInitializer
 				/* repeat */  if (sp_repeat_state.equals("context")) sp_repeat_state = "all"; // else leave it
 
 				sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
-//				if (HudifyConfig.scrub_name) sp_track = SpotifyUtil.scrub(sp_track);
+				if (HudifyConfig.scrub_name) sp_track = SpotifyUtil.scrub(sp_track);
 				sp_fancy_track = SpotifyUtil.scrub(sp_track);
 
 				sp_device_id = json.get("device").getAsJsonObject().get("id").getAsString();
@@ -245,7 +244,7 @@ public class HudifyMain implements ClientModInitializer
 				}
 
 
-				// artist info
+				/** sp_artists + sp_first_artist **/
 				JsonArray artistArray = json.get("item").getAsJsonObject().get("artists").getAsJsonArray();
 				StringBuilder artistString = new StringBuilder(artistArray.get(0).getAsJsonObject().get("name").getAsString());
 				sp_first_artist = artistString.toString();
@@ -253,32 +252,30 @@ public class HudifyMain implements ClientModInitializer
 					artistString.append(", ").append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
 				}
 				sp_artists = artistString.toString();
-				// artist info
+				/** sp_artists + sp_first_artist **/
 
 
 //		sp_album = sp_is_podcast ? "" : json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 				sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 
-				//</editor-fold> update individual variables
-
-
 				SpotifyData.UpdateMaps();
 
 			} // if response successful
 
-//			if (HudifyConfig.truncate_length != -1) truncate();
+			if (HudifyConfig.truncate_length != -1) truncate();
 
 		} catch (Exception e) {
-			LogThis(Level.ERROR,"exception caught in updatePlaybackInfo(): " + e.getMessage());
-//            if (e instanceof IOException && e.getMessage().equals("Connection reset")) {
+			LogThis(Level.ERROR,"exception caught in getPlaybackInfo(): " + e.getMessage());
+//            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
+//            {
 //                Log(Level.INFO,"Resetting connection and retrying info get...");
-////                results[0] = "Reset"; }
-//            else, catch generic exception ig
+////                results[0] = "Reset";
+//            }
+//            else
 		}
 		HudifyMain.dump(dump_msg);
 //        return;
 	}
-
 
 
 
@@ -290,23 +287,17 @@ public class HudifyMain implements ClientModInitializer
 		registerNextKey();
 		registerPrevKey();
 	}
-	private static boolean refreshKeyPrevState = false; // these are necessary,
-	private static boolean toggleKeyPrevState = false;  // to prevent one key press
-	private static boolean nextKeyPrevState = false;    // from making the thing run a few dozen times
-	private static boolean prevKeyPrevState = false;
-	// don't waste time abstracting these, they work perfectly as they are
-	// and the duplicated code is isolated and very easy to collapse and ignore and work around
-
+	// todo i can abstract out the below into a single function with arguments
 	private static void registerRefreshKey() {
 		KeyBinding newKey = new KeyBinding("hudify.key.refresh", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "hudify");
 		KeyBindingHelper.registerKeyBinding(newKey);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (newKey.wasPressed() && !refreshKeyPrevState) {
-//				if (sp_is_authorized) { // no need to check authorization ; apiRequest already does
-				if (db) LogThis(Level.INFO,"Refresh key pressed");
-				updatePlaybackInfo();
-//				} else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
+				if (sp_is_authorized) {
+					updatePlaybackInfo();
+				}
+				else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 			}
 			refreshKeyPrevState = newKey.wasPressed();
 		});
@@ -317,10 +308,11 @@ public class HudifyMain implements ClientModInitializer
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (newKey.wasPressed() && !toggleKeyPrevState) {
-//				if (sp_is_authorized) {
-					if (db) LogThis(Level.INFO,"Toggle key pressed");
+				if (sp_is_authorized) {
+					if (db) LogThis(Level.INFO,"Toggle key pressed!"); //info
 					SpotifyUtil.togglePlayPause();
-//				} else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
+				}
+				else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 			}
 			toggleKeyPrevState = newKey.wasPressed();
 		});
@@ -331,10 +323,11 @@ public class HudifyMain implements ClientModInitializer
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 		if (newKey.wasPressed() && !nextKeyPrevState) {
-//			if (sp_is_authorized) {
+			if (sp_is_authorized) {
 				if (db) LogThis(Level.INFO,"Next key pressed");
 				SpotifyUtil.nextSong();
-//			} else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
+			}
+			else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 
 		}
 			nextKeyPrevState = newKey.wasPressed();
@@ -346,10 +339,11 @@ public class HudifyMain implements ClientModInitializer
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (newKey.wasPressed() && !prevKeyPrevState) {
-//				if (sp_is_authorized) {
+				if (sp_is_authorized) {
 					if (db) LogThis(Level.INFO,"Prev key pressed");
 					SpotifyUtil.prevSong();
-//				} else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
+				}
+				else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 			}
 			prevKeyPrevState = newKey.wasPressed();
 		});

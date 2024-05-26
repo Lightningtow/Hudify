@@ -1,7 +1,7 @@
 {
     "schemaVersion": 1,
     "id": "hudify",
-    "version": "2.1.0__ch3.3",
+    "version": "1",
     "name": "Hudify",
     "description": "Passes Spotify info to CustomHud",
     "authors": [
@@ -17,6 +17,9 @@
     "entrypoints": {
         "client": [
             "lightningtow.hudify.HudifyMain"
+        ],
+        "modmenu": [
+            "lightningtow.hudify.integrations.ModMenuIntegration"
         ]
     },
     "depends": {
@@ -26,6 +29,7 @@
         "fabric-api": "*",
         "custom_hud": "*"
     },
+    "minecraft": ">=1.20.4- <1.20.5-",
     "custom": {
         "hudify_notes": "This fabric.mod.json file is auto-generated from build.gradle",
         "modmenu": {

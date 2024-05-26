@@ -6,11 +6,11 @@ pluginManagement {
 			name = 'Fabric'
 			url = 'https://maven.fabricmc.net/'
 		}
-		maven { url = "https://maven.kikugie.dev/releases" }
+//		maven { url = "https://maven.kikugie.dev/releases" }
 	}
 }
 
-plugins { id "dev.kikugie.stonecutter" version "0.3.5" }
+//plugins { id "dev.kikugie.stonecutter" version "0.3.5" }
 
 //stonecutter {
 //	shared {
@@ -22,31 +22,31 @@ plugins { id "dev.kikugie.stonecutter" version "0.3.5" }
 //
 //	create rootProject
 //}
-stonecutter {
-	shared {
-//		versions "1.20.4", "1.20.1" // these specify directories used in `versions`, as well as versions used in comments
-//		versions "3.3", "4.0" // these specify directories used in `versions`, as well as versions used in comments
-		versions "3.3" // these specify directories used in `versions`, as well as versions used in comments
-		vcsVersion "3.3"
-	}
-
+//stonecutter {
 //	shared {
-//		vers("1.20.4--v3", "1.20.4")
-//		vers("1.20.4--v4", "1.20.4")
-////		vers("1.20.1--v3", "1.20.1")
-////		vers("1.20.4--v3", "1.20.2")
-////		vers("1.20.6--v3", "1.20.6")
-////		vers("1.20.1--v4", "1.20.1")
-////		vers("1.20.4--v4", "1.20.2")
-////		vers("1.20.6--v4", "1.20.6")
+////		versions "1.20.4", "1.20.1" // these specify directories used in `versions`, as well as versions used in comments
+////		versions "3.3", "4.0" // these specify directories used in `versions`, as well as versions used in comments
+//		versions "3.3" // these specify directories used in `versions`, as well as versions used in comments
 //		vcsVersion "3.3"
-//
 //	}
-
-
-
-	create rootProject
-}
+//
+////	shared {
+////		vers("1.20.4--v3", "1.20.4")
+////		vers("1.20.4--v4", "1.20.4")
+//////		vers("1.20.1--v3", "1.20.1")
+//////		vers("1.20.4--v3", "1.20.2")
+//////		vers("1.20.6--v3", "1.20.6")
+//////		vers("1.20.1--v4", "1.20.1")
+//////		vers("1.20.4--v4", "1.20.2")
+//////		vers("1.20.6--v4", "1.20.6")
+////		vcsVersion "3.3"
+////
+////	}
+//
+//
+//
+//	create rootProject
+//}
 //extensions.configure<StonecutterSettings> {
 //	kotlinController = true
 //	centralScript = "build.gradle.kts"

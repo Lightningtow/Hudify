@@ -1,9 +1,0 @@
-plugins.apply "dev.kikugie.stonecutter"
-stonecutter.active "3.3" /* [SC] DO NOT EDIT */
-stonecutter.registerChiseled tasks.register("chiseledBuild", stonecutter.chiseled) {
-    setGroup "build"
-
-    ofTask "build"
-}
-// to regenerate run tasks: for each version, 'gradle->stonecutter->set active project to xx', then 'refresh active project'
-// dont use `Tasks -> project -> runActive` since this doesnt work with the shared directory
