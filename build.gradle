@@ -5,9 +5,9 @@ plugins {
 
 }
 //version = "${property("hudify_version")}__ch${stonecutter.current.version}" // include game version in the mod filename
-version = project.hudify_version
+version = "${project.hudify_version}__for_customhud_v${customhud_api_label}"
+//version = project.hudify_version
 group = project.maven_group
-
 base { archivesName = property("archives_base_name") }
 
 repositories {	// You should only use this when depending on other mods
@@ -21,7 +21,6 @@ repositories {	// You should only use this when depending on other mods
 
 
 dependencies {
-//	minecraft "com.mojang:minecraft:${stonecutter.current.minecraft_version}" // provide version with stonecutter
 
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -30,45 +29,23 @@ dependencies {
 	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}" // { exclude module: "fabric-api" }
 //	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
 	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
-	modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"
+	modImplementation "maven.modrinth:customhud:${project.customhud_version}"
 
 //	modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api', version: project.journeymap_api_version, changing: true
 //	modCompileOnlyApi group: 'maven.modrinth', name: 'customhud', version: project.customhud_v3_version, changing: true
 //	modRuntimeOnly "maven.modrinth:customhud:${project.customhud_v3_version}"
 
-
 //	include "maven.modrinth:midnightlib:${project.midnightlib_version}"
-
 //	modImplementation files("run/mods/custom_hud-${project.customhud_version}.jar")
-//	modImplementation "maven.modrinth:customhud:${project.customhud_version}"
-
-//	modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"  // 3.3
-
-//	if (stonecutter.current.version == "4.0") {
-////		modImplementation files("../../run/mods/custom_hud-4.0.0-beta.381.20.4.jar") // todo you need to comment this for 3.3 to work
-//	} else {
-//		modImplementation "maven.modrinth:customhud:3.3.2+1.20.4"
-//	}
-
 
 }
 
-loom {
-
-//			runConfigs.all // generate IDE tasks for running client, server and testmod, datagen if those are present
-//		runConfigs.client {
-//			ideConfigGenerated(true)
-//			runDir = "/run"
-//		}
-	runConfigs.server { ideConfigGenerated(false) }
-	// prevent intelliJ from auto-creating the 'Minecraft Server' run config, you can safely delete this
-}
+loom { runConfigs.server { ideConfigGenerated(false) } }
+// prevents intelliJ from auto-creating the 'Minecraft Server' run config. You can safely delete this
 
 
-//processResources {}
-processResources {
-//	dependsOn(generateModInfoJson)
 
+processResources { // converts the  "version": "${version}" in the fabric.mod.json to the actual version
 	inputs.property "version", project.version
 	filesMatching("fabric.mod.json") {
 		expand "version": project.version

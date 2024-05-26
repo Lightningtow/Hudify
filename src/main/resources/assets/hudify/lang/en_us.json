@@ -19,8 +19,5 @@
   "hudify.midnightconfig.db": "Log debug info",
   "hudify.midnightconfig.db.tooltip": "Logs extra debug info. Very spammy",
   "hudify.midnightconfig.CLIENT_ID": "Spotify Client ID",
-  "hudify.midnightconfig.CLIENT_ID.tooltip": "The Client ID for your Spotify app. See readme",
-
-  "hudify.midnightconfig.db": "Log debug info",
-  "hudify.midnightconfig.db.tooltip": "Logs extra debug info. Very spammy"
+  "hudify.midnightconfig.CLIENT_ID.tooltip": "The Client ID for your Spotify app. See readme"
 }

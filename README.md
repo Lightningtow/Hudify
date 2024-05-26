@@ -1,5 +1,5 @@
 # Hudify - A Spotify integration for CustomHud
-## Requires [CustomHud](https://modrinth.com/mod/customhud)
+## Requires [CustomHud](https://modrinth.com/mod/customhud). Please read the installation instructions below!  
 
 <details>
 <summary>Installation</summary>
@@ -8,13 +8,14 @@ You'll need to create a Spotify developer app to use this mod.
 Why? In short, because it's easier for everyone. Since Spotify's API ratelimits are per app, not per user,
 if everyone has their own app, Hudify can poll the API much more frequently without worrying about hitting ratelimits.
 This allows Hudify to display far more accurate info, with much less risk of getting desynchronized.  
-Playback controls are locked behind a Spotify Premium subscription, which is out of my control  
+Note: Playback controls are locked behind a Spotify Premium subscription, which is out of my control.  
+The CustomHud variables should work fine without a subscription.   
 ### Installation instructions:
 1) Create a Spotify app according to [this](https://developer.spotify.com/documentation/web-api/tutorials/getting-started#create-an-app).  
 2) Set your app name and description to anything you want, and be sure to set your Redirect URI to `http://localhost:8001/callback`.  
 3) Get your Client ID from your newly created app  
-4) And that's it, as far as Spotify goes. No need to request an access token like the docs prompt you to, Hudify takes care of that for you.  
-5) 
+4) Put your Client ID in Hudify's config, via ModMenu.  
+5) Press a Hudify hotkey to initialize, and that's it!. No need to request an access token like the docs prompt you to, because Hudify takes care of that for you.
 
 To uninstall, also be sure to also disconnect the app from https://www.spotify.com/us/account/apps
 
@@ -71,7 +72,7 @@ These were added by me for debugging, I can't think of any reason you'd need the
 {sp_album}
 {sp_artists}
 {sp_progress} / {sp_duration}
-Playing from {sp_context_name} ({sp_context_type})
+{{sp_context_name, "Playing from {sp_context_name} ({sp_context_type})"}}
 
 Shuffle: {sp_shuffle}
 Repeat: {sp_repeat}
@@ -80,7 +81,7 @@ Repeat: {sp_repeat}
 =endif=
 ```
 #### Known issues:
-- playback controls can be finicky
+- playback controls can be finicky. Don't mash the keybinds, it'll make things worse  
 - at launch, variables are empty if app is open but paused
 - context doesn't update if playing from queue or search results. 
   - This is a limitation of [Spotify's api](https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback). I don't believe I can fix this

@@ -17,6 +17,8 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
+import net.minecraft.util.Util;
 import org.apache.logging.log4j.Level;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -105,15 +107,24 @@ public class SpotifyUtil
         updatePlaybackRequest();
     }
 
-    public static String authorize()
+    public static void authorize()
     {
+        // this is what opens the web browser to authorize
+
         if (db) LogThis(Level.INFO,"running SpotifyUtil.authorize()");
+
+        if (get_client_id().trim().isEmpty()) {
+            LogThis(Level.INFO,"Could not authorize, empty client ID");
+            HudifyMain.send_message("Could not authorize, empty client ID", 3);
+            return;
+        }
+
         StringBuilder authURI = null;
         String[] scope_list = {
-                "user-read-playback-state",
-//                "user-read-currently-playing", // kinda redundant with user-read-playback-state
-                "user-modify-playback-state",
-                "playlist-read-private"  };
+                "user-read-playback-state", // get playback state
+//                "user-read-currently-playing", // redundant with user-read-playback-state
+                "user-modify-playback-state", // allows play/pause/skip
+                "playlist-read-private"  }; // allows you to get the name of context playlist
         // https://developer.spotify.com/documentation/web-api/concepts/scopes
         try
         {
@@ -141,10 +152,15 @@ public class SpotifyUtil
         }
         if (authURI == null)
         {
-            return "https://www.google.com";
-        }
+            LogThis(Level.INFO,"Could not authorize, authURI is null");
+            HudifyMain.send_message("Could not authorize, authURI is null", 3);
 
-        return authURI.toString();
+            return;// false;
+        }
+        LogThis(Level.INFO,"Sucessfully opened authorization prompt");
+        Util.getOperatingSystem().open(authURI.toString());
+
+        return;// authURI.toString();
     }
 
     public static void authorize(String authCode)
@@ -173,7 +189,7 @@ public class SpotifyUtil
                     .header("Accept", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(accessBody.toString()))
                     .build();
-            LogThis(Level.INFO,"url request" + accessBody);
+            if (db) LogThis(Level.INFO,"url request " + accessBody);
             HttpResponse<String> accessResponse = client.send(accessRequest, HttpResponse.BodyHandlers.ofString());
             JsonObject accessJson = JsonParser.parseString(accessResponse.body()).getAsJsonObject();
             accessToken = accessJson.get("access_token").getAsString();
@@ -303,12 +319,13 @@ public class SpotifyUtil
 
 
     public enum reqType {GET, POST, PUT, DELETE}
-    /** pass this a URL, like in the "request sample" part of <a href="https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback">...</a>
+    /** pass this a URL, like in the "request sample" part of
+     *     <a href="https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback">...</a>
      * THIS CAN RETURN NULL
      * and is supposed to return null, if you're doing stuff that doesn't need a response like play/pause, skip etc
      * example call:  EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT,"https:/ /api.spotify.com/v1/me/player/pause"));
      * (remove the whitespace between the slashes in the link above, thats to stop javadocs from throwing warnings)
-     /** be sure to call this using an executor, something not on the main thread, so as to not freeze the main thread
+     * be sure to call this using an executor, something not on the main thread, so as to not freeze the main thread
     **/
     public static JsonObject apiRequest(reqType type, String url)  {
         try
@@ -329,7 +346,7 @@ public class SpotifyUtil
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 //            Log(Level.INFO,"GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
-            sp_status_code = response.statusCode();
+//            sp_status_code = response.statusCode(); // lets keep sp_status_code to just updatePlaybackInfo()
 
             if (response.statusCode() == 401) /* unauthorized */ {
                 if (refreshAccessToken()) apiRequest(type, url);
@@ -354,7 +371,7 @@ public class SpotifyUtil
 //                return "rate limited!";
                 //                        } else if (data[0].equals("Reset")) {
                 // getPlaybackInfo returns this if connection reset
-                //                            Log(Level.ERROR,"Reset condition, maintaining HUD until reset"); // was level info and from blockiy
+                //  Log(Level.ERROR,"Reset condition, maintaining HUD until reset"); // was level info and from blockiy
             }
 //            Log(Level.INFO,"get entire request json " + getRes.body()); // prints entire block of returned json
             if (response.body().isEmpty()) {
@@ -384,11 +401,9 @@ public class SpotifyUtil
 
 
     public static String scrub(String input) {
-
+        // take stuff like 'remastered' etc and scrub it from the end of track name
         String output = input;
 
-//        String[] blacklist = {"bonus track", "bonus", "intro", "outro", "interlude", "original mix", "single version", "recorded at spotify singles nyc",
-//                "spotify singles", "remastere?d? [0-9]{4} \\/ remixed",};
 
         ArrayList<String> blacklist = new ArrayList<>();
         blacklist.add("bonus track");
@@ -449,7 +464,7 @@ public class SpotifyUtil
 
     public static void togglePlayPause() {
         if (sp_is_playing) { // isPlaying
-            if (db) HudifyMain.send_message("Paused playback", 3);
+            if (db) HudifyMain.send_message("Paused playback", 3); // todo this runs even if 403 forbidden
             LogThis(Level.INFO,"Pausing playback");
             EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT,"https://api.spotify.com/v1/me/player/pause"));
         }
@@ -466,7 +481,6 @@ public class SpotifyUtil
 
     // https://developer.spotify.com/documentation/web-api/concepts/api-calls
 
-    // todo can i combine the request functions? theyre mostly duplicated
 
 
 

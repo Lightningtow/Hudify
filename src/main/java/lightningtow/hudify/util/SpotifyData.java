@@ -96,15 +96,20 @@ public class SpotifyData {
 
         intmap.put("sp_status_code", sp_status_code);
 
-        Triplet<String, Integer, Boolean> prog = new Triplet<>(((sp_progress / 60) + ":" + String.format("%02d", sp_progress % 60)), sp_progress, sp_progress > 0);
+
+        // import oshi.util.tuples.Triplet;
+        Triplet<String, Integer, Boolean> prog
+                = new Triplet<>(((sp_progress / 60) + ":" + String.format("%02d", sp_progress % 60)), sp_progress, sp_progress > 0);
         specialmap.put("sp_progress", prog);
         specialmap.put("sp_prog", prog);
 
-        Triplet<String, Integer, Boolean> dur = new Triplet<>(((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)), sp_duration, sp_duration > 0);
+        Triplet<String, Integer, Boolean> dur
+                = new Triplet<>(((sp_duration / 60) + ":" + String.format("%02d", sp_duration % 60)), sp_duration, sp_duration > 0);
         specialmap.put("sp_duration", dur);
         specialmap.put("sp_dur", dur);
 
-        Triplet<String, Integer, Boolean> msg = new Triplet<>(get_sp_message(), sp_msg_time_rem, !get_sp_message().isEmpty());
+        Triplet<String, Integer, Boolean> msg
+                = new Triplet<>(get_sp_message(), sp_msg_time_rem, !get_sp_message().isEmpty());
         specialmap.put("sp_message", msg);
         specialmap.put("sp_msg", msg);
 
@@ -113,6 +118,41 @@ public class SpotifyData {
 
     }
 
+    public static void resetData() { resetData(false); } // why doesn't java let you set default arguments
+    public static void resetData(boolean resetALL) {
+        sp_device_id = "";
+        sp_device_is_active = false;
+        sp_device_name = "";
+
+        sp_track = "";
+        sp_fancy_track = "";
+
+        sp_artists = "";
+        sp_first_artist = "";
+        sp_album = "";
+        sp_context_type = "";
+        sp_context_name = "";
+
+        sp_is_podcast = false;
+        sp_repeat_state = "";
+//         sp_is_authorized = false;  // DO NOT RESET THIS, IT WILL SPAM YOU WITH REFRESHES EVERY TIME
+
+        if (resetALL) {
+            sp_progress = 0;
+            sp_duration = 0;
+
+            sp_status_code = 123456;
+            sp_prev_context = "";
+            sp_prev_context_uri = "";
+//              sp_needs_refresh = false;
+
+            sp_message = "";
+            sp_msg_time_rem = 0;
+
+            sp_is_playing = false;
+        }
+
+    }
 
 // see this link for unofficial estimates of ratelimits
 // https://community.spotify.com/t5/Spotify-for-Developers/Web-API-ratelimit/m-p/5503153/highlight/true#M7931
