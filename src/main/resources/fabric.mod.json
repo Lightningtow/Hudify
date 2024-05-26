@@ -1,12 +1,10 @@
 {
     "schemaVersion": 1,
     "id": "hudify",
-    "version": "1",
+    "version": "${version}",
     "name": "Hudify",
     "description": "Passes Spotify info to CustomHud",
-    "authors": [
-        "Lightningtow"
-    ],
+    "authors": [ "Lightningtow" ],
     "contact": {
         "homepage": "https://github.com/Lightningtow/Hudify",
         "issues": "https://github.com/Lightningtow/Hudify/issues"
@@ -15,12 +13,8 @@
     "icon": "assets/hudify/icon.png",
     "environment": "client",
     "entrypoints": {
-        "client": [
-            "lightningtow.hudify.HudifyMain"
-        ],
-        "modmenu": [
-            "lightningtow.hudify.integrations.ModMenuIntegration"
-        ]
+        "client": [ "lightningtow.hudify.HudifyMain" ],
+        "modmenu": [ "lightningtow.hudify.integrations.ModMenuIntegration" ]
     },
     "depends": {
         "fabricloader": ">=0.15.0",
@@ -33,9 +27,7 @@
     "custom": {
         "hudify_notes": "This fabric.mod.json file is auto-generated from build.gradle",
         "modmenu": {
-            "links": {
-                "modmenu.discord": "https://discord.com/invite/BYSCX96fyt"
-            },
+            "links": { "modmenu.discord": "https://discord.com/invite/BYSCX96fyt" },
             "update_checker": true
         }
     }

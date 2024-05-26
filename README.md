@@ -11,7 +11,7 @@ This allows Hudify to display far more accurate info, with much less risk of get
 Playback controls are locked behind a Spotify Premium subscription, which is out of my control  
 ### Installation instructions:
 1) Create a Spotify app according to [this](https://developer.spotify.com/documentation/web-api/tutorials/getting-started#create-an-app).  
-2) Set your app name and description to anything you want, but be sure to set your Redirect URI to `http://localhost:8001/callback`.  
+2) Set your app name and description to anything you want, and be sure to set your Redirect URI to `http://localhost:8001/callback`.  
 3) Get your Client ID from your newly created app  
 4) And that's it, as far as Spotify goes. No need to request an access token like the docs prompt you to, Hudify takes care of that for you.  
 5) 

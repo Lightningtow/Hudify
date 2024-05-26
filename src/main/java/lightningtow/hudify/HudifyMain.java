@@ -105,9 +105,8 @@ public class HudifyMain implements ClientModInitializer
 
 //		Log(Level.INFO,"initializing main loop");
 		//info
-		if (!SpotifyData.sp_is_authorized) {
+		if (!SpotifyData.sp_is_authorized && !(SpotifyUtil.get_client_id().isEmpty())) {
 			LogThis(Level.INFO,"initializing client. Spotify is not authorized, initiating authorization progress ");
-
 			Util.getOperatingSystem().open(SpotifyUtil.authorize());
 		}
 //		else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
@@ -123,6 +122,12 @@ public class HudifyMain implements ClientModInitializer
 						sp_duration = -1;
 					}
 					else {
+//						if (HudifyConfig.refresh_client_auth) {
+//							HudifyConfig.refresh_client_auth = false;
+//							Util.getOperatingSystem().open(SpotifyUtil.authorize());
+//						}
+
+
 						updatePlaybackInfo();
 						tick_message();
 						// 204 when app is closed, doesnt immediately go away when app opened

@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
+import lightningtow.hudify.HudifyConfig;
 import lightningtow.hudify.HudifyMain;
 
 import java.io.File;
@@ -23,13 +24,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static lightningtow.hudify.HudifyMain.MOD_ID;
 import static lightningtow.hudify.util.SpotifyData.*;
 import static lightningtow.hudify.HudifyConfig.db;
 import static lightningtow.hudify.HudifyMain.LogThis;
 public class SpotifyUtil
 {
-    private static final String client_id = "2f8c634ba8cc43a8be450ff3f745886f";
+//    private static final String client_id = "2f8c634ba8cc43a8be450ff3f745886f";
+//    private static final String client_id = "invalid client id test";
+
+    public static String get_client_id() {
+        return HudifyConfig.CLIENT_ID.trim();
+    }
+
     private static String verifier;
     private static String authCode;
     private static String accessToken;
@@ -113,7 +119,7 @@ public class SpotifyUtil
         {
             authURI = new StringBuilder();
             authURI.append("https://accounts.spotify.com/authorize");
-            authURI.append("?client_id=" + client_id);
+            authURI.append("?client_id=").append(get_client_id());
             authURI.append("&response_type=code"); // http://localhost:8001/callback
             authURI.append("&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fcallback");
             authURI.append("&scope=");
@@ -159,7 +165,7 @@ public class SpotifyUtil
             accessBody.append("grant_type=authorization_code");
             accessBody.append("&code=").append(authCode);
             accessBody.append("&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fcallback");
-            accessBody.append("&client_id=" + client_id);
+            accessBody.append("&client_id=").append(get_client_id());
             accessBody.append("&code_verifier=").append(verifier);
             HttpRequest accessRequest = HttpRequest.newBuilder(
                     new URI(tokenAddress))
@@ -190,7 +196,7 @@ public class SpotifyUtil
         {
             String refreshRequestBody = "grant_type=refresh_token" +
                     "&refresh_token=" + refreshToken +
-                    "&client_id=" + client_id;
+                    "&client_id=" + get_client_id();
 
             HttpRequest refreshRequest = HttpRequest.newBuilder(
                     new URI(tokenAddress))

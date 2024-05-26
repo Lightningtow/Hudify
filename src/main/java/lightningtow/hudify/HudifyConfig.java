@@ -9,6 +9,8 @@ public class HudifyConfig extends MidnightConfig {
     @Entry public static boolean db = true;
     @Entry public static boolean scrub_name = false;
     @Entry public static String CLIENT_ID = "";
+//    @Entry public static boolean refresh_client_auth = false;
+
 
 }
 //
