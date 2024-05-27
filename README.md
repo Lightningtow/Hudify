@@ -1,8 +1,8 @@
 # Hudify - A Spotify integration for CustomHud
 ## Requires [CustomHud](https://modrinth.com/mod/customhud). Please read the installation instructions below!  
 
-[![Modrinth](https://img.shields.io/badge/Modrinth-%20Hudify-008000?style=flat&logo=modrinth)](https://modrinth.com/mod/hudify)
-[![GitHub](https://img.shields.io/badge/GitHub-%20Hudify-808080?style=flat&logo=github)](https://modrinth.com/mod/hudify)
+[![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_46h.png)](https://modrinth.com/mod/hudify)
+[![GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_46h.png)](https://github.com/Lightningtow/Hudify)
 
 <details>
 <summary>Installation</summary>
