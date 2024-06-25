@@ -58,9 +58,9 @@ All string variables can be used as a boolean. They return false if the string i
 These were added by me for debugging, I can't think of any reason you'd need them, but you can use them if you like   
 `{sp_device_id}` - String. ID of device. Gibberish string of random digits  
 `{sp_device_name}` - String. What you named the device you're playing from  
-`{sp_device_is_active}` - String. Whether the device is active  
+`{sp_device_is_active}` - Boolean. Whether the device is active  
 
-`{sp_status_code}` - Number. Status code from the header of the most recent Spotify API call.  
+`{sp_status_code}` - Number. Status code from the header of the most recent Spotify API call. See link below   
 `{sp_status_string}` - String. Description of the status code of latest "get playback info" call, according to [Spotify's docs](https://developer.spotify.com/documentation/web-api/concepts/api-calls)  
 `{sp_is_authorized}` - Boolean. Whether currently authed with Spotify   
 

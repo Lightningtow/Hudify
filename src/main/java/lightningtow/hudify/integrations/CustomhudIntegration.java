@@ -4,7 +4,7 @@ import com.minenash.customhud.HudElements.supplier.SpecialSupplierElement;
 import com.minenash.customhud.HudElements.supplier.StringSupplierElement;
 import static lightningtow.hudify.util.SpotifyData.*;
 
-// 4.0
+/* 4.0 */
 //import com.minenash.customhud.data.Flags;
 //import static com.minenash.customhud.data.Flags.wrap;
 //import static com.minenash.customhud.registry.CustomHudRegistry.registerElement;
@@ -28,9 +28,9 @@ import static lightningtow.hudify.util.SpotifyData.*;
 //            }
 //        }
 //}
-//3.3
 
 
+/* 3.3 */
 import static com.minenash.customhud.mod_compat.CustomHudRegistry.registerElement;
 public class CustomhudIntegration {
         public static void initCustomhud() {

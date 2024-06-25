@@ -8,7 +8,7 @@ plugins {
 version = "${project.hudify_version}__for_customhud_v${customhud_api_label}"
 //version = project.hudify_version
 group = project.maven_group
-base { archivesName = property("archives_base_name") }
+base { archivesName = project.archives_base_name }
 
 repositories {	// You should only use this when depending on other mods
 	maven {
