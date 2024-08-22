@@ -13,7 +13,7 @@
   "hudify.midnightconfig.inactive_poll_rate": "Inactive Poll rate",
   "hudify.midnightconfig.inactive_poll_rate.tooltip":"How often to poll Spotify's API when the Spotify isn't running.\nSetting this too long will increase the time for Hudify to notice when you first start playing music.\nFor example if you set this to 60 seconds, then start playing, you'll have up to a 60 second delay before Hudify displays anything",
   "hudify.midnightconfig.scrub_name": "Scrub name",
-  "hudify.midnightconfig.scrub_name.tooltip": "If disabled, makes {sp_fancy_track} just return the track name without scrubbing anything.\nSaves a bit of processing power if you're not using the variable",
+  "hudify.midnightconfig.scrub_name.tooltip": "If disabled, makes {sp_fancy_track} just return the track name without scrubbing anything.\nSaves a tiny bit of processing power if you're not using the variable",
   "hudify.midnightconfig.truncate_length": "Truncate length",
   "hudify.midnightconfig.truncate_length.tooltip": "Truncate long variables after this many characters.\nApplies to artists, albums, and track names.\nSet to -1 to never truncate",
   "hudify.midnightconfig.db": "Log debug info",

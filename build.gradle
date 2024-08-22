@@ -5,7 +5,7 @@ plugins {
 
 }
 //version = "${property("hudify_version")}__ch${stonecutter.current.version}" // include game version in the mod filename
-version = "${project.hudify_version}__for_customhud_v${customhud_api_label}"
+version = "${project.hudify_version}__for_ch${customhud_api_label}"
 //version = project.hudify_version
 group = project.maven_group
 base { archivesName = project.archives_base_name }
@@ -31,8 +31,8 @@ dependencies {
 	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
 
 
-//	modImplementation "maven.modrinth:customhud:${project.customhud_version}" // v3
-	modImplementation files("${project.local_customhud_filepath}")   // v4
+	modImplementation "maven.modrinth:customhud:${project.customhud_version}" // v3
+//	modImplementation files("${project.local_customhud_filepath}")   // v4
 
 //	modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api', version: project.journeymap_api_version, changing: true
 //	modCompileOnlyApi group: 'maven.modrinth', name: 'customhud', version: project.customhud_v3_version, changing: true
@@ -54,70 +54,12 @@ processResources { // converts the  "version": "${version}" in the fabric.mod.js
 	}
 }
 
-tasks.withType(JavaCompile).configureEach { it.options.release = 17 }
+tasks.withType(JavaCompile).configureEach { it.options.release = 21 }
 
 java {
 	withSourcesJar() // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17 // if it is present. If you remove this line, sources will not be generated.
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21 // if it is present. If you remove this line, sources will not be generated.
 }
 
 jar { from("LICENSE") { rename { "${it}_${project.base.archivesName.get()}" }}}
-
-//def fabricModInfoJson() {
-//	Map info = [
-//			"schemaVersion": 1,
-//			"id": "hudify",
-//			"version": "1",
-//			"name": "Hudify",
-//			"description": "Passes Spotify info to CustomHud",
-//			"authors": [ "Lightningtow" ],
-//			"contact": [
-//					"homepage": "https://github.com/Lightningtow/Hudify",
-////					"sources": "https://github.com/Lightningtow/Hudify",
-//					"issues": "https://github.com/Lightningtow/Hudify/issues"
-//			],
-//			"license": "CC0-1.0",
-//			"icon": "assets/hudify/icon.png",
-//			"environment": "client",
-//			"entrypoints": [
-//					"client": [ "lightningtow.hudify.HudifyMain" ],
-//					"modmenu": [ "lightningtow.hudify.integrations.ModMenuIntegration" ]
-//			],
-//			"depends": [
-//					"fabricloader": ">=0.15.0",
-//					"minecraft": "~1.20.4",
-//					"java": ">=17",
-//					"fabric-api": "*",
-//					"custom_hud": "*"
-//			],
-//			"minecraft": ">=1.20.4- <1.20.5-",
-//			"custom": [
-//					"hudify_notes": "This fabric.mod.json file is auto-generated from build.gradle",
-//
-//					"modmenu": [
-//							"links": [
-//									"modmenu.discord": "https://discord.com/invite/BYSCX96fyt"
-//							],
-//							"update_checker": true
-//					]
-//			]
-//	]
-////	info.depends += [ "custom_hud": "${project.customhud_version}" ] // this doesnt work because local file
-////	if (stonecutter.current.version == "4.0") {
-////		info.depends += [ "custom_hud": "*" ]
-////
-////	} else {
-////		info.depends += [ "custom_hud": ">=2.0.0- <4.0.0" ]
-////	}
-//
-//	return info
-//}
-//tasks.create(name: "generateModInfoJson", type: DefaultTask) {
-//	doLast {
-////		def output = file("../../src/main/resources/fabric.mod.json")
-//		def output = file("src/main/resources/fabric.mod.json")
-//		mkdir output.parentFile
-//		output.text = new groovy.json.JsonBuilder(fabricModInfoJson()).toPrettyString()
-//	}
-//}

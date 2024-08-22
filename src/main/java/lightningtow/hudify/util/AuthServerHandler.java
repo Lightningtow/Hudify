@@ -15,6 +15,10 @@ import lightningtow.hudify.HudifyMain;
 import org.apache.logging.log4j.Level;
 public class AuthServerHandler implements HttpHandler
 {
+    /**
+    A huge thank you to Erruqie's Blockify for this code!
+     */
+
     @Override
     public void handle(HttpExchange httpExchange) throws IOException
     {

@@ -31,6 +31,11 @@ import static lightningtow.hudify.HudifyConfig.db;
 import static lightningtow.hudify.HudifyMain.LogThis;
 public class SpotifyUtil
 {
+    /**
+     A huge thank you to Erruqie's Blockify for much of this code!
+     */
+
+
 //    private static final String client_id = "2f8c634ba8cc43a8be450ff3f745886f";
 //    private static final String client_id = "invalid client id test";
 
@@ -52,6 +57,7 @@ public class SpotifyUtil
     public static HttpRequest getPlaybackRequest() { return playbackRequest; }
 
     private static File authFile;
+    private static final String auth_filename = "hudify_tokens_dont_edit.json";
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
@@ -62,9 +68,9 @@ public class SpotifyUtil
         //Log(Level.INFO,"running SpotifyUtil.initialize()");
         LogThis(Level.INFO,"initializing Spotify integration");
 
-        authFile = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + "HudifyTokens.json");
+        authFile = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + auth_filename);
 //        authFile = new File(System.getProperty("user.dir") + File.separator
-//                + "config" + File.separator + MOD_ID+ File.separator + "HudifyTokens.json");
+//                + "config" + File.separator + MOD_ID+ File.separator + auth_filename);
 
         try
         {

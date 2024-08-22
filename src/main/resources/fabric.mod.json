@@ -3,8 +3,9 @@
     "id": "hudify",
     "version": "${version}",
     "name": "Hudify",
-    "description": "Passes Spotify info to CustomHud",
+    "description": "Passes Spotify info to CustomHud\n\nNote: if using Hudify on an unsupported Minecraft version, and clicking the Configure button doesn't work, you can manually edit the config file at '.minecraft/config/hudify.json'",
     "authors": [ "Lightningtow" ],
+    "contributors": [ "Minenash", "Erruqie" ],
     "contact": {
         "homepage": "https://github.com/Lightningtow/Hudify",
         "issues": "https://github.com/Lightningtow/Hudify/issues"
@@ -18,14 +19,15 @@
     },
     "depends": {
         "fabricloader": ">=0.15.0",
-        "minecraft": "~1.20.4",
-        "java": ">=17",
+        "minecraft": ">=1.21",
+        "java": ">=21",
         "fabric-api": "*",
         "custom_hud": "*"
     },
-    "minecraft": ">=1.20.4- <1.20.5-",
+    "recommends": {
+        "minecraft": "1.21.1"
+    },
     "custom": {
-        "hudify_notes": "This fabric.mod.json file is auto-generated from build.gradle",
         "modmenu": {
             "links": { "modmenu.discord": "https://discord.com/invite/BYSCX96fyt" },
             "update_checker": true
