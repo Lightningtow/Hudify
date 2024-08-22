@@ -54,17 +54,27 @@ public class HudifyMain implements ClientModInitializer
 		set_sp_message(msg);
 	}
 
-	public static void truncate() { // chop the ends off variables after a user-specified number of characters
+	public static String tryTruncate(String victim) {
 		int len = HudifyConfig.truncate_length;
-//		if (db) Log(Level.INFO,"truncating to: {}", sp_artists.substring(0, len));
+		if (len == -1) return victim;
 
-		sp_artists = (sp_artists.length() > len) ? sp_artists.substring(0, len).trim() + "..." : sp_artists;
-		sp_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
-		sp_fancy_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
-		sp_album = (sp_album.length() > len) ? sp_album.substring(0, len).trim() + "..." : sp_album;
-		// todo make this only run once. use before/after variables to detect if track URI changed
-		// todo attempt to make the outputted variable cleaner, truncating at word breaks and removing trailing commas
+		String thing = victim;
+		thing = (victim.length() > len) ? victim.substring(0, len).trim() + "..." : victim;
+		return thing;
 	}
+
+//	public static void truncate() { // chop the ends off variables after a user-specified number of characters
+//		int len = HudifyConfig.truncate_length;
+////		if (db) Log(Level.INFO,"truncati	ng to: {}", sp_artists.substring(0, len));
+//
+//		sp_artists = (sp_artists.length() > len) ? sp_artists.substring(0, len).trim() + "..." : sp_artists;
+//		sp_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
+//		LogThis(Level.INFO, sp_track);
+//		sp_fancy_track = (sp_track.length() > len) ? sp_track.substring(0, len).trim() + "..." : sp_track;
+//		sp_album = (sp_album.length() > len) ? sp_album.substring(0, len).trim() + "..." : sp_album;
+//		// todo make this only run once. use before/after variables to detect if track URI changed
+//		// todo attempt to make the outputted variable cleaner, truncating at word breaks and removing trailing commas
+//	}
 
 	public static void LogThis(org.apache.logging.log4j.Level lvl, String msg) {
 		msg = "(" + MOD_DISPLAY_NAME + ") " + msg;
@@ -182,9 +192,10 @@ public class HudifyMain implements ClientModInitializer
 			{
 				JsonObject json = (JsonObject) JsonParser.parseString(playbackResponse.body());
 				// the `json.get("progress_ms")` is incorrect after pausing then resuming
+				boolean truncating = (HudifyConfig.truncate_length != -1);
+				int len = HudifyConfig.truncate_length;
 
-
-				dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
+                dump_msg += " " + json.get("progress_ms") + " / " + json.get("item").getAsJsonObject().get("duration_ms");
 
 				sp_is_podcast = (json.get("currently_playing_type").getAsString().equals("episode"));
 
@@ -195,8 +206,12 @@ public class HudifyMain implements ClientModInitializer
 				sp_repeat_state = json.get("repeat_state").getAsString(); // if repeat is "context" change to "all"
 				/* repeat */  if (sp_repeat_state.equals("context")) sp_repeat_state = "all"; // else leave it
 
-				sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
-				sp_fancy_track = HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track;
+				sp_track = tryTruncate(json.get("item").getAsJsonObject().get("name").getAsString());
+				sp_fancy_track = tryTruncate(HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track);
+
+//				sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
+//				sp_fancy_track = HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track;
+
 
 				sp_device_id = json.get("device").getAsJsonObject().get("id").getAsString();
 				sp_device_is_active = json.get("device").getAsJsonObject().get("is_active").getAsBoolean();
@@ -249,18 +264,18 @@ public class HudifyMain implements ClientModInitializer
 				for (int i = 1; i < artistArray.size(); i++) /* skip the first artist */ {
 					artistString.append(", ").append(artistArray.get(i).getAsJsonObject().get("name").getAsString());
 				}
-				sp_artists = artistString.toString();
+				sp_artists = tryTruncate(artistString.toString());
 				/** sp_artists + sp_first_artist **/
 
 
 //		sp_album = sp_is_podcast ? "" : json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
-				sp_album = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
+				sp_album = tryTruncate(json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString());
 
 				SpotifyData.UpdateMaps();
 
 			} // if response successful
 
-			if (HudifyConfig.truncate_length != -1) truncate();
+//			if (HudifyConfig.truncate_length != -1) truncate();
 
 		} catch (Exception e) {
 			LogThis(Level.ERROR,"exception caught in getPlaybackInfo(): " + e.getMessage());
