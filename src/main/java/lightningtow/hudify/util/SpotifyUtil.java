@@ -430,11 +430,17 @@ public class SpotifyUtil
         blacklist.add("[0-9]{4} remastere?d?");
         blacklist.add("remastere?d?");
         blacklist.add("single");
+        blacklist.add("music from [\\w\\s]*");
+        blacklist.add("from [^\\])]*");
+        // https://regexr.com is the good regex website
+        //   \w matches any letter
+        //   \s matches any whitespace
 
         ArrayList<String> real_blacklist = new ArrayList<>();
         for (String elem : blacklist) {
-            real_blacklist.add("- " + elem);
-            real_blacklist.add("– " + elem);
+            real_blacklist.add(" - " + elem);
+            real_blacklist.add(" - " + elem);
+            real_blacklist.add(" – " + elem);
             real_blacklist.add("\\/\\/ " + elem);
             real_blacklist.add("\\(" + elem + "\\)");
             real_blacklist.add("\\[" + elem + "\\]");
@@ -443,7 +449,7 @@ public class SpotifyUtil
 
 
         for (String elem : real_blacklist) {
-            String regex = "(?i)" + elem;
+            String regex = "(?i)" + elem; // ?i makes it case insensitive
             output = output.replaceAll(regex, "");
 
         }
