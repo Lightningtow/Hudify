@@ -29,14 +29,16 @@ dependencies {
 	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}" // { exclude module: "fabric-api" }
 //	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
 	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
-	modImplementation "maven.modrinth:customhud:${project.customhud_version}"
+
+
+//	modImplementation "maven.modrinth:customhud:${project.customhud_version}" // v3
+	modImplementation files("${project.local_customhud_filepath}")   // v4
 
 //	modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api', version: project.journeymap_api_version, changing: true
 //	modCompileOnlyApi group: 'maven.modrinth', name: 'customhud', version: project.customhud_v3_version, changing: true
 //	modRuntimeOnly "maven.modrinth:customhud:${project.customhud_v3_version}"
 
 //	include "maven.modrinth:midnightlib:${project.midnightlib_version}"
-//	modImplementation files("run/mods/custom_hud-${project.customhud_version}.jar")
 
 }
 
