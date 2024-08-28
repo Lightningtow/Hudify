@@ -22,9 +22,7 @@
         "minecraft": ">=1.21",
         "java": ">=21",
         "fabric-api": "*",
-        "custom_hud": "*",
-        "midnightlib": "*"
-
+        "custom_hud": "*"
     },
     "recommends": {
         "minecraft": "1.21.1"

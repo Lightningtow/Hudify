@@ -1,4 +1,9 @@
-plugins { id 'fabric-loom' version '1.6-SNAPSHOT' }
+plugins {
+	id 'fabric-loom' version '1.6-SNAPSHOT'
+//	id 'maven-publish'
+//	id 'stonecuttter'
+
+}
 //version = "${property("hudify_version")}__ch${stonecutter.current.version}" // include game version in the mod filename
 
 //version = "${project.hudify_version}__for_customhud_v${customhud_api_label}"
@@ -25,7 +30,8 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}" // { exclude module: "fabric-api" }
-	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
+//	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
+	modImplementation include("maven.modrinth:midnightlib:${project.midnightlib_version}")
 
 
 	modImplementation "maven.modrinth:customhud:${project.customhud_version}" // v3
@@ -39,8 +45,7 @@ dependencies {
 
 }
 
-loom { runConfigs.server { ideConfigGenerated(false) }; runConfigs.client { ideConfigGenerated(false) }}
-
+loom { runConfigs.server { ideConfigGenerated(false) } }
 // prevents intelliJ from auto-creating the 'Minecraft Server' run config. You can safely delete this
 
 
