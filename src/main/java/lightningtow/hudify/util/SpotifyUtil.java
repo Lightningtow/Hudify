@@ -109,9 +109,8 @@ public class SpotifyUtil
         updatePlaybackRequest();
     }
 
-    public static void authorize()
+    public static void authorize() /* this is what opens the web browser to authorize*/
     {
-        // this is what opens the web browser to authorize
 
         if (db) LogThis(Level.INFO,"running SpotifyUtil.authorize()");
 
