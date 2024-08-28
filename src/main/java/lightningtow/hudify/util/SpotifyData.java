@@ -9,6 +9,8 @@ public class SpotifyData {
     /** the single source of truth for current Spotify state **/
     //<editor-fold desc="variables">
 
+    public static String sp_album_art_link = "";
+
     public static String sp_track = ""; // track or episode name
     public static String sp_fancy_track = ""; // track with 'bonus track, remastered' etc scrubbed out
 
