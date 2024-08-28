@@ -95,7 +95,7 @@ public class HudifyMain implements ClientModInitializer
 		HudifyConfig.init(MOD_ID, HudifyConfig.class); //todo uncomment me
 		SpotifyUtil.initialize();
 
-		SpotifyUtil.authorize(); // nothing happens if you attempt to auth and fail
+//		SpotifyUtil.authorize(); // "nothing happens if you attempt to auth and fail" NOT TRUE, IT OPENS THE BROWSER EVER TIME
 
 
 //		if (SpotifyUtil.get_client_id().isEmpty()) {

@@ -52,6 +52,7 @@ public class SpotifyUtil
     public static HttpRequest getPlaybackRequest() { return playbackRequest; }
 
     private static File authFile;
+    private static final String auth_filename = "hudify_tokens_dont_edit.json";
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
@@ -62,7 +63,7 @@ public class SpotifyUtil
         //Log(Level.INFO,"running SpotifyUtil.initialize()");
         LogThis(Level.INFO,"initializing Spotify integration");
 
-        authFile = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + "HudifyTokens.json");
+        authFile = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + auth_filename);
 //        authFile = new File(System.getProperty("user.dir") + File.separator
 //                + "config" + File.separator + MOD_ID+ File.separator + "HudifyTokens.json");
 
@@ -79,6 +80,7 @@ public class SpotifyUtil
                 accessToken = "";
                 refreshToken = "";
                 sp_is_authorized = false;
+                authorize();
             }
             else
             {
