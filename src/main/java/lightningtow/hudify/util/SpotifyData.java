@@ -14,6 +14,7 @@ public class SpotifyData {
     public static Identifier sp_album_art_identifier = new Identifier("textures/hudify/albumart.png");
 
     public static String sp_album_art_link = "";
+    public static String sp_prev_album_art_link = "";
 
     public static String sp_track = ""; // track or episode name
     public static String sp_fancy_track = ""; // track with 'bonus track, remastered' etc scrubbed out

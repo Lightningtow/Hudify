@@ -330,9 +330,14 @@ public class HudifyMain implements ClientModInitializer
 // [20:27:10] [Spotify Thread/INFO] (Hudify) (Hudify) {"height":640,"url":"https://i.scdn.co/image/ab67616d0000b2733b4362147e2b0595d512033e","width":640}
 				sp_album_art_link = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").getAsJsonArray().get(1).getAsJsonObject().get("url").getAsString();
 
-				getAlbumArt();
 				LogThis(Level.INFO, "got album art");
+				if (sp_prev_album_art_link.isEmpty() || !sp_album_art_link.equals( json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").getAsJsonArray().get(1).getAsJsonObject().get("url").getAsString())) {
+					// if album art changed or is empty
+                    LogThis(Level.INFO,"album art links do NOT match, running getAlbumArt");
 
+					sp_prev_album_art_link = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").getAsJsonArray().get(1).getAsJsonObject().get("url").getAsString();
+					getAlbumArt();
+				}
 //				LogThis(Level.INFO, "album art link: " + sp_album_art_link);
 
 				sp_device_id = json.get("device").getAsJsonObject().get("id").getAsString();
