@@ -84,6 +84,12 @@ public class HudifyMain implements ClientModInitializer
 		org.apache.logging.log4j.LogManager.getLogger(MOD_DISPLAY_NAME).log(lvl, msg);
 	}
 
+	public static void genBracketVariables(String trackname) {
+		sp_track = tryTruncate(trackname);
+		sp_track_smartbrackets = tryTruncate(SpotifyUtil.smartbrackets(trackname));
+		sp_track_nobrackets = tryTruncate(SpotifyUtil.nobrackets(trackname));
+	}
+
 
 	@Override
 	public void onInitializeClient()
@@ -209,8 +215,10 @@ public class HudifyMain implements ClientModInitializer
 				sp_repeat_state = json.get("repeat_state").getAsString(); // if repeat is "context" change to "all"
 				/* repeat */  if (sp_repeat_state.equals("context")) sp_repeat_state = "all"; // else leave it
 
-				sp_track = tryTruncate(json.get("item").getAsJsonObject().get("name").getAsString());
-				sp_fancy_track = tryTruncate(HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track);
+				genBracketVariables(json.get("item").getAsJsonObject().get("name").getAsString());
+				// sp_track and other vars. truncation included
+//				sp_track = tryTruncate(json.get("item").getAsJsonObject().get("name").getAsString());
+//				sp_fancy_track = tryTruncate(HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track);
 
 //				sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
 //				sp_fancy_track = HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track;

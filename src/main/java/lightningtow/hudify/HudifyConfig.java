@@ -8,7 +8,9 @@ public class HudifyConfig extends MidnightConfig {
 
     @Entry(min = -1, max = 200) public static int truncate_length = -1;
     @Entry public static String CLIENT_ID = "";
-//    @Comment(centered = true) public static Comment advanced_options_divider;
+    @Entry public static boolean smartbrackets_kill_featuring = false;
+
+    //    @Comment(centered = true) public static Comment advanced_options_divider;
     @Entry(category = ADVANCED) public static boolean scrub_name = true;
     @Entry(category = ADVANCED) public static boolean db = false;
     @Entry(category = ADVANCED, min = 800, max = 60000) public static int poll_rate = 850;

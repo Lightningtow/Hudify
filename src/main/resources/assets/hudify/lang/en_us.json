@@ -7,6 +7,7 @@
   "hudify.key.refresh": "Refresh Playback Info",
   "hudify.messages.premium_required": "Spotify Premium is required for this feature",
   "hudify.midnightconfig.title": "Hudify Config",
+  "hudify.midnightconfig.category.advanced": "Advanced Options",
   "hudify.midnightconfig.midnightlib_description": "§nMidnightLib",
   "hudify.midnightconfig.poll_rate": "Poll rate",
   "hudify.midnightconfig.poll_rate.tooltip":"How often to send an API request to Spotify to refresh variables, in milliseconds\nWARNING: Too low a value can cause you to hit Spotify ratelimits!",
@@ -20,5 +21,6 @@
   "hudify.midnightconfig.db.tooltip": "Logs extra debug info. Very spammy",
   "hudify.midnightconfig.CLIENT_ID": "Spotify Client ID",
   "hudify.midnightconfig.CLIENT_ID.tooltip": "The Client ID for your Spotify app. See readme",
-  "hudify.midnightconfig.category.advanced": "Advanced Options"
+  "hudify.midnightconfig.smartbrackets_kill_featuring": "Smartbrackets remove \"Featuring\"",
+  "hudify.midnightconfig.smartbrackets_kill_featuring.tooltip": "Removes 'featuring', 'with', etc from sp_track_smartbrackets"
 }
