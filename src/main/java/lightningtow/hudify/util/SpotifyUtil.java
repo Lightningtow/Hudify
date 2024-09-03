@@ -463,7 +463,7 @@ public class SpotifyUtil
             blacklist.add("ft[^\\])]*");
 
         }
-
+        // what if i just scrub out extra punctuation before regexing it
 
 
         // smart brackets did not edit these:
@@ -486,7 +486,6 @@ public class SpotifyUtil
         for (String elem : blacklist) {
             real_blacklist.add(" - Spider-Man: Across the Spider-Verse"); // since its exact, no need for every combo
             real_blacklist.add(" - " + elem);
-            real_blacklist.add(" - " + elem);
             real_blacklist.add(" – " + elem);
 
             real_blacklist.add("\\/\\/ " + elem);
@@ -494,24 +493,23 @@ public class SpotifyUtil
             real_blacklist.add("\\[" + elem + "\\]");
 //            real_blacklist.add(elem);
 
-            if (HudifyConfig.smartbrackets_kill_featuring) {
+//            if (HudifyConfig.smartbrackets_kill_featuring) {
 //                // because some songs put feat directly in the title with no brackets
-                real_blacklist.add("featuring [\\w\\s]*"); // no whitespace so it matches feat with and w/o a period, feat.
+//                real_blacklist.add("featuring [\\w\\s]*"); // no whitespace so it matches feat with and w/o a period, feat.
                     // this makes it so it still appears in nobrackets. will get feedback later
-                real_blacklist.add("feat. [\\w\\s]*");
+//                real_blacklist.add("feat. [\\w\\s]*");
+// todo this makes smartbrackets leave trailing punctuation
 
-//                real_blacklist.add("with [^\\])]*");
-//                real_blacklist.add("feat[\\w\\s]*");
-//                real_blacklist.add("ft[\\w\\s]*");
+
 //
-            }
+//            }
         }
 
 
         for (String elem : real_blacklist) {
             String regex = "(?i)" + elem; // ?i makes it case insensitive
             output = output.replaceAll(regex, "");
-            output = output.replace("  ", " "); // makes doublespaces single spaces
+//            output = output.replace("  ", " "); // makes doublespaces single spaces
 
         }
 
