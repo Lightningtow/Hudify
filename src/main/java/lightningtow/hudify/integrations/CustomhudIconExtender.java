@@ -34,6 +34,7 @@ import java.util.function.Supplier;
 
 import static lightningtow.hudify.HudifyMain.LogThis;
 import static lightningtow.hudify.util.SpotifyData.sp_album_art_link;
+import static lightningtow.hudify.util.SpotifyData.sp_native_image;
 
 public class CustomhudIconExtender extends IconElement {
     private static final MinecraftClient client = MinecraftClient.getInstance();
@@ -59,13 +60,18 @@ public class CustomhudIconExtender extends IconElement {
     public CustomhudIconExtender(Identifier texture, Flags flags) {
         super(flags, 0);
 
-        NativeImage img = null;
-        try {
-            Optional<Resource> resource = client.getResourceManager().getResource(texture);
-            if (resource.isPresent())
-                img = NativeImage.read(resource.get().getInputStream());
-        }
-        catch (IOException e) { CustomHud.LOGGER.catching(e); }
+        NativeImage img = sp_native_image;
+
+
+//        NativeImage img = null;
+//        try {
+//
+//
+//            Optional<Resource> resource = client.getResourceManager().getResource(texture);
+//            if (resource.isPresent())
+//                img = NativeImage.read(resource.get().getInputStream());
+//        }
+//        catch (IOException e) { CustomHud.LOGGER.catching(e); }
 
 
         iconAvailable = img != null;

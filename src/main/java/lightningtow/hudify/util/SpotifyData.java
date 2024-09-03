@@ -1,5 +1,7 @@
 package lightningtow.hudify.util;
 
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.util.Identifier;
 import oshi.util.tuples.Triplet;
 
 import java.util.HashMap;
@@ -8,6 +10,8 @@ import java.util.HashMap;
 public class SpotifyData {
     /** the single source of truth for current Spotify state **/
     //<editor-fold desc="variables">
+    public static NativeImage sp_native_image = null;
+    public static Identifier sp_album_art_identifier = new Identifier("textures/hudify/albumart.png");
 
     public static String sp_album_art_link = "";
 

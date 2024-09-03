@@ -100,64 +100,82 @@ public class HudifyMain implements ClientModInitializer
 		msg = "(" + MOD_DISPLAY_NAME + ") " + msg;
 		LogManager.getLogger(MOD_DISPLAY_NAME).log(lvl, msg);
 	}
-	static ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
 	public static void getAlbumArt() {
 		final MinecraftClient client = MinecraftClient.getInstance();
 
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
 
 //        if (link == null || link.isEmpty()) link = "https://i.scdn.co/image/ab67616d00001e023ce4f9e5bc032ff88268edba";
 
 		try {
 
-			InputStream in;
-			if (sp_album_art_link == null || sp_album_art_link.isEmpty()) in = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
-			else in = new URL(sp_album_art_link).openStream();
-//            InputStream in = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
+//			InputStream in;
+//			if (sp_album_art_link == null || sp_album_art_link.isEmpty()) in = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
+//			else in = new URL(sp_album_art_link).openStream();
 //            InputStream in = new URL(link).openStream();
-			byte[] byteArray = in.readAllBytes();
+			InputStream in = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
+//			byte[] byteArray = in.readAllBytes();
 
 //						byte[] byteArray = byteArrayOutputStream.toByteArray();
 
+			LogThis(Level.INFO, "1");
 
 			// read a jpeg from a inputFile
-//			BufferedImage bufferedImage = ImageIO.read(in);
-//			NativeImage img = null;
-			NativeImage img = NativeImage.read(in);
+			BufferedImage bufferedImage = ImageIO.read(in);
 
-			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArray));
+//			NativeImage img = null;
+//			NativeImage img = NativeImage.read(in); // either this is crashing
+//			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArray));  // or this is crashing
 
 			// https://stackoverflow.com/questions/2716596/how-to-put-data-from-an-outputstream-into-a-bytebuffer
 
-			ImageIO.write(ImageIO.read(in), "PNG", byteArrayOutputStream);
+			LogThis(Level.INFO, "2");
+
+			ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
+			bufferedImage = null;
+			LogThis(Level.INFO, "2b");
+
+			byte [] byteArray = byteArrayOutputStream.toByteArray();
+			byteArrayOutputStream = null;
+
+//			ImageIO.write(bufferedImage, "PNG", byteArrayOutputStream);
+			LogThis(Level.INFO, "3");
+
+			sp_native_image = NativeImage.read(byteArray);
+
 //			ImageIO.write(bufferedImage, "PNG", byteArrayOutputStream);
 //			ImageIO.write(ImageIO.read(in), "PNG", thing);
+			LogThis(Level.INFO, "4");
 
 //            ByteBuffer byteBuffer = ByteBuffer.wrap(byteArray);
 //			image = new NativeImageBackedTexture(NativeImage.read(ImageIO.write));
+			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArray));
 
-//			image = new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray()));
+//			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray()));
 //			img = image.getImage();
 
 //            image = new NativeImageBackedTexture(NativeImage.read(resultingBytes));
 //            client.getTextureManager().registerTexture(new Identifier("test"), image);
 			// todo wait i got it to display teh bird, just need to figure out what i did there
 
-			Identifier newtexture = new Identifier("textures/hudify/albumart.png");
+//			Identifier newtexture = new Identifier("textures/hudify/albumart.png");
 
-//			client.getTextureManager().registerTexture(newtexture, new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray())));
-			client.getTextureManager().registerTexture(newtexture, image);
+//			client.getTextureManager().registerTexture(sp_album_art_identifier, new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray())));
+			client.getTextureManager().destroyTexture(sp_album_art_identifier);
+			client.getTextureManager().registerTexture(sp_album_art_identifier, image);
 
+			LogThis(Level.INFO, "5");
 
 			in.close();
-			byteArrayOutputStream.close();
+//			byteArrayOutputStream.close();
 //            Optional<Resource> resource = client.getResourceManager().getResource(Identifier.tryParse("textures/item/albumart"));
 //            if (resource.isPresent())
 //                img = NativeImage.read(resource.get().getInputStream());
 // this^ doesnt cause Java.lang.NullPointerException: Cannot invoke "minecraft.util.Identifier.getNamespace()" because "identifier" is null
 		} catch (IOException e) {
-			LogThis(Level.ERROR, "error in try(InputStream) in CustomHudExtender: " + e.getMessage());
+			LogThis(Level.ERROR, "error in try(InputStream) in CustomHudExtender: " + Arrays.toString(e.getStackTrace()));
 //            e.printStackTrace();
 		}
 //		NativeImageBackedTexture finalImage = image;
@@ -190,7 +208,6 @@ public class HudifyMain implements ClientModInitializer
 		HudifyConfig.init(MOD_ID, HudifyConfig.class); //todo uncomment me
 		SpotifyUtil.initialize();
 
-		SpotifyUtil.authorize(); // nothing happens if you attempt to auth and fail
 
 
 //		if (SpotifyUtil.get_client_id().isEmpty()) {
@@ -314,7 +331,9 @@ public class HudifyMain implements ClientModInitializer
 				sp_album_art_link = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").getAsJsonArray().get(1).getAsJsonObject().get("url").getAsString();
 
 				getAlbumArt();
-				LogThis(Level.INFO, "album art link: " + sp_album_art_link);
+				LogThis(Level.INFO, "got album art");
+
+//				LogThis(Level.INFO, "album art link: " + sp_album_art_link);
 
 				sp_device_id = json.get("device").getAsJsonObject().get("id").getAsString();
 				sp_device_is_active = json.get("device").getAsJsonObject().get("is_active").getAsBoolean();
@@ -374,6 +393,7 @@ public class HudifyMain implements ClientModInitializer
 //		sp_album = sp_is_podcast ? "" : json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 				sp_album = tryTruncate(json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString());
 
+				LogThis(Level.INFO, "updating maps");
 				UpdateMaps();
 
 			} // if response successful
@@ -381,7 +401,7 @@ public class HudifyMain implements ClientModInitializer
 //			if (HudifyConfig.truncate_length != -1) truncate();
 
 		} catch (Exception e) {
-			LogThis(Level.ERROR,"exception caught in getPlaybackInfo(): " + e.getMessage());
+			LogThis(Level.ERROR,"exception caught in getPlaybackInfo(): " + e.getMessage()+" "+Arrays.toString(e.getStackTrace()));
 //            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
 //            { Log(Level.INFO,"Resetting connection and retrying info get...");
 ////                results[0] = "Reset"; }
