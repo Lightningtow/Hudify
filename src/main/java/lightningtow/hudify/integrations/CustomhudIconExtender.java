@@ -115,6 +115,8 @@ public class CustomhudIconExtender extends IconElement {
         context.getMatrices().translate(piece.x+shiftX, piece.y+shiftY-yOffset-2, 0);
         rotate(context.getMatrices(), width, height);
 //        context.draw();
+        if (!referenceCorner)
+            context.getMatrices().translate(0, -(11*scale-11)/2F, 0);
         context.drawTexture(texture, 0, 0, width, height, 0, 0, textureWidth, textureHeight, textureWidth, textureHeight);
         context.getMatrices().pop();
     }
