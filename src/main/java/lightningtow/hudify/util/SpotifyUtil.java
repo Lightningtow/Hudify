@@ -20,12 +20,13 @@ import java.net.http.HttpResponse;
 
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.Level;
-import java.util.ArrayList;
-import java.util.Scanner;
+
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static lightningtow.hudify.HudifyConfig.smartbrackets_kill_featuring;
 import static lightningtow.hudify.util.SpotifyData.*;
 import static lightningtow.hudify.HudifyConfig.db;
 import static lightningtow.hudify.HudifyMain.LogThis;
@@ -326,7 +327,7 @@ public class SpotifyUtil
      * and is supposed to return null, if you're doing stuff that doesn't need a response like play/pause, skip etc
      * example call:  EXECUTOR_SERVICE.execute(() -> apiRequest(reqType.PUT,"https:/ /api.spotify.com/v1/me/player/pause"));
      * (remove the whitespace between the slashes in the link above, thats to stop javadocs from throwing warnings)
-     * be sure to call this using an executor, something not on the main thread, so as to not freeze the main thread
+     * be sure to call this using an executor, not on the main thread, so as to not freeze the main thread
     **/
     public static JsonObject apiRequest(reqType type, String url)  {
         try
@@ -400,11 +401,32 @@ public class SpotifyUtil
         return null;//"error in getRequest()";
     }
 
+    public static String nobrackets(String input) {
+        char[] blacklist = { '{', '(', '-' };
+        String output = "";
+        char x1 = '(';
+        char x2 = '[';
+        char x3 = '{'; // hoping itll be faster to have individual variables rather than an array
+        char x4 = '-';
+        char x5 = '–';
 
-    public static String scrub(String input) {
+        // todo this is very inefficient, make this only run when track updates
+        for(int i = 0, len = input.length() ; i < len ; i++) {
+            char c = input.charAt(i);
+            if (c == x1 || c == x2 || c == x3 || c == x4 || c == x5) {
+                output = input.substring(0, i-1);
+                return output;
+
+            }
+        }
+        return input;
+    }
+
+    public static String smartbrackets(String input) {
         // take stuff like 'remastered' etc and scrub it from the end of track name
         String output = input;
 
+        // todo this is very inefficient, make this only run when track updates
 
         ArrayList<String> blacklist = new ArrayList<>();
         blacklist.add("bonus track");
@@ -412,6 +434,11 @@ public class SpotifyUtil
         blacklist.add("intro");
         blacklist.add("outro");
         blacklist.add("interlude");
+        blacklist.add("cover");
+        blacklist.add("remix");
+        blacklist.add("david garrett edition");
+
+
 //        blacklist.add("live with the sfso");
 //        if (sp_first_artist.equals("Metallica") && sp_album.equals("S&M2")) blacklist.add("live");
         blacklist.add("original mix");
@@ -427,25 +454,64 @@ public class SpotifyUtil
         blacklist.add("single");
         blacklist.add("music from [\\w\\s]*");
         blacklist.add("from [^\\])]*");
+
+        if (HudifyConfig.smartbrackets_kill_featuring) {
+            blacklist.add("with [^\\])]*");
+            blacklist.add("featuring [\\w\\s]*"); // no whitespace so it matches feat with and w/o a period, feat.
+            blacklist.add("feat. [\\w\\s]*"); // no whitespace so it matches feat with and w/o a period, feat.
+//            blacklist.add("feat [^\\])]*"); // no whitespace so it matches feat with and w/o a period, feat.
+            blacklist.add("ft[^\\])]*");
+
+        }
+
+
+
+        // smart brackets did not edit these:
+        // burnout - beat avengers remix
+        // piece of your mind feat. iona smith and beat fatigue - grid division remix
+        // family reunion - live/1999
+        // Ante Up (feat. Busta Rhymes, Teflon & Remi Martin) - Remix
+        // shatter me featuring lzzy hale
+
         // https://regexr.com is the good regex website
         //   \w matches any letter
         //   \s matches any whitespace
 
+        //    [^\])]*  matches any character that isnt ) or ]
+        //    [\w\s]*  matches any letter, number, underscore, or whitespace
+        //    which is better? ig it depends on whether tracks have needlessly complicated names
+
         ArrayList<String> real_blacklist = new ArrayList<>();
+        // real blacklist is the blacklist with every combo of bracket and dash
         for (String elem : blacklist) {
+            real_blacklist.add(" - Spider-Man: Across the Spider-Verse"); // since its exact, no need for every combo
             real_blacklist.add(" - " + elem);
             real_blacklist.add(" - " + elem);
             real_blacklist.add(" – " + elem);
+
             real_blacklist.add("\\/\\/ " + elem);
             real_blacklist.add("\\(" + elem + "\\)");
             real_blacklist.add("\\[" + elem + "\\]");
 //            real_blacklist.add(elem);
+
+            if (HudifyConfig.smartbrackets_kill_featuring) {
+//                // because some songs put feat directly in the title with no brackets
+                real_blacklist.add("featuring [\\w\\s]*"); // no whitespace so it matches feat with and w/o a period, feat.
+                    // this makes it so it still appears in nobrackets. will get feedback later
+                real_blacklist.add("feat. [\\w\\s]*");
+
+//                real_blacklist.add("with [^\\])]*");
+//                real_blacklist.add("feat[\\w\\s]*");
+//                real_blacklist.add("ft[\\w\\s]*");
+//
+            }
         }
 
 
         for (String elem : real_blacklist) {
             String regex = "(?i)" + elem; // ?i makes it case insensitive
             output = output.replaceAll(regex, "");
+            output = output.replace("  ", " "); // makes doublespaces single spaces
 
         }
 
