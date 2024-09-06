@@ -27,11 +27,17 @@ To uninstall, also be sure to also disconnect the app from https://www.spotify.c
 
 
 Program messages are displayed in the `{sp_message}` variable rather than in Minecraft chat, for compatibility with more Minecraft versions.
+<details>
+<summary>All Hudify variables:</summary>
 
-### Variables added:
+#### Icon variable:
+`{sp_album_art}` - Displays the album art. Currently limited to a resolution of 64x, supporting higher resolutions is high priority  
+  
 #### String variables:
 `{sp_track}` / `{sp_song}` - Song/episode's title  
-`{sp_fancy_track}` - Track title with stuff like "remastered", "bonus track" etc scrubbed out.  
+`{sp_track_smart_brackets}` / `{sp_smartbrackets}` - Attempts to remove unnecessary info from track titles like 'remastered', 'bonus track', etc while leaving in deliberate usages of parentheses in song titles  
+`{sp_track_no_brackets}` / `{sp_nobrackets}` - Removes all bracketed words from song titles.  
+Note: the word "bracket" above refers to characters/words wrapped with \[square brackets\], (parentheses), or followed by a - dash.  
 `{sp_album}` - Album of current track. Blank if podcast  
 `{sp_artist}` / `{sp_artists}` - All artist(s)  
 `{sp_first_artist}` - The very first artist listed  
@@ -66,6 +72,7 @@ These were added by me for debugging, I can't think of any reason you'd need the
 
 </details>
 
+</details>
 
 
 ### Example CustomHud Config:
@@ -84,6 +91,7 @@ Repeat: {sp_repeat}
 =endif=
 ```
 #### Known issues:
+- podcasts aren't really supported at the moment. It shouldn't crash anything but many variables won't update properly  
 - playback controls can be finicky. Don't mash the keybinds, it'll make things worse  
 - at launch, variables are empty if app is open but paused
 - context doesn't update if playing from queue or search results. 
