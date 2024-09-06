@@ -4,7 +4,6 @@ import com.minenash.customhud.HudElements.supplier.NumberSupplierElement;
 import com.minenash.customhud.HudElements.supplier.SpecialSupplierElement;
 import com.minenash.customhud.HudElements.supplier.StringSupplierElement;
 
-import static lightningtow.hudify.HudifyMain.LogThis;
 import static lightningtow.hudify.util.SpotifyData.*;
 
 /*
@@ -22,17 +21,6 @@ if switching to v3: uncomment the entire CustomhudBoolSupplier.java file
 
 /* 4.0 */
 import com.minenash.customhud.data.Flags;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.Level;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
 import static com.minenash.customhud.data.Flags.wrap;
 import static com.minenash.customhud.registry.CustomHudRegistry.registerElement;
@@ -40,7 +28,7 @@ public class CustomhudIntegration {
         public static void initCustomhud() {
             UpdateMaps();
 
-            registerElement("sp_album_art", (f, c) -> new CustomhudIconExtender(sp_album_art_identifier, f)  );
+            registerElement("sp_album_art", (f, c) -> new CustomhudIconExtender(g_album_art_identifier, f)  );
 
 
             for ( String key : stringmap.keySet() ) { // f, c == flags, context

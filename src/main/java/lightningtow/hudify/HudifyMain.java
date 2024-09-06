@@ -3,9 +3,7 @@ package lightningtow.hudify;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.minenash.customhud.CustomHud;
 import lightningtow.hudify.integrations.CustomhudIntegration;
-import lightningtow.hudify.util.SpotifyData;
 import lightningtow.hudify.util.SpotifyUtil;
 import net.fabricmc.api.ClientModInitializer;
 
@@ -16,32 +14,22 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.resource.Resource;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.PngMetadata;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.lwjgl.glfw.GLFW;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
 
 import static lightningtow.hudify.util.SpotifyData.*;
 import static lightningtow.hudify.HudifyConfig.db;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.http.HttpResponse;
-import java.nio.Buffer;
-import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -78,7 +66,7 @@ public class HudifyMain implements ClientModInitializer
 	public static String tryTruncate(String victim) {
 		// feed this a string that may or may not need to be trunated
 		// if it is too long, itll truncate and return the chopped string
-		// if its not so long it needs to be truncated, itll just return it without changing it
+		// if it doesnt need to be truncated, itll just return it without changing it
 		int len = HudifyConfig.truncate_length;
 		if (len == -1) return victim;
 
@@ -115,10 +103,10 @@ public class HudifyMain implements ClientModInitializer
 
 		try {
 
-			LogThis(Level.INFO, "link: " + sp_album_art_link);
+			LogThis(Level.INFO, "link: " + g_album_art_link);
 			InputStream in;
-			if (sp_album_art_link == null || sp_album_art_link.isEmpty()) in = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
-			else in = new URL(sp_album_art_link).openStream();
+			if (g_album_art_link == null || g_album_art_link.isEmpty()) in = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
+			else in = new URL(g_album_art_link).openStream();
 //			InputStream in = new URL("https://i.scdn.co/image/ab67616d00001e020c098e7d643246d5f2e8bb62").openStream();
 //			InputStream in = new URL("https://i.scdn.co/image/ab67616d00004851cfc4b1939aba562fc97159c5").openStream();
 
@@ -175,7 +163,7 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 //			ImageIO.write(bufferedImage, "PNG", byteArrayOutputStream);
 			LogThis(Level.INFO, "3");
 
-			sp_native_image = NativeImage.read(byteArray);
+			g_native_image = NativeImage.read(byteArray);
 
 //			ImageIO.write(bufferedImage, "PNG", byteArrayOutputStream);
 //			ImageIO.write(ImageIO.read(in), "PNG", thing);
@@ -195,8 +183,8 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 //			Identifier newtexture = new Identifier("textures/hudify/albumart.png");
 
 //			client.getTextureManager().registerTexture(sp_album_art_identifier, new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray())));
-			client.getTextureManager().destroyTexture(sp_album_art_identifier);
-			client.getTextureManager().registerTexture(sp_album_art_identifier, nativeImageBackedTexture);
+			client.getTextureManager().destroyTexture(g_album_art_identifier);
+			client.getTextureManager().registerTexture(g_album_art_identifier, nativeImageBackedTexture);
 
 			LogThis(Level.INFO, "5");
 
@@ -374,13 +362,13 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 //[20:24:01] [Spotify Thread/INFO] (Hudify) (Hudify) [{"height":640,"url":"https://i.scdn.co/image/ab67616d0000b273cfc4b1939aba562fc97159c5","width":640},{"height":300,"url":"https://i.scdn.co/image/ab67616d00001e02cfc4b1939aba562fc97159c5","width":300},{"height":64,"url":"https://i.scdn.co/image/ab67616d00004851cfc4b1939aba562fc97159c5","width":64}]
 				//sp_icon_link = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").getAsJsonArray().get(0).toString();
 // [20:27:10] [Spotify Thread/INFO] (Hudify) (Hudify) {"height":640,"url":"https://i.scdn.co/image/ab67616d0000b2733b4362147e2b0595d512033e","width":640}
-				sp_album_art_link = albumart;
+				g_album_art_link = albumart;
 
-				if (sp_prev_album_art_link.isEmpty() || !sp_prev_album_art_link.equals(albumart)) {
+				if (g_prev_album_art_link.isEmpty() || !g_prev_album_art_link.equals(albumart)) {
 					// if album art changed or is empty
                     LogThis(Level.INFO,"album art links do NOT match, running getAlbumArt");
 
-					sp_prev_album_art_link = albumart;
+					g_prev_album_art_link = albumart;
 					getAlbumArt();
 					LogThis(Level.INFO, "got album art");
 

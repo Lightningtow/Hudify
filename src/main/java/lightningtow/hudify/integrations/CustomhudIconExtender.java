@@ -1,40 +1,14 @@
 package lightningtow.hudify.integrations;
-import com.minenash.customhud.CustomHud;
 import com.minenash.customhud.HudElements.icon.IconElement;
 import com.minenash.customhud.data.Flags;
 import com.minenash.customhud.render.RenderPiece;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import lightningtow.hudify.util.SpotifyData;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.*;
 import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.net.URL;
 
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.PngMetadata;
-import org.apache.logging.log4j.Level;
-import org.joml.Matrix4f;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-import java.nio.ByteBuffer;
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import static lightningtow.hudify.HudifyMain.LogThis;
-import static lightningtow.hudify.util.SpotifyData.sp_album_art_link;
-import static lightningtow.hudify.util.SpotifyData.sp_native_image;
+import static lightningtow.hudify.util.SpotifyData.g_native_image;
 
 public class CustomhudIconExtender extends IconElement {
     private static final MinecraftClient client = MinecraftClient.getInstance();
@@ -60,7 +34,7 @@ public class CustomhudIconExtender extends IconElement {
     public CustomhudIconExtender(Identifier texture, Flags flags) {
         super(flags, 0);
 
-        NativeImage img = sp_native_image;
+        NativeImage img = g_native_image;
 
 
 //        NativeImage img = null;
