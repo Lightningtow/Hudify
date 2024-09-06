@@ -29,6 +29,7 @@ import javax.imageio.stream.ImageOutputStream;
 import static lightningtow.hudify.util.SpotifyData.*;
 import static lightningtow.hudify.HudifyConfig.db;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
@@ -128,7 +129,30 @@ public class HudifyMain implements ClientModInitializer
 			LogThis(Level.INFO, "1");
 
 			// read a jpeg from a inputFile
+
+			int targetsize = 256;
+//			BufferedImage bufferedImage = Scalr.resize(ImageIO.read(in), targetsize);
+//			BufferedImage scaledImg = Scalr.resize(ImageIO.read(in), targetsize);
+			LogThis(Level.INFO, "before read");
 			BufferedImage bufferedImage = ImageIO.read(in);
+			LogThis(Level.INFO, "after read");
+//			Image image = ImageIO.read(in).getScaledInstance(newsize, newsize, Image.SCALE_DEFAULT);
+//			BufferedImage img = ; // load image
+//			BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
+//			BufferedImage bufferedImage = new BufferedImage(newsize, newsize, BufferedImage.TYPE_INT_RGB);
+// https://stackoverflow.com/questions/9132149/how-to-convert-buffered-image-to-image-and-vice-versa
+//			BufferedImage bufferedImage = image;
+
+
+/*
+Image.SCALE_DEFAULT: Use the default image-scaling algorithm.
+Image.SCALE_FAST: Choose an image-scaling algorithm that gives higher priority to scaling speed than smoothness of the scaled image.
+Image.SCALE_SMOOTH: Choose an image-scaling algorithm that gives higher priority to image smoothness than scaling speed.
+Image.SCALE_AREA_AVERAGING: Use the Area Averaging image scaling algorithm.
+Image.SCALE_REPLICATE: Use the image scaling algorithm embodied in the ReplicateScaleFilter class.
+https://stackoverflow.com/questions/5895829/resizing-image-in-java
+
+ */
 
 //			NativeImage img = null;
 //			NativeImage img = NativeImage.read(in); // either this is crashing
@@ -156,7 +180,7 @@ public class HudifyMain implements ClientModInitializer
 
 //            ByteBuffer byteBuffer = ByteBuffer.wrap(byteArray);
 //			image = new NativeImageBackedTexture(NativeImage.read(ImageIO.write));
-			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArray));
+			NativeImageBackedTexture nativeImageBackedTexture = new NativeImageBackedTexture(NativeImage.read(byteArray));
 
 //			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray()));
 //			img = image.getImage();
@@ -169,7 +193,7 @@ public class HudifyMain implements ClientModInitializer
 
 //			client.getTextureManager().registerTexture(sp_album_art_identifier, new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray())));
 			client.getTextureManager().destroyTexture(sp_album_art_identifier);
-			client.getTextureManager().registerTexture(sp_album_art_identifier, image);
+			client.getTextureManager().registerTexture(sp_album_art_identifier, nativeImageBackedTexture);
 
 			LogThis(Level.INFO, "5");
 
@@ -284,7 +308,7 @@ public class HudifyMain implements ClientModInitializer
 
 	}
 
-	public static final int jsonImageChoice = 1; // 0 == 640, 1 == 300, 2 == 64
+	public static final int jsonImageChoice = 2; // 0 == 640,   1 == 300,   2 == 64
 
 	public static void updatePlaybackInfo()
 	{
