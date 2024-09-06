@@ -1,5 +1,5 @@
 package lightningtow.hudify.integrations;
-import com.minenash.customhud.HudElements.icon.IconElement;
+import  com.minenash.customhud.HudElements.icon.IconElement;
 import com.minenash.customhud.data.Flags;
 import com.minenash.customhud.render.RenderPiece;
 import net.minecraft.client.MinecraftClient;
@@ -8,6 +8,7 @@ import net.minecraft.client.texture.NativeImage;
 
 import net.minecraft.util.Identifier;
 
+import static lightningtow.hudify.util.SpotifyData.g_album_art_identifier;
 import static lightningtow.hudify.util.SpotifyData.g_native_image;
 
 public class CustomhudIconExtender extends IconElement {
@@ -49,7 +50,9 @@ public class CustomhudIconExtender extends IconElement {
 
 
         iconAvailable = img != null;
-        this.texture = iconAvailable ? texture : TEXTURE_NOT_FOUND;
+//        this.texture = iconAvailable ? texture : TEXTURE_NOT_FOUND;
+
+        this.texture = iconAvailable ? texture : g_album_art_identifier;
 
         textureWidth = iconAvailable ? img.getWidth() : 16;
         textureHeight = iconAvailable ? img.getHeight() : 16;
