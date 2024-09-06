@@ -3,6 +3,7 @@ package lightningtow.hudify;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.minenash.customhud.CustomHud;
 import lightningtow.hudify.integrations.CustomhudIntegration;
 import lightningtow.hudify.util.SpotifyData;
 import lightningtow.hudify.util.SpotifyUtil;
@@ -12,15 +13,35 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.resource.Resource;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.PngMetadata;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.lwjgl.glfw.GLFW;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
 
 import static lightningtow.hudify.util.SpotifyData.*;
 import static lightningtow.hudify.HudifyConfig.db;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.net.http.HttpResponse;
+import java.nio.Buffer;
+import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -79,9 +100,130 @@ public class HudifyMain implements ClientModInitializer
 //		// todo attempt to make the outputted variable cleaner, truncating at word breaks and removing trailing commas
 //	}
 
-	public static void LogThis(org.apache.logging.log4j.Level lvl, String msg) {
+	public static void LogThis(Level lvl, String msg) {
 		msg = "(" + MOD_DISPLAY_NAME + ") " + msg;
-		org.apache.logging.log4j.LogManager.getLogger(MOD_DISPLAY_NAME).log(lvl, msg);
+		LogManager.getLogger(MOD_DISPLAY_NAME).log(lvl, msg);
+	}
+
+	public static void getAlbumArt() {
+		final MinecraftClient client = MinecraftClient.getInstance();
+
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+
+//        if (link == null || link.isEmpty()) link = "https://i.scdn.co/image/ab67616d00001e023ce4f9e5bc032ff88268edba";
+
+		try {
+
+			LogThis(Level.INFO, "link: " + sp_album_art_link);
+			InputStream in;
+			if (sp_album_art_link == null || sp_album_art_link.isEmpty()) in = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
+			else in = new URL(sp_album_art_link).openStream();
+//			InputStream in = new URL("https://i.scdn.co/image/ab67616d00001e020c098e7d643246d5f2e8bb62").openStream();
+//			InputStream in = new URL("https://i.scdn.co/image/ab67616d00004851cfc4b1939aba562fc97159c5").openStream();
+
+//			InputStream in = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
+//            InputStream in = new URL(sp_album_art_link).openStream();
+
+//			byte[] byteArray = in.readAllBytes();
+
+//						byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+			LogThis(Level.INFO, "1");
+
+			// read a jpeg from a inputFile
+
+			int targetsize = 256;
+//			BufferedImage bufferedImage = Scalr.resize(ImageIO.read(in), targetsize);
+//			BufferedImage scaledImg = Scalr.resize(ImageIO.read(in), targetsize);
+			LogThis(Level.INFO, "before read");
+			BufferedImage bufferedImage = ImageIO.read(in);
+			LogThis(Level.INFO, "after read");
+//			Image image = ImageIO.read(in).getScaledInstance(newsize, newsize, Image.SCALE_DEFAULT);
+//			BufferedImage img = ; // load image
+//			BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
+//			BufferedImage bufferedImage = new BufferedImage(newsize, newsize, BufferedImage.TYPE_INT_RGB);
+// https://stackoverflow.com/questions/9132149/how-to-convert-buffered-image-to-image-and-vice-versa
+//			BufferedImage bufferedImage = image;
+
+
+/*
+Image.SCALE_DEFAULT: Use the default image-scaling algorithm.
+Image.SCALE_FAST: Choose an image-scaling algorithm that gives higher priority to scaling speed than smoothness of the scaled image.
+Image.SCALE_SMOOTH: Choose an image-scaling algorithm that gives higher priority to image smoothness than scaling speed.
+Image.SCALE_AREA_AVERAGING: Use the Area Averaging image scaling algorithm.
+Image.SCALE_REPLICATE: Use the image scaling algorithm embodied in the ReplicateScaleFilter class.
+https://stackoverflow.com/questions/5895829/resizing-image-in-java
+
+ */
+
+//			NativeImage img = null;
+//			NativeImage img = NativeImage.read(in); // either this is crashing
+//			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArray));  // or this is crashing
+
+			// https://stackoverflow.com/questions/2716596/how-to-put-data-from-an-outputstream-into-a-bytebuffer
+
+			LogThis(Level.INFO, "2");
+
+			ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
+			bufferedImage = null;
+			LogThis(Level.INFO, "2b");
+
+			byte [] byteArray = byteArrayOutputStream.toByteArray();
+			byteArrayOutputStream = null;
+
+//			ImageIO.write(bufferedImage, "PNG", byteArrayOutputStream);
+			LogThis(Level.INFO, "3");
+
+			sp_native_image = NativeImage.read(byteArray);
+
+//			ImageIO.write(bufferedImage, "PNG", byteArrayOutputStream);
+//			ImageIO.write(ImageIO.read(in), "PNG", thing);
+			LogThis(Level.INFO, "4");
+
+//            ByteBuffer byteBuffer = ByteBuffer.wrap(byteArray);
+//			image = new NativeImageBackedTexture(NativeImage.read(ImageIO.write));
+			NativeImageBackedTexture nativeImageBackedTexture = new NativeImageBackedTexture(NativeImage.read(byteArray));
+
+//			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray()));
+//			img = image.getImage();
+
+//            image = new NativeImageBackedTexture(NativeImage.read(resultingBytes));
+//            client.getTextureManager().registerTexture(new Identifier("test"), image);
+			// todo wait i got it to display teh bird, just need to figure out what i did there
+
+//			Identifier newtexture = new Identifier("textures/hudify/albumart.png");
+
+//			client.getTextureManager().registerTexture(sp_album_art_identifier, new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray())));
+			client.getTextureManager().destroyTexture(sp_album_art_identifier);
+			client.getTextureManager().registerTexture(sp_album_art_identifier, nativeImageBackedTexture);
+
+			LogThis(Level.INFO, "5");
+
+			in.close();
+//			byteArrayOutputStream.close();
+//            Optional<Resource> resource = client.getResourceManager().getResource(Identifier.tryParse("textures/item/albumart"));
+//            if (resource.isPresent())
+//                img = NativeImage.read(resource.get().getInputStream());
+// this^ doesnt cause Java.lang.NullPointerException: Cannot invoke "minecraft.util.Identifier.getNamespace()" because "identifier" is null
+		} catch (IOException e) {
+			LogThis(Level.ERROR, "error in try(InputStream) in CustomHudExtender: " + Arrays.toString(e.getStackTrace()));
+//            e.printStackTrace();
+		}
+//		NativeImageBackedTexture finalImage = image;
+
+//		try {
+//			Optional<Resource> resource = client.getResourceManager().getResource(texture);
+//			if (resource.isPresent())
+//				img = NativeImage.read(resource.get().getInputStream());
+//		}
+//		catch (IOException e) { CustomHud.LOGGER.catching(e); }
+/*
+        https://i.scdn.co/image/ab67616d00001e023ce4f9e5bc032ff88268edba
+        https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228
+*/
+
+
 	}
 
 	public static void genBracketVariables(String trackname) {
@@ -104,6 +246,7 @@ public class HudifyMain implements ClientModInitializer
 		HudifyConfig.init(MOD_ID, HudifyConfig.class); //todo uncomment me
 		SpotifyUtil.initialize();
 
+
 //		SpotifyUtil.authorize(); // "nothing happens if you attempt to auth and fail" NOT TRUE, THIS OPENS THE WEB BROWSER
 
 
@@ -119,7 +262,7 @@ public class HudifyMain implements ClientModInitializer
 //			SpotifyUtil.authorize();
 //
 //		}
-		SpotifyData.resetData();
+		resetData();
 
 //		else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
 		Thread requestThread = new Thread( () -> {
@@ -176,6 +319,8 @@ public class HudifyMain implements ClientModInitializer
 
 	}
 
+	public static final int jsonImageChoice = 2; // 0 == 640,   1 == 300,   2 == 64
+
 	public static void updatePlaybackInfo()
 	{
 		String dump_msg = "getPlaybackInfo";
@@ -223,6 +368,24 @@ public class HudifyMain implements ClientModInitializer
 //				sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
 //				sp_fancy_track = HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track;
 
+				String albumart = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").getAsJsonArray().get(jsonImageChoice).getAsJsonObject().get("url").getAsString();
+
+//				sp_icon_link = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").toString();
+//[20:24:01] [Spotify Thread/INFO] (Hudify) (Hudify) [{"height":640,"url":"https://i.scdn.co/image/ab67616d0000b273cfc4b1939aba562fc97159c5","width":640},{"height":300,"url":"https://i.scdn.co/image/ab67616d00001e02cfc4b1939aba562fc97159c5","width":300},{"height":64,"url":"https://i.scdn.co/image/ab67616d00004851cfc4b1939aba562fc97159c5","width":64}]
+				//sp_icon_link = json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("images").getAsJsonArray().get(0).toString();
+// [20:27:10] [Spotify Thread/INFO] (Hudify) (Hudify) {"height":640,"url":"https://i.scdn.co/image/ab67616d0000b2733b4362147e2b0595d512033e","width":640}
+				sp_album_art_link = albumart;
+
+				if (sp_prev_album_art_link.isEmpty() || !sp_prev_album_art_link.equals(albumart)) {
+					// if album art changed or is empty
+                    LogThis(Level.INFO,"album art links do NOT match, running getAlbumArt");
+
+					sp_prev_album_art_link = albumart;
+					getAlbumArt();
+					LogThis(Level.INFO, "got album art");
+
+				}
+//				LogThis(Level.INFO, "album art link: " + sp_album_art_link);
 
 				sp_device_id = json.get("device").getAsJsonObject().get("id").getAsString();
 				sp_device_is_active = json.get("device").getAsJsonObject().get("is_active").getAsBoolean();
@@ -282,14 +445,14 @@ public class HudifyMain implements ClientModInitializer
 //		sp_album = sp_is_podcast ? "" : json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString();
 				sp_album = tryTruncate(json.get("item").getAsJsonObject().get("album").getAsJsonObject().get("name").getAsString());
 
-				SpotifyData.UpdateMaps();
+				UpdateMaps();
 
 			} // if response successful
 
 //			if (HudifyConfig.truncate_length != -1) truncate();
 
 		} catch (Exception e) {
-			LogThis(Level.ERROR,"exception caught in getPlaybackInfo(): " + e.getMessage());
+			LogThis(Level.ERROR,"exception caught in getPlaybackInfo(): " + e.getMessage()+" "+Arrays.toString(e.getStackTrace()));
 //            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
 //            { Log(Level.INFO,"Resetting connection and retrying info get...");
 ////                results[0] = "Reset"; }
