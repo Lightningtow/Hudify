@@ -18,7 +18,7 @@ if switching to v4: comment the entire CustomhudBoolSupplier.java file
 if switching to v3: uncomment the entire CustomhudBoolSupplier.java file
 
  */
-
+// MAIN BRANCH SHOULD NOT EVER BE USING 4.0 STUFF
 
 /* 4.0 */
 import com.minenash.customhud.data.Flags;

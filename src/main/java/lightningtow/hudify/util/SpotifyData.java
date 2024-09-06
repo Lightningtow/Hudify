@@ -17,7 +17,9 @@ public class SpotifyData {
     public static String sp_prev_album_art_link = "";
 
     public static String sp_track = ""; // track or episode name
-    public static String sp_fancy_track = ""; // track with 'bonus track, remastered' etc scrubbed out
+//    public static String sp_fancy_track = ""; // track with 'bonus track, remastered' etc scrubbed out
+    public static String sp_track_smartbrackets = "";
+    public static String sp_track_nobrackets = "";
 
     public static String sp_artists = ""; // all artists as one string
     public static String sp_first_artist = ""; // first artist listed. if one artist or podcast, identical to `artists`
@@ -80,11 +82,19 @@ public class SpotifyData {
 
     public static void UpdateMaps() {
 
-        stringmap.put("sp_song", sp_track);
         stringmap.put("sp_track", sp_track);
-        stringmap.put("sp_fancy_track", sp_fancy_track);
+        stringmap.put("sp_smartbrackets", sp_track_smartbrackets);
+        stringmap.put("sp_nobrackets", sp_track_nobrackets);
+
+        stringmap.put("sp_song", sp_track);
+        stringmap.put("sp_track_smart_brackets", sp_track_smartbrackets);
+        stringmap.put("sp_track_no_brackets", sp_track_nobrackets);
+
+        stringmap.put("sp_fancy_track", sp_track_smartbrackets); // deprecated
+
         stringmap.put("sp_artist", sp_artists);
         stringmap.put("sp_artists", sp_artists);
+
         stringmap.put("sp_first_artist", sp_first_artist);
         stringmap.put("sp_context_type", sp_context_type);
         stringmap.put("sp_context_name", sp_context_name);
@@ -132,7 +142,7 @@ public class SpotifyData {
         sp_device_name = "";
 
         sp_track = "";
-        sp_fancy_track = "";
+//        sp_fancy_track = "";
 
         sp_artists = "";
         sp_first_artist = "";

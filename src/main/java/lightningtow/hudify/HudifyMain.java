@@ -76,6 +76,9 @@ public class HudifyMain implements ClientModInitializer
 	}
 
 	public static String tryTruncate(String victim) {
+		// feed this a string that may or may not need to be trunated
+		// if it is too long, itll truncate and return the chopped string
+		// if its not so long it needs to be truncated, itll just return it without changing it
 		int len = HudifyConfig.truncate_length;
 		if (len == -1) return victim;
 
@@ -223,6 +226,12 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 
 	}
 
+	public static void genBracketVariables(String trackname) {
+		sp_track = tryTruncate(trackname);
+		sp_track_smartbrackets = tryTruncate(SpotifyUtil.smartbrackets(trackname));
+		sp_track_nobrackets = tryTruncate(SpotifyUtil.nobrackets(trackname));
+	}
+
 
 	@Override
 	public void onInitializeClient()
@@ -237,6 +246,8 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 		HudifyConfig.init(MOD_ID, HudifyConfig.class); //todo uncomment me
 		SpotifyUtil.initialize();
 
+
+//		SpotifyUtil.authorize(); // "nothing happens if you attempt to auth and fail" NOT TRUE, THIS OPENS THE WEB BROWSER
 
 
 //		if (SpotifyUtil.get_client_id().isEmpty()) {
@@ -349,8 +360,10 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 				sp_repeat_state = json.get("repeat_state").getAsString(); // if repeat is "context" change to "all"
 				/* repeat */  if (sp_repeat_state.equals("context")) sp_repeat_state = "all"; // else leave it
 
-				sp_track = tryTruncate(json.get("item").getAsJsonObject().get("name").getAsString());
-				sp_fancy_track = tryTruncate(HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track);
+				genBracketVariables(json.get("item").getAsJsonObject().get("name").getAsString());
+				// sp_track and other vars. truncation included
+//				sp_track = tryTruncate(json.get("item").getAsJsonObject().get("name").getAsString());
+//				sp_fancy_track = tryTruncate(HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track);
 
 //				sp_track = json.get("item").getAsJsonObject().get("name").getAsString();
 //				sp_fancy_track = HudifyConfig.scrub_name ? SpotifyUtil.scrub(sp_track) : sp_track;
