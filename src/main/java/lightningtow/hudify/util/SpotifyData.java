@@ -12,8 +12,10 @@ public class SpotifyData {
     //<editor-fold desc="variables">
     public static NativeImage g_native_image = null;
 //    public static Identifier g_album_art_identifier = new Identifier("textures/hudify/albumart.png");
-    public static Identifier g_album_art_identifier = new Identifier("hudify:textures/64.png");
-// ideally youd specify them separately Identifier.of("hudify", "textures/64.png");
+    public static Identifier g_album_art_identifier = Identifier.of("hudify", "textures/64.png");
+//    public static Identifier g_album_art_identifier = new Identifier("hudify:textures/64.png");
+
+    // ideally youd specify them separately
     public static String g_album_art_link = "";
     public static String g_prev_album_art_link = "";
 

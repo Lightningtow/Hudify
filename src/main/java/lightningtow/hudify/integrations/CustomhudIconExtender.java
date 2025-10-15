@@ -6,6 +6,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.texture.NativeImage;
 
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.resource.ResourcePackProfile;
 import net.minecraft.util.Identifier;
 
 import static lightningtow.hudify.util.SpotifyData.g_album_art_identifier;
@@ -14,7 +17,7 @@ import static lightningtow.hudify.util.SpotifyData.g_native_image;
 public class CustomhudIconExtender extends IconElement {
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
-    private static final Identifier TEXTURE_NOT_FOUND = new Identifier("textures/item/barrier.png");
+//    private static final Identifier TEXTURE_NOT_FOUND = new Identifier("textures/item/barrier.png");
 
 //    private static final Identifier LOCATION = new Identifier("textures/item/albumart");
 //    private Identifier texture;// = new Identifier("textures/item/albumart");
@@ -39,13 +42,9 @@ public class CustomhudIconExtender extends IconElement {
 
 
 //        NativeImage img = null;
-//        try {
-//
-//
-//            Optional<Resource> resource = client.getResourceManager().getResource(texture);
+//        try { Optional<Resource> resource = client.getResourceManager().getResource(texture);
 //            if (resource.isPresent())
-//                img = NativeImage.read(resource.get().getInputStream());
-//        }
+//                img = NativeImage.read(resource.get().getInputStream()); }
 //        catch (IOException e) { CustomHud.LOGGER.catching(e); }
 
 
@@ -84,21 +83,34 @@ public class CustomhudIconExtender extends IconElement {
 
     }
 
+//    @Override
+//    public void render(DrawContext context, RenderPiece piece) {
+//        if (width == 0)
+//            return;
+//        context.getMatrices().push();
+//        context.getMatrices().translate(piece.x+shiftX, piece.y+shiftY-yOffset-2, 0);
+////        rotate(context.getMatrices(), width, height);
+////        context.draw();
+//        if (!referenceCorner)
+//            context.getMatrices().translate(0, -(11*scale-11)/2F, 0);
+//        context.drawTexture(texture, 0, 0, width, height, 0, 0, textureWidth, textureHeight, textureWidth, textureHeight);
+//        context.getMatrices().pop();
+//    }
+
     @Override
     public void render(DrawContext context, RenderPiece piece) {
-        if (width == 0)
-            return;
-        context.getMatrices().push();
-        context.getMatrices().translate(piece.x+shiftX, piece.y+shiftY-yOffset-2, 0);
-        rotate(context.getMatrices(), width, height);
-//        context.draw();
+        MatrixStack matrices = context.getMatrices();
+        matrices.push();
+        matrices.translate(piece.x + shiftX, piece.y + shiftY - 2, 0);
         if (!referenceCorner)
-            context.getMatrices().translate(0, -(11*scale-11)/2F, 0);
+            matrices.translate(0, -(11*scale-11)/2F, 0);
+//        matrices.scale(scale, scale, 0);
+        int width = (int) (11*scale);
+        rotate(matrices, width, width);
+
         context.drawTexture(texture, 0, 0, width, height, 0, 0, textureWidth, textureHeight, textureWidth, textureHeight);
-        context.getMatrices().pop();
+        matrices.pop();
     }
-
-
 
 
 
