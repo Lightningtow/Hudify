@@ -15,7 +15,7 @@ Note: Playback controls are locked behind a Spotify Premium subscription, which 
 The CustomHud variables should work fine without a subscription.   
 ### Installation instructions:
 1) Create a Spotify app according to [this](https://developer.spotify.com/documentation/web-api/tutorials/getting-started#create-an-app).  
-2) Set your app name and description to anything you want, and be sure to set your Redirect URI to `http://localhost:8001/callback`.  
+2) Set your app name and description to anything you want, and be sure to set your Redirect URI to `http://127.0.0.1:8000/callback`.  
 3) Get your Client ID from your newly created app  
 4) Put your Client ID in Hudify's config, via ModMenu.  
 5) Press a Hudify hotkey to initialize, and that's it!. No need to request an access token like the docs prompt you to, because Hudify takes care of that for you.

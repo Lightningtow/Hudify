@@ -45,7 +45,10 @@ public class SpotifyUtil
     private static String refreshToken;
     private static final String tokenAddress = "https://accounts.spotify.com/api/token";
     private static HttpClient client;
-    public static HttpClient getClient() { return client; }
+    public static HttpClient getClient() { return client; } ;
+//    private static final String redirect_uri = "http://127.0.0.1:8000/callback";
+    private static final String redirect_uri = "http%3A%2F%2F127.0.0.1%3A8000%2Fcallback";
+
 
     private static HttpServer authServer;
     private static ThreadPoolExecutor threadPoolExecutor;
@@ -133,8 +136,8 @@ public class SpotifyUtil
             authURI = new StringBuilder();
             authURI.append("https://accounts.spotify.com/authorize");
             authURI.append("?client_id=").append(get_client_id());
-            authURI.append("&response_type=code"); // http://localhost:8001/callback
-            authURI.append("&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fcallback");
+            authURI.append("&response_type=code");
+            authURI.append("&redirect_uri=").append(redirect_uri);
             authURI.append("&scope=");
             for (String scope : scope_list) {
                 authURI.append("%20").append(scope);
@@ -182,7 +185,7 @@ public class SpotifyUtil
             StringBuilder accessBody = new StringBuilder();
             accessBody.append("grant_type=authorization_code");
             accessBody.append("&code=").append(authCode);
-            accessBody.append("&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fcallback");
+            accessBody.append("&redirect_uri=").append(redirect_uri);
             accessBody.append("&client_id=").append(get_client_id());
             accessBody.append("&code_verifier=").append(verifier);
             HttpRequest accessRequest = HttpRequest.newBuilder(
