@@ -5,11 +5,13 @@ import com.minenash.customhud.render.RenderPiece;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.texture.NativeImage;
-
+import net.minecraft.client.render.RenderLayer;
+//import net.minecraft.client.render.RenderPipeline;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourcePackProfile;
 import net.minecraft.util.Identifier;
+import org.joml.Matrix3x2fStack;
 
 import static lightningtow.hudify.util.SpotifyData.g_album_art_identifier;
 import static lightningtow.hudify.util.SpotifyData.g_native_image;
@@ -100,15 +102,28 @@ public class CustomhudIconExtender extends IconElement {
     @Override
     public void render(DrawContext context, RenderPiece piece) {
         MatrixStack matrices = context.getMatrices();
+//        Matrix3x2fStack matrices = context.getMatrices();
+//        matrices.pushMatrix();
         matrices.push();
-        matrices.translate(piece.x + shiftX, piece.y + shiftY - 2, 0);
-        if (!referenceCorner)
+        matrices.translate(piece.x + shiftX, piece.y + shiftY - yOffset - 2, 0);
+//        matrices.translate(piece.x + shiftX, piece.y + shiftY - 2);
+        if (!referenceCorner) {
+//            matrices.translate(0, -(11*scale-11)/2F);
             matrices.translate(0, -(11*scale-11)/2F, 0);
-//        matrices.scale(scale, scale, 0);
-        int width = (int) (11*scale);
-        rotate(matrices, width, width);
+//            matrices.translate(0, 0, 0);
 
-        context.drawTexture(texture, 0, 0, width, height, 0, 0, textureWidth, textureHeight, textureWidth, textureHeight);
+        }
+//        matrices.scale(scale, scale, 0);
+        int newwidth = (int) (11*scale);
+        rotate(matrices, width, height);
+
+//        context.drawTexture(texture, 0, 0, width, height, 0, 0, textureWidth, textureHeight, textureWidth, textureHeight);
+//        context.drawItem(stack, 0, 0);
+
+//        context.drawTexture( texture,0, 0,  0, 0, width, height, textureWidth, textureHeight, textureWidth, textureHeight);
+        context.drawTexture(RenderLayer::getGuiTexturedOverlay, texture, 0, 0, 0, 0, width, height, textureWidth, textureHeight, textureWidth, textureHeight);
+
+//        matrices.popMatrix();
         matrices.pop();
     }
 

@@ -14,6 +14,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.lwjgl.glfw.GLFW;
@@ -171,7 +172,9 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 
 //            ByteBuffer byteBuffer = ByteBuffer.wrap(byteArray);
 //			image = new NativeImageBackedTexture(NativeImage.read(ImageIO.write));
+			// todo this one was active last i built but commenting due to 'no suitable constructor'
 			NativeImageBackedTexture nativeImageBackedTexture = new NativeImageBackedTexture(NativeImage.read(byteArray));
+// todo this one was active last i built but commenting due to 'no suitable constructor'
 
 //			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray()));
 //			img = image.getImage();
@@ -184,7 +187,10 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 
 //			client.getTextureManager().registerTexture(sp_album_art_identifier, new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray())));
 			client.getTextureManager().destroyTexture(g_album_art_identifier);
+
+			// todo this one was active last i built but commenting due to 'no suitable constructor'
 			client.getTextureManager().registerTexture(g_album_art_identifier, nativeImageBackedTexture);
+// todo this one was active last i built but commenting due to 'no suitable constructor'
 
 			LogThis(Level.INFO, "5");
 
@@ -476,8 +482,12 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 //			refreshKeyPrevState = newKey.wasPressed();
 //		});
 //	}
+//	private static final net.minecraft.client.option.KeyBinding.Category HUDIFY_CATEGORY = KeyBinding.Category.create(Identifier.of("hudify", "hudify"));
+
 	private static void registerToggleKey() {
+//		KeyBinding newKey = new KeyBinding("hudify.key.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, HUDIFY_CATEGORY);
 		KeyBinding newKey = new KeyBinding("hudify.key.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, MOD_DISPLAY_NAME);
+
 		KeyBindingHelper.registerKeyBinding(newKey);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {

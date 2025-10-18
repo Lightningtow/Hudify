@@ -1,4 +1,5 @@
 package lightningtow.hudify.util;
+import java.net.URLEncoder;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -21,6 +22,7 @@ import java.net.http.HttpResponse;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.Level;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,6 +40,7 @@ public class SpotifyUtil
     public static String get_client_id() {
         return HudifyConfig.CLIENT_ID.trim();
     }
+    public static String get_redirect_uri() { return encodeURL(HudifyConfig.CALLBACK_URI.trim()); }
 
     private static String verifier;
     private static String authCode;
@@ -47,7 +50,7 @@ public class SpotifyUtil
     private static HttpClient client;
     public static HttpClient getClient() { return client; } ;
 //    private static final String redirect_uri = "http://127.0.0.1:8000/callback";
-    private static final String redirect_uri = "http%3A%2F%2F127.0.0.1%3A8000%2Fcallback";
+//    private static final String redirect_uri = "http%3A%2F%2F127.0.0.1%3A8000%2Fcallback";
 
 
     private static HttpServer authServer;
@@ -60,6 +63,14 @@ public class SpotifyUtil
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
+    private static String encodeURL(String url) {
+        String newurl = URLEncoder.encode(url, StandardCharsets.UTF_8);
+        LogThis(Level.DEBUG,"encoding url " + url + " to " + newurl);
+
+        return newurl;
+
+
+    }
 
     //<editor-fold desc="auth utils">
     public static void initialize()
@@ -137,7 +148,7 @@ public class SpotifyUtil
             authURI.append("https://accounts.spotify.com/authorize");
             authURI.append("?client_id=").append(get_client_id());
             authURI.append("&response_type=code");
-            authURI.append("&redirect_uri=").append(redirect_uri);
+            authURI.append("&redirect_uri=").append(get_redirect_uri());
             authURI.append("&scope=");
             for (String scope : scope_list) {
                 authURI.append("%20").append(scope);
@@ -185,7 +196,7 @@ public class SpotifyUtil
             StringBuilder accessBody = new StringBuilder();
             accessBody.append("grant_type=authorization_code");
             accessBody.append("&code=").append(authCode);
-            accessBody.append("&redirect_uri=").append(redirect_uri);
+            accessBody.append("&redirect_uri=").append(get_redirect_uri());
             accessBody.append("&client_id=").append(get_client_id());
             accessBody.append("&code_verifier=").append(verifier);
             HttpRequest accessRequest = HttpRequest.newBuilder(

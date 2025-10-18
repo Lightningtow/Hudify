@@ -9,10 +9,11 @@ public class HudifyConfig extends MidnightConfig {
     @Entry(min = -1, max = 200) public static int truncate_length = -1;
     @Entry public static String CLIENT_ID = "";
     @Entry public static boolean smartbrackets_kill_featuring = false;
+    @Entry public static boolean scrub_name = true;
+    @Entry public static boolean db = false;
 
     //    @Comment(centered = true) public static Comment advanced_options_divider;
-    @Entry(category = ADVANCED) public static boolean scrub_name = true;
-    @Entry(category = ADVANCED) public static boolean db = false;
+    @Entry(category = ADVANCED) public static String CALLBACK_URI = "http://127.0.0.1:8000/callback";
     @Entry(category = ADVANCED, min = 800, max = 60000) public static int poll_rate = 850;
     @Entry(category = ADVANCED, min = 1, max = 60) public static int inactive_poll_rate = 3;
 //    @Entry public static boolean refresh_client_auth = false;
