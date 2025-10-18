@@ -237,7 +237,7 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 		}
 		catch (Exception e) { LogThis(Level.ERROR,"Error integrating with CustomHud: " + e); }
 //		File authFile = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + "HudifyTokens.json");
-		HudifyConfig.init(MOD_ID, HudifyConfig.class); //todo uncomment me
+		HudifyConfig.init(MOD_ID, HudifyConfig.class);
 		SpotifyUtil.initialize();
 
 
@@ -274,7 +274,7 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 
 
 					if (MinecraftClient.getInstance().world == null) {
-						Thread.sleep(HudifyConfig.inactive_poll_rate * 1000L);
+						Thread.sleep(HudifyConfig.inactive_poll_rate);
 						sp_progress = 0;
 						sp_duration = -1;
 					}
@@ -290,7 +290,7 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 						if (sp_status_code == 204) { // No Content - The request has succeeded but returns no message body.
 //							sp_progress = 0; // dont reset progress and duration here, it breaks it when app is paused
 							SpotifyUtil.refreshActiveSession(); // returns this when app is closed, and refreshActiveSession throws 404s
-							Thread.sleep(HudifyConfig.inactive_poll_rate * 1000L);
+							Thread.sleep(HudifyConfig.inactive_poll_rate);
 
 						} else if (sp_status_code == 429) { // rate limited
 							// approximately 180 calls per minute without throwing 429, ~3 calls per second

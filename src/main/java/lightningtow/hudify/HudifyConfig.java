@@ -15,7 +15,7 @@ public class HudifyConfig extends MidnightConfig {
     //    @Comment(centered = true) public static Comment advanced_options_divider;
     @Entry(category = ADVANCED) public static String CALLBACK_URI = "http://127.0.0.1:8000/callback";
     @Entry(category = ADVANCED, min = 800, max = 60000) public static int poll_rate = 850;
-    @Entry(category = ADVANCED, min = 1, max = 60) public static int inactive_poll_rate = 3;
+    @Entry(category = ADVANCED, min = 1, max = 60) public static int inactive_poll_rate = 3000;
 //    @Entry public static boolean refresh_client_auth = false;
 
 
