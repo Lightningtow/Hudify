@@ -1,5 +1,5 @@
 # Hudify - A Spotify integration for CustomHud
-## Requires [CustomHud](https://modrinth.com/mod/customhud). Please read the installation instructions below!  
+## Requires [MidnightLib](https://modrinth.com/mod/midnightlib) and **version 4.0+** of [CustomHud](https://modrinth.com/mod/customhud).
 
 [![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_46h.png)](https://modrinth.com/mod/hudify)
 [![GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_46h.png)](https://github.com/Lightningtow/Hudify)
@@ -14,7 +14,7 @@ This allows Hudify to display far more accurate info, with much less risk of get
 Note: Playback controls are locked behind a Spotify Premium subscription, which is out of my control.  
 The CustomHud variables should work fine without a subscription.   
 ### Installation instructions:
-1) Create a Spotify app according to [this](https://developer.spotify.com/documentation/web-api/tutorials/getting-started#create-an-app).  
+1) Create a Spotify app by following [this guide](https://developer.spotify.com/documentation/web-api/tutorials/getting-started#create-an-app).  
 2) Set your app name and description to anything you want, and be sure to set your Redirect URI to `http://127.0.0.1:8000/callback`.  
 3) Get your Client ID from your newly created app  
 4) Put your Client ID in Hudify's config, via ModMenu.  
