@@ -363,7 +363,14 @@ public class SpotifyUtil
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 //            Log(Level.INFO,"GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
 //            sp_status_code = response.statusCode(); // lets keep sp_status_code to just updatePlaybackInfo()
-
+            if (response.statusCode() == 200) /* success! */ {
+                // OK - The request has succeeded. The client can read the result of the request in the body and the headers of the response.
+                return null;
+            }
+            if (response.statusCode() == 200) /* success! */ {
+                // No Content - The request has succeeded but returns no message body.
+                return null;
+            }
             if (response.statusCode() == 401) /* unauthorized */ {
                 if (refreshAccessToken()) apiRequest(type, url);
                 else sp_is_authorized = false;
