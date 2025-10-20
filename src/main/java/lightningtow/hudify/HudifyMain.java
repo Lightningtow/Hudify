@@ -11,9 +11,14 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.client.texture.ReloadableTexture;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.resource.Resource;
+import net.minecraft.resource.Resource;
+
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -31,8 +36,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 public class HudifyMain implements ClientModInitializer
 {
@@ -97,6 +104,8 @@ public class HudifyMain implements ClientModInitializer
 	public static void getAlbumArt() {
 		final MinecraftClient client = MinecraftClient.getInstance();
 
+		final Identifier TEXTURE_NOT_FOUND = Identifier.of("textures/item/barrier.png");
+
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
 
@@ -105,9 +114,9 @@ public class HudifyMain implements ClientModInitializer
 		try {
 
 			LogThis(Level.INFO, "link: " + g_album_art_link);
-			InputStream in;
-			if (g_album_art_link == null || g_album_art_link.isEmpty()) in = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
-			else in = new URL(g_album_art_link).openStream();
+			InputStream inputStream;
+			if (g_album_art_link == null || g_album_art_link.isEmpty()) inputStream = new URL("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228").openStream();
+			else inputStream = new URL(g_album_art_link).openStream();
 //			InputStream in = new URL("https://i.scdn.co/image/ab67616d00001e020c098e7d643246d5f2e8bb62").openStream();
 //			InputStream in = new URL("https://i.scdn.co/image/ab67616d00004851cfc4b1939aba562fc97159c5").openStream();
 
@@ -126,14 +135,17 @@ public class HudifyMain implements ClientModInitializer
 //			BufferedImage bufferedImage = Scalr.resize(ImageIO.read(in), targetsize);
 //			BufferedImage scaledImg = Scalr.resize(ImageIO.read(in), targetsize);
 			LogThis(Level.INFO, "before read");
-			BufferedImage bufferedImage = ImageIO.read(in);
+			BufferedImage bufferedImage = ImageIO.read(inputStream);
 			LogThis(Level.INFO, "after read");
-//			Image image = ImageIO.read(in).getScaledInstance(newsize, newsize, Image.SCALE_DEFAULT);
-//			BufferedImage img = ; // load image
-//			BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
-//			BufferedImage bufferedImage = new BufferedImage(newsize, newsize, BufferedImage.TYPE_INT_RGB);
-// https://stackoverflow.com/questions/9132149/how-to-convert-buffered-image-to-image-and-vice-versa
-//			BufferedImage bufferedImage = image;
+
+//			NativeImage img = null;
+//			try {
+////				Optional<Resource> resource = client.getResourceManager().getResource(texture);
+////				if (resource.isPresent())
+//				img = NativeImage.read(inputStream);
+////				img = NativeImage.read(resource.get().getInputStream());
+//			}
+//			catch (IOException e) { LogThis(Level.ERROR, "error in get album art: " + Arrays.toString(e.getStackTrace())); }
 
 
 /*
@@ -173,11 +185,26 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 //            ByteBuffer byteBuffer = ByteBuffer.wrap(byteArray);
 //			image = new NativeImageBackedTexture(NativeImage.read(ImageIO.write));
 			// todo this one was active last i built but commenting due to 'no suitable constructor'
-			NativeImageBackedTexture nativeImageBackedTexture = new NativeImageBackedTexture(NativeImage.read(byteArray));
+//			AbstractTexture reloadableTexture = new AbstractTexture("hi",NativeImage.read(byteArray));
+			String hi = "hi";
+			Supplier<String> nameSupplier = new Supplier<String>() {
+				@Override
+				public String get() {
+					return "hi";
+				}
+			};
+
+			LogThis(Level.INFO, "5");
+
+
+
+			NativeImageBackedTexture nativeImageBackedTexture = new NativeImageBackedTexture(nameSupplier, g_native_image);
+
 // todo this one was active last i built but commenting due to 'no suitable constructor'
 
 //			NativeImageBackedTexture image = new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray()));
 //			img = image.getImage();
+			LogThis(Level.INFO, "5.5");
 
 //            image = new NativeImageBackedTexture(NativeImage.read(resultingBytes));
 //            client.getTextureManager().registerTexture(new Identifier("test"), image);
@@ -187,14 +214,17 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 
 //			client.getTextureManager().registerTexture(sp_album_art_identifier, new NativeImageBackedTexture(NativeImage.read(byteArrayOutputStream.toByteArray())));
 			client.getTextureManager().destroyTexture(g_album_art_identifier);
-
+			LogThis(Level.INFO, "6");
 			// todo this one was active last i built but commenting due to 'no suitable constructor'
 			client.getTextureManager().registerTexture(g_album_art_identifier, nativeImageBackedTexture);
+			LogThis(Level.INFO, "7");
+//			client.getTextureManager().registerTexture(g_album_art_identifier, img);
+//			client.getTextureManager().
 // todo this one was active last i built but commenting due to 'no suitable constructor'
 
-			LogThis(Level.INFO, "5");
+			LogThis(Level.INFO, "8");
 
-			in.close();
+			inputStream.close();
 //			byteArrayOutputStream.close();
 //            Optional<Resource> resource = client.getResourceManager().getResource(Identifier.tryParse("textures/item/albumart"));
 //            if (resource.isPresent())
@@ -315,9 +345,10 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 
 	public static final int jsonImageChoice = 2; // 0 == 640,   1 == 300,   2 == 64
 
+	public static final boolean DUMPING = false;
 	public static void updatePlaybackInfo()
 	{
-		String dump_msg = "getPlaybackInfo";
+		String dump_msg = "updatePlaybackInfo";
 		try
 		{
 
@@ -375,9 +406,13 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
                     LogThis(Level.INFO,"album art links do NOT match, running getAlbumArt");
 
 					g_prev_album_art_link = albumart;
-					getAlbumArt();
-					LogThis(Level.INFO, "got album art");
-
+					try {
+						getAlbumArt();
+						LogThis(Level.INFO, "got album art");
+					}
+					catch (Exception e) {
+						LogThis(Level.ERROR, "exception caught in getAlbumArt(): " + e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
+					}
 				}
 //				LogThis(Level.INFO, "album art link: " + sp_album_art_link);
 
@@ -393,7 +428,7 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 				if (!sp_prev_context_uri.equals(contextJson.get("uri").getAsString()) || sp_prev_context.isEmpty()) {
 					// if context changed or is empty
 //                    Log(Level.INFO,"contexts do NOT match, updating context");
-					if (db) LogThis(Level.INFO,"type: " + sp_context_type + ", uris "
+					if (db && DUMPING) LogThis(Level.INFO,"type: " + sp_context_type + ", uris "
 							+ sp_prev_context_uri + " / " + contextJson.get("uri").getAsString());
 					sp_prev_context_uri = contextJson.get("uri").getAsString();
 					switch (sp_context_type) {
@@ -446,12 +481,12 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 //			if (HudifyConfig.truncate_length != -1) truncate();
 
 		} catch (Exception e) {
-			LogThis(Level.ERROR,"exception caught in getPlaybackInfo(): " + e.getMessage()+" "+Arrays.toString(e.getStackTrace()));
+			LogThis(Level.ERROR,"exception caught in updatePlaybackInfo(): " + e.getMessage()+" "+Arrays.toString(e.getStackTrace()));
 //            if (e instanceof IOException && e.getMessage().equals("Connection reset"))
 //            { Log(Level.INFO,"Resetting connection and retrying info get...");
 ////                results[0] = "Reset"; }
 		}
-		HudifyMain.dump(dump_msg);
+		if(DUMPING) {HudifyMain.dump(dump_msg);}
 //        return;
 	}
 
@@ -460,33 +495,17 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 
 	//<editor-fold desc="register keybindings">
 	public static void registerKeyBindings() {
-//		registerRefreshKey();
 		registerToggleKey();
 		registerNextKey();
 		registerPrevKey();
 	}
-	// aint worth abstracting out
-//	private static void registerRefreshKey() {
-//		KeyBinding newKey = new KeyBinding("hudify.key.refresh", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, MOD_DISPLAY_NAME);
-//		KeyBindingHelper.registerKeyBinding(newKey);
-//
-//		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-//			if (newKey.wasPressed() && !refreshKeyPrevState) {
-//				if (sp_is_authorized) { // todo this isnt really necessary anymore delete later?
-//					updatePlaybackInfo();
-//				}
-//				else SpotifyUtil.authorize();
-//
-////				else { Util.getOperatingSystem().open(SpotifyUtil.authorize()); }
-//			}
-//			refreshKeyPrevState = newKey.wasPressed();
-//		});
-//	}
-//	private static final net.minecraft.client.option.KeyBinding.Category HUDIFY_CATEGORY = KeyBinding.Category.create(Identifier.of("hudify", "hudify"));
+
+	private static final KeyBinding.Category HUDIFY_CATEGORY = KeyBinding.Category.create(Identifier.of(MOD_ID));
+
+//	private static final KeyBinding toggleKey = new KeyBinding("hudify.key.toggle", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), HUDIFY_CATEGORY);
 
 	private static void registerToggleKey() {
-//		KeyBinding newKey = new KeyBinding("hudify.key.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, HUDIFY_CATEGORY);
-		KeyBinding newKey = new KeyBinding("hudify.key.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, MOD_DISPLAY_NAME);
+		KeyBinding newKey = new KeyBinding("hudify.key.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, HUDIFY_CATEGORY);
 
 		KeyBindingHelper.registerKeyBinding(newKey);
 
@@ -502,7 +521,7 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 		});
 	}
 	private static void registerNextKey() {
-		KeyBinding newKey = new KeyBinding("hudify.key.next", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, MOD_DISPLAY_NAME);
+		KeyBinding newKey = new KeyBinding("hudify.key.next", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), HUDIFY_CATEGORY);
 		KeyBindingHelper.registerKeyBinding(newKey);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -519,7 +538,7 @@ https://stackoverflow.com/questions/5895829/resizing-image-in-java
 		});
 	}
 	private static void registerPrevKey() {
-		KeyBinding newKey = new KeyBinding("hudify.key.prev", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, MOD_DISPLAY_NAME);
+		KeyBinding newKey = new KeyBinding("hudify.key.prev", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), HUDIFY_CATEGORY);
 		KeyBindingHelper.registerKeyBinding(newKey);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {

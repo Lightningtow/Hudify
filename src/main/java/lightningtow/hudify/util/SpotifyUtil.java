@@ -64,6 +64,7 @@ public class SpotifyUtil
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
     private static String encodeURL(String url) {
+        // replace slashes and periods and such in URLs with the proper %27 html notation
         String newurl = URLEncoder.encode(url, StandardCharsets.UTF_8);
         LogThis(Level.DEBUG,"encoding url " + url + " to " + newurl);
 
@@ -347,7 +348,7 @@ public class SpotifyUtil
         try
         {
 
-            if(db) LogThis(Level.INFO,"link: " + url);
+            if(db && HudifyMain.DUMPING) LogThis(Level.INFO,"requesting " + url);
 
             HttpRequest.Builder reqBuilder = HttpRequest.newBuilder(new URI(url));
             switch (type) {
@@ -364,13 +365,24 @@ public class SpotifyUtil
 //            Log(Level.INFO,"GET Request (" + getReq + "): " + getRes + " " + getRes.statusCode());
 //            sp_status_code = response.statusCode(); // lets keep sp_status_code to just updatePlaybackInfo()
 
-            if (response.statusCode() == 401) /* unauthorized */ {
+            if(db && HudifyMain.DUMPING) LogThis(Level.INFO,"response: " + response);
+            if (response.statusCode() == 200) /* success! */ {
+                // OK - The request has succeeded. The client can read the result of the request in the body and the headers of the response.
+                return null;
+            }
+            if (response.statusCode() == 200) /* success! */ {
+                // No Content - The request has succeeded but returns no message body.
+                return null;
+            }
+            else if (response.statusCode() == 401) /* unauthorized */ {
                 if (refreshAccessToken()) apiRequest(type, url);
                 else sp_is_authorized = false;
             }
             else if (response.statusCode() == 403) /* forbidden */ {
 //               HudifyMain.send_message("");
-                if(db) LogThis(Level.INFO,type + " request " + url + " returned 403 forbidden");
+//                if(db) LogThis(Level.INFO,type + " request " + url + " returned 403 forbidden");
+                if(db) LogThis(Level.INFO,"403:" + response);
+
 
             }
             else if (response.statusCode() == 404) /* not found */ {
@@ -397,7 +409,7 @@ public class SpotifyUtil
                 try {
                     return (JsonObject) JsonParser.parseString(response.body());
                 } catch (Exception e) {
-                    LogThis(Level.ERROR, "Error parsing api request:" + type + " request " + url + " returned 403 forbidden");
+                    LogThis(Level.ERROR, "Error parsing api response:" + type + " request " + url + " returned 403 forbidden");
                     return null;
                 }
 

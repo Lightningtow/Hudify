@@ -18,15 +18,15 @@
         "modmenu": [ "lightningtow.hudify.integrations.ModMenuIntegration" ]
     },
     "depends": {
-        "fabricloader": ">=0.15.0",
-        "minecraft": ">=1.21.2",
+        "fabricloader": ">=0.17.3",
+        "minecraft": ">=1.21.9",
         "java": ">=21",
         "fabric-api": "*",
-        "custom_hud": ">=4.0",
+        "custom_hud": ">=4.0.0",
         "midnightlib": "*"
     },
     "recommends": {
-        "minecraft": "~1.21.3"
+        "minecraft": "~1.21.9"
     },
     "custom": {
         "modmenu": {
