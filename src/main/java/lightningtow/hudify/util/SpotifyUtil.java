@@ -367,11 +367,11 @@ public class SpotifyUtil
                 // OK - The request has succeeded. The client can read the result of the request in the body and the headers of the response.
                 return null;
             }
-            if (response.statusCode() == 200) /* success! */ {
+            else if (response.statusCode() == 204) /* success! */ {
                 // No Content - The request has succeeded but returns no message body.
                 return null;
             }
-            if (response.statusCode() == 401) /* unauthorized */ {
+            else if (response.statusCode() == 401) /* unauthorized */ {
                 if (refreshAccessToken()) apiRequest(type, url);
                 else sp_is_authorized = false;
             }
@@ -404,7 +404,7 @@ public class SpotifyUtil
                 try {
                     return (JsonObject) JsonParser.parseString(response.body());
                 } catch (Exception e) {
-                    LogThis(Level.ERROR, "Error parsing api request:" + type + " request " + url + " returned 403 forbidden");
+                    LogThis(Level.ERROR, "Error parsing api request:" + type + " request " + url + " returned uncaught status code");
                     return null;
                 }
 
